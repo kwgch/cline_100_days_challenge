@@ -1,0 +1,34 @@
+#board {
+    display: grid;
+    grid-template-columns: repeat(8, 45px);
+    grid-template-rows: repeat(8, 45px);
+    border: 1px solid black;
+    width: 360px; /* 8 * 45 */
+}
+
+.cell {
+    width: 45px;
+    height: 45px;
+    background-color: lightgreen;
+    border: 1px solid black;
+    box-sizing: border-box;
+}
+
+.piece {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin: 2.5px;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.black {
+    background-color: black;
+}
+
+.white {
+    background-color: white;
+}
