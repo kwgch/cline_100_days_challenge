@@ -1,0 +1,100 @@
+1. Othello
+2. Poker
+3. Calculator
+4. Shogi
+5. Font Converter
+6. Catch Game
+7. File Translator
+8. Space Invaders
+9. Image Editing Software
+10. Air Hockey
+11. Rating System
+12. Sudoku Auto-Generator
+13. 15 Puzzle
+14. Dummy Data Generator
+15. Cannonball Game
+16. Translation Bot
+17. Air Raid Game
+18. Flashcard App
+19. Airplane Flying Simulation
+20. Greeting Bot
+21. Time Signal Bot
+22. Fighter Jet Looping Simulation
+23. Brick Breaker
+24. UFO Shooting Game
+25. Poker (Second Version)
+26. Picture Puzzle
+27. Target Click Game
+28. Meteor Avoidance Game
+29. Turn-Based Game
+30. Billiards
+31. Invader Game
+32. Maze Generator
+33. Discord ChatGPT Bot
+34. Discord Alarm Bot
+35. Class Diagram Auto-Generator
+36. Concentration (Memory) Game
+37. YouTube Music Downloader
+38. Tap Game
+39. Whack-a-Mole
+40. Ghostbusters Game
+41. File Management Software
+42. Brain Training Game
+43. Capsule Drop Puzzle
+44. Dogfight Game
+45. Typing Game
+46. Minesweeper
+47. Inventory Management App
+48. Dice Gambling Game
+49. VoiceVox Integration
+50. Othello 2
+51. Fruit Drop Game
+52. Darts
+53. Mega Solar Management Simulation
+54. Binary Options Experience Game
+55. Omikuji (Fortune Telling)
+56. Cipher Decoding Game
+57. Text Adventure
+58. Acchi Muite Hoi Game
+59. Shiritori Game
+60. Product Inventory Ledger
+61. Cashbook
+62. Financial Statements Generator
+63. Hacking Game
+64. Shooting Gallery Game
+65. Word Guessing Game
+66. Make 10 Game
+67. Chatbot
+68. Quiz Game
+69. Number Place (Sudoku)
+70. Shape Sorting Game
+71. Russian Roulette
+72. Function Plotter (using pygame)
+73. Wordle
+74. Spreadsheet Application
+75. Shift Scheduler
+76. 100-Cell Calculation
+77. Temperature Data Graphing
+78. Web Form
+79. Weather Forecast App
+80. Currency Converter
+81. Personal Diary App
+82. Habit Tracker
+83. Expense Tracker
+84. Recipe Manager
+85. Workout Planner
+86. Meditation Timer
+87. Language Learning App
+88. Music Player
+89. Video Streaming App
+90. News Aggregator
+91. Book Library
+92. Task Manager
+93. Note-Taking App
+94. Password Manager
+95. Portfolio Website
+96. Blogging Platform
+97. E-commerce Store
+98. Social Media Dashboard
+99. Travel Planner
+100. Virtual Pet Game

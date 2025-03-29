@@ -1,4 +1,20 @@
-<!DOCTYPE html>
+const fs = require('fs');
+
+const args = process.argv.slice(2);
+const numChallenges = args.length > 0 ? parseInt(args[0]) : null;
+
+fs.readFile('list.txt', 'utf8', (err, data) => {
+  if (err) {
+    console.error(err);
+    return;
+  }
+
+  let challengeList = data.split('\r\n');
+  if (numChallenges !== null && !isNaN(numChallenges) && numChallenges >= 0 && numChallenges <= 100) {
+    challengeList = challengeList.slice(0, numChallenges);
+  }
+
+  let html = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -26,11 +42,18 @@
 
         <section id="challenges">
             <h2>Challenges</h2>
-            <div class="challenge-grid">
-                <a href="src/001/index.html" class="challenge-card">
-                    <h3>001</h3>
-                    <p>1. Othello</p>
-                </a>
+            <div class="challenge-grid">`;
+
+  for (let i = 0; i < challengeList.length; i++) {
+    const challengeNumber = String(i + 1).padStart(3, '0');
+    html += `
+                <a href="src/${challengeNumber}/index.html" class="challenge-card">
+                    <h3>${challengeNumber}</h3>
+                    <p>${challengeList[i]}</p>
+                </a>`;
+  }
+
+  html += `
             </div>
         </section>
 
@@ -67,8 +90,17 @@
     </main>
 
     <footer>
-        <p>&copy; 2025 m.kwgch</p>
+        <p>&copy; 2025 m.kwgch | Programmed by Cline</p>
     </footer>
     <script src="script.js"></script>
 </body>
-</html>
+</html>`;
+
+  fs.writeFile('index.html', html, err => {
+    if (err) {
+      console.error(err);
+    } else {
+      console.log('index.html generated successfully!');
+    }
+  });
+});
