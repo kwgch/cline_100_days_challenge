@@ -1,0 +1,340 @@
+# Mode: ACT
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+# シンプル電卓アプリケーション仕様書
+
+## 概要
+このドキュメントでは、HTML、JavaScript、CSSを使用したシンプルな電卓アプリケーションの仕様とアーキテクチャ設計について説明します。このアプリケーションはローカルファイルのみで動作し、基本的な計算機能を提供します。
+
+## 機能要件
+
+- 基本的な算術演算（加算、減算、乗算、除算）の実行
+- 数値の入力（0-9）
+- 小数点の入力
+- 計算結果の表示
+- クリア機能（現在の入力または全ての入力をクリア）
+- 連続計算の対応
+
+## UI要件
+
+- 数字ボタン（0-9）
+- 演算子ボタン（+, -, *, /）
+- イコールボタン（=）
+- クリアボタン（C, AC）
+- 小数点ボタン（.）
+- 計算結果表示エリア
+- レスポンシブデザイン（モバイルデバイスにも対応）
+
+## 技術仕様
+
+- HTML5: UI構造の構築
+- CSS3: スタイリングとレイアウト
+- JavaScript: 計算ロジックと入力処理
+- ローカルファイルのみで実行可能（外部依存なし）
+
+# アーキテクチャ設計書
+
+## ファイル構成
+
+```
+calculator/
+├── index.html      # メインHTMLファイル
+├── styles.css      # CSSスタイルシート
+└── script.js       # JavaScriptロジック
+```
+
+## HTML構造設計
+
+```html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>シンプル電卓</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="calculator">
+        <div class="display">
+            <div id="result">0</div>
+        </div>
+        <div class="buttons">
+            <button class="btn clear" id="clear">AC</button>
+            <button class="btn operator" id="divide">/</button>
+            <button class="btn operator" id="multiply">*</button>
+            <button class="btn number" id="seven">7</button>
+            <button class="btn number" id="eight">8</button>
+            <button class="btn number" id="nine">9</button>
+            <button class="btn operator" id="subtract">-</button>
+            <button class="btn number" id="four">4</button>
+            <button class="btn number" id="five">5</button>
+            <button class="btn number" id="six">6</button>
+            <button class="btn operator" id="add">+</button>
+            <button class="btn number" id="one">1</button>
+            <button class="btn number" id="two">2</button>
+            <button class="btn number" id="three">3</button>
+            <button class="btn equals" id="equals">=</button>
+            <button class="btn number" id="zero">0</button>
+            <button class="btn decimal" id="decimal">.</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+```
+
+## CSS設計
+
+```css
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+}
+
+.calculator {
+    background-color: #333;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 300px;
+    overflow: hidden;
+}
+
+.display {
+    background-color: #222;
+    color: white;
+    text-align: right;
+    padding: 20px;
+    font-size: 2rem;
+}
+
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background-color: #444;
+}
+
+.btn {
+    border: none;
+    background-color: #555;
+    color: white;
+    font-size: 1.5rem;
+    padding: 20px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn:hover {
+    background-color: #666;
+}
+
+.operator {
+    background-color: #ff9500;
+}
+
+.operator:hover {
+    background-color: #ffaa33;
+}
+
+.equals {
+    background-color: #ff9500;
+    grid-row: span 2;
+}
+
+.clear {
+    background-color: #a5a5a5;
+    color: #000;
+}
+
+.clear:hover {
+    background-color: #b5b5b5;
+}
+
+#zero {
+    grid-column: span 2;
+}
+```
+
+## JavaScript設計
+
+```javascript
+document.addEventListener('DOMContentLoaded', function() {
+    // 状態変数
+    let displayValue = '0';
+    let firstOperand = null;
+    let waitingForSecondOperand = false;
+    let operator = null;
+    
+    // 表示要素
+    const display = document.getElementById('result');
+    
+    // 表示を更新する関数
+    function updateDisplay() {
+        display.textContent = displayValue;
+    }
+    
+    // 数字ボタンのイベントハンドラ
+    function inputDigit(digit) {
+        if (waitingForSecondOperand === true) {
+            displayValue = digit;
+            waitingForSecondOperand = false;
+        } else {
+            displayValue = displayValue === '0' ? digit : displayValue + digit;
+        }
+    }
+    
+    // 小数点ボタンのイベントハンドラ
+    function inputDecimal() {
+        if (waitingForSecondOperand) {
+            displayValue = '0.';
+            waitingForSecondOperand = false;
+            return;
+        }
+        
+        if (!displayValue.includes('.')) {
+            displayValue += '.';
+        }
+    }
+    
+    // 演算子ボタンのイベントハンドラ
+    function handleOperator(nextOperator) {
+        const inputValue = parseFloat(displayValue);
+        
+        if (operator && waitingForSecondOperand) {
+            operator = nextOperator;
+            return;
+        }
+        
+        if (firstOperand === null) {
+            firstOperand = inputValue;
+        } else if (operator) {
+            const result = performCalculation();
+            displayValue = String(result);
+            firstOperand = result;
+        }
+        
+        waitingForSecondOperand = true;
+        operator = nextOperator;
+    }
+    
+    // 計算実行関数
+    function performCalculation() {
+        const secondOperand = parseFloat(displayValue);
+        
+        if (operator === '+') {
+            return firstOperand + secondOperand;
+        } else if (operator === '-') {
+            return firstOperand - secondOperand;
+        } else if (operator === '*') {
+            return firstOperand * secondOperand;
+        } else if (operator === '/') {
+            return firstOperand / secondOperand;
+        }
+        
+        return secondOperand;
+    }
+    
+    // リセット関数
+    function resetCalculator() {
+        displayValue = '0';
+        firstOperand = null;
+        waitingForSecondOperand = false;
+        operator = null;
+    }
+    
+    // イベントリスナーの設定
+    document.querySelectorAll('.number').forEach(button => {
+        button.addEventListener('click', () => {
+            inputDigit(button.textContent);
+            updateDisplay();
+        });
+    });
+    
+    document.querySelectorAll('.operator').forEach(button => {
+        button.addEventListener('click', () => {
+            handleOperator(button.textContent);
+            updateDisplay();
+        });
+    });
+    
+    document.getElementById('equals').addEventListener('click', () => {
+        if (!operator) return;
+        
+        displayValue = String(performCalculation());
+        operator = null;
+        firstOperand = null;
+        waitingForSecondOperand = false;
+        updateDisplay();
+    });
+    
+    document.getElementById('decimal').addEventListener('click', () => {
+        inputDecimal();
+        updateDisplay();
+    });
+    
+    document.getElementById('clear').addEventListener('click', () => {
+        resetCalculator();
+        updateDisplay();
+    });
+    
+    // 初期表示
+    updateDisplay();
+});
+```
+
+## データフロー
+
+1. ユーザーがボタンをクリック
+2. イベントリスナーが対応する処理を実行
+3. 状態変数が更新される
+4. 表示が更新される
+5. 計算結果が表示される
+
+## 拡張性
+
+このアーキテクチャは以下の機能拡張に対応可能です：
+
+- 追加の演算機能（平方根、パーセント計算など）
+- 履歴機能
+- テーマ切り替え
+- キーボード入力対応
