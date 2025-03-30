@@ -90,7 +90,7 @@ fs.readFile('list.txt', 'utf8', (err, data) => {
     </main>
 
     <footer>
-        <p>&copy; 2025 m.kwgch | Programmed by Cline</p>
+        <p>&copy; 2025 m.kwgch</p>
     </footer>
     <script src="script.js"></script>
 </body>
