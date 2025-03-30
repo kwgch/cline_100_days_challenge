@@ -1,0 +1,587 @@
+# Mode: ACT
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+
+
+# 将棋ゲーム開発仕様書
+
+## 概要
+
+HTML、JavaScript、CSSを使用して、ローカル環境で動作する将棋ゲームを開発します。2人のプレイヤーが交互に操作して対戦するゲームです。
+
+## 機能要件
+
+### 基本機能
+1. 将棋盤の表示
+2. 駒の初期配置
+3. プレイヤー1とプレイヤー2の交互の手番管理
+4. 駒の移動ルールの実装
+5. 駒の成り（成駒）の実装
+6. 駒を取る機能
+7. 持ち駒を打つ機能
+8. 王手・詰みの判定
+9. ゲームの勝敗判定
+10. 手数のカウントと表示
+
+### ユーザーインターフェース
+1. 将棋盤と駒の視覚的表示
+2. プレイヤー1の持ち駒表示
+3. プレイヤー2の持ち駒表示
+4. 現在の手番表示
+5. 手数表示
+6. 駒の選択と移動のインタラクション
+7. 成り駒の選択ダイアログ
+8. ゲーム終了時のメッセージ表示
+9. リセット/新規ゲーム機能
+
+## 技術要件
+
+### 開発言語・技術
+- HTML5
+- CSS3
+- JavaScript (ES6+)
+- ローカルストレージ（オプション：ゲーム状態の保存用）
+
+### 制約条件
+- 外部ライブラリやフレームワークを使用しない
+- サーバー通信なし、ローカルファイルのみで動作
+- モダンブラウザ（Chrome、Firefox、Safari、Edge最新版）で動作
+
+# 将棋ゲーム アーキテクチャ設計書
+
+## デザインパターン
+
+本プロジェクトでは以下のデザインパターンを採用します：
+
+1. **Stateパターン**: ゲームの状態管理（初期状態、プレイヤー1の手番、プレイヤー2の手番、ゲーム終了など）
+2. **Factoryパターン**: 駒の生成
+3. **Observerパターン**: UI更新とゲーム状態の連携
+4. **Strategyパターン**: 駒の移動ルールの実装
+5. **Singletonパターン**: ゲームマネージャー
+
+## ファイル構成
+
+```
+shogi-game/
+├── index.html         # メインHTML
+├── css/
+│   └── style.css      # スタイルシート
+└── js/
+    ├── main.js        # メインアプリケーション初期化
+    ├── models/
+    │   ├── board.js       # 将棋盤モデル
+    │   ├── piece.js       # 駒の基底クラス
+    │   └── pieces/        # 各駒の具体的クラス
+    │       ├── king.js
+    │       ├── rook.js
+    │       ├── bishop.js
+    │       └── ...
+    ├── states/
+    │   ├── gameState.js       # 状態の基底クラス
+    │   ├── initialState.js    # 初期状態
+    │   ├── player1TurnState.js # プレイヤー1の手番
+    │   ├── player2TurnState.js # プレイヤー2の手番
+    │   └── gameOverState.js   # ゲーム終了状態
+    ├── factories/
+    │   └── pieceFactory.js    # 駒の生成ファクトリー
+    ├── strategies/
+    │   └── moveStrategy.js    # 駒の移動戦略
+    ├── managers/
+    │   └── gameManager.js     # ゲーム全体の管理（Singleton）
+    ├── utils/
+    │   ├── eventEmitter.js    # イベント管理（Observer実装）
+    │   └── validator.js       # 移動の妥当性検証
+    └── views/
+        ├── boardView.js       # 将棋盤のレンダリング
+        ├── pieceView.js       # 駒の表示
+        └── gameView.js        # ゲーム全体のUI
+```
+
+## 段階的実装計画
+
+### フェーズ1: 基本構造とUI
+1. HTML/CSSで将棋盤の基本レイアウトを作成
+2. 駒の基本クラス設計と表示
+3. GameManagerのSingletonパターン実装
+4. 状態管理の基本構造（Stateパターン）実装
+5. 手数カウンターの実装
+
+### フェーズ2: 駒の動きとルール
+1. 各駒の具体的クラスとMoveStrategy実装
+2. 駒の移動ルールの実装
+3. 駒の選択と移動のUI実装
+4. 移動の妥当性検証機能
+5. ターン管理の実装
+
+### フェーズ3: ゲームロジック
+1. 手番の交代機能
+2. 駒を取る機能
+3. 持ち駒の管理と表示
+4. 持ち駒を打つ機能
+5. 成り駒の実装
+
+### フェーズ4: 勝敗判定
+1. 王手判定の実装
+2. 詰み判定と勝敗決定
+3. ゲームリセット機能
+
+## モジュール詳細設計
+
+### GameManager (Singletonパターン)
+```javascript
+class GameManager {
+  constructor() {
+    if (GameManager.instance) {
+      return GameManager.instance;
+    }
+    
+    this.board = new Board();
+    this.currentState = new InitialState(this);
+    this.eventEmitter = new EventEmitter();
+    this.player1Captured = [];
+    this.player2Captured = [];
+    this.moveCount = 0;
+    
+    GameManager.instance = this;
+  }
+  
+  changeState(newState) {
+    this.currentState = newState;
+    this.eventEmitter.emit('stateChanged', newState);
+  }
+  
+  incrementMoveCount() {
+    this.moveCount++;
+    this.eventEmitter.emit('moveCountUpdated', this.moveCount);
+  }
+  
+  // その他のゲーム管理メソッド
+}
+```
+
+### GameState (Stateパターン)
+```javascript
+// 基底クラス
+class GameState {
+  constructor(gameManager) {
+    this.gameManager = gameManager;
+  }
+  
+  onEnter() {}
+  onExit() {}
+  handleBoardClick(position) {}
+  handlePieceSelection(piece) {}
+  getCurrentPlayer() {}
+}
+
+// 具体的な状態クラス
+class Player1TurnState extends GameState {
+  onEnter() {
+    // プレイヤー1ターンの初期化処理
+    this.gameManager.eventEmitter.emit('turnChanged', 'player1');
+  }
+  
+  getCurrentPlayer() {
+    return 'player1';
+  }
+  
+  handlePieceSelection(piece) {
+    // プレイヤー1の駒のみ選択可能
+    if (piece.player === 'player1') {
+      // 駒選択処理
+      return true;
+    }
+    return false;
+  }
+  
+  handleBoardClick(position) {
+    // 移動先の選択処理
+    // 移動が完了したら
+    this.gameManager.incrementMoveCount();
+    this.gameManager.changeState(new Player2TurnState(this.gameManager));
+  }
+}
+
+class Player2TurnState extends GameState {
+  onEnter() {
+    // プレイヤー2ターンの初期化処理
+    this.gameManager.eventEmitter.emit('turnChanged', 'player2');
+  }
+  
+  getCurrentPlayer() {
+    return 'player2';
+  }
+  
+  handlePieceSelection(piece) {
+    // プレイヤー2の駒のみ選択可能
+    if (piece.player === 'player2') {
+      // 駒選択処理
+      return true;
+    }
+    return false;
+  }
+  
+  handleBoardClick(position) {
+    // 移動先の選択処理
+    // 移動が完了したら
+    this.gameManager.incrementMoveCount();
+    this.gameManager.changeState(new Player1TurnState(this.gameManager));
+  }
+}
+```
+
+### Piece と MoveStrategy (Strategyパターン)
+```javascript
+class Piece {
+  constructor(player, position, moveStrategy) {
+    this.player = player; // 'player1' または 'player2'
+    this.position = position;
+    this.promoted = false;
+    this.moveStrategy = moveStrategy;
+  }
+  
+  getValidMoves(board) {
+    return this.moveStrategy.getValidMoves(this, board);
+  }
+  
+  promote() {
+    this.promoted = true;
+    // 成り駒の移動戦略に変更
+    this.moveStrategy = this.getPromotedMoveStrategy();
+  }
+  
+  getPromotedMoveStrategy() {
+    // 成り駒の移動戦略を返す
+  }
+  
+  canPromote(toPosition) {
+    // 成れるかどうかの判定
+    if (this.promoted) return false;
+    
+    // プレイヤー1（下側）の駒は上位3段に入ると成れる
+    if (this.player === 'player1' && toPosition.y = 6) return true;
+    
+    return false;
+  }
+}
+
+// 駒の移動戦略
+class MoveStrategy {
+  getValidMoves(piece, board) {
+    // 抽象メソッド
+  }
+}
+
+// 具体的な移動戦略
+class BishopMoveStrategy extends MoveStrategy {
+  getValidMoves(piece, board) {
+    // 角の移動可能範囲を計算
+    const validMoves = [];
+    const directions = [
+      {x: 1, y: 1}, {x: 1, y: -1}, 
+      {x: -1, y: 1}, {x: -1, y: -1}
+    ];
+    
+    for (const dir of directions) {
+      let x = piece.position.x + dir.x;
+      let y = piece.position.y + dir.y;
+      
+      while (board.isPositionInBoard({x, y})) {
+        const targetPiece = board.getPieceAt({x, y});
+        
+        if (!targetPiece) {
+          // 空きマスには移動可能
+          validMoves.push({x, y});
+        } else if (targetPiece.player !== piece.player) {
+          // 相手の駒は取れる
+          validMoves.push({x, y});
+          break;
+        } else {
+          // 自分の駒があるので、それ以上進めない
+          break;
+        }
+        
+        x += dir.x;
+        y += dir.y;
+      }
+    }
+    
+    return validMoves;
+  }
+}
+```
+
+### PieceFactory (Factoryパターン)
+```javascript
+class PieceFactory {
+  static createPiece(type, player, position) {
+    switch(type) {
+      case 'king':
+        return new King(player, position, new KingMoveStrategy());
+      case 'rook':
+        return new Rook(player, position, new RookMoveStrategy());
+      case 'bishop':
+        return new Bishop(player, position, new BishopMoveStrategy());
+      case 'gold':
+        return new Gold(player, position, new GoldMoveStrategy());
+      case 'silver':
+        return new Silver(player, position, new SilverMoveStrategy());
+      case 'knight':
+        return new Knight(player, position, new KnightMoveStrategy());
+      case 'lance':
+        return new Lance(player, position, new LanceMoveStrategy());
+      case 'pawn':
+        return new Pawn(player, position, new PawnMoveStrategy());
+    }
+  }
+  
+  static createInitialBoard() {
+    const board = new Board();
+    
+    // プレイヤー2（上側）の駒を配置
+    board.placePiece(this.createPiece('lance', 'player2', {x: 0, y: 0}), {x: 0, y: 0});
+    board.placePiece(this.createPiece('knight', 'player2', {x: 1, y: 0}), {x: 1, y: 0});
+    board.placePiece(this.createPiece('silver', 'player2', {x: 2, y: 0}), {x: 2, y: 0});
+    board.placePiece(this.createPiece('gold', 'player2', {x: 3, y: 0}), {x: 3, y: 0});
+    board.placePiece(this.createPiece('king', 'player2', {x: 4, y: 0}), {x: 4, y: 0});
+    board.placePiece(this.createPiece('gold', 'player2', {x: 5, y: 0}), {x: 5, y: 0});
+    board.placePiece(this.createPiece('silver', 'player2', {x: 6, y: 0}), {x: 6, y: 0});
+    board.placePiece(this.createPiece('knight', 'player2', {x: 7, y: 0}), {x: 7, y: 0});
+    board.placePiece(this.createPiece('lance', 'player2', {x: 8, y: 0}), {x: 8, y: 0});
+    
+    board.placePiece(this.createPiece('bishop', 'player2', {x: 1, y: 1}), {x: 1, y: 1});
+    board.placePiece(this.createPiece('rook', 'player2', {x: 7, y: 1}), {x: 7, y: 1});
+    
+    for (let x = 0; x  callback(data));
+    }
+  }
+  
+  off(eventName, callback) {
+    // イベントリスナーの削除
+    if (this.events[eventName]) {
+      if (callback) {
+        this.events[eventName] = this.events[eventName].filter(cb => cb !== callback);
+      } else {
+        delete this.events[eventName];
+      }
+    }
+  }
+}
+```
+
+### Board
+```javascript
+class Board {
+  constructor() {
+    // 9x9の二次元配列を初期化
+    this.grid = Array(9).fill().map(() => Array(9).fill(null));
+  }
+  
+  placePiece(piece, position) {
+    this.grid[position.y][position.x] = piece;
+    if (piece) {
+      piece.position = position;
+    }
+  }
+  
+  getPieceAt(position) {
+    return this.grid[position.y][position.x];
+  }
+  
+  movePiece(fromPos, toPos) {
+    const piece = this.getPieceAt(fromPos);
+    const capturedPiece = this.getPieceAt(toPos);
+    
+    this.placePiece(null, fromPos);
+    this.placePiece(piece, toPos);
+    
+    return capturedPiece; // 取った駒を返す
+  }
+  
+  isPositionInBoard(position) {
+    return position.x >= 0 && position.x = 0 && position.y  move.x === kingPosition.x && move.y === kingPosition.y)) {
+            return true; // 王手
+          }
+        }
+      }
+    }
+
+    return false; // 王手ではない
+  }
+}
+```
+
+次に、UI の実装を行います。BoardView クラスを作成し、将棋盤の表示と操作を管理します。
+
+```javascript
+class BoardView {
+  constructor(gameManager) {
+    this.gameManager = gameManager;
+    this.element = document.getElementById('shogi-board');
+    this.selectedPiece = null;
+    this.highlightedCells = [];
+    
+    this.gameManager.eventEmitter.on('boardUpdated', () => this.render());
+    this.gameManager.eventEmitter.on('turnChanged', (player) => this.updateTurnDisplay(player));
+    this.gameManager.eventEmitter.on('moveCountUpdated', (count) => this.updateMoveCount(count));
+    
+    this.initBoard();
+  }
+  
+  initBoard() {
+    // 9x9のグリッドを作成
+    for (let y = 0; y  this.handleCellClick(x, y));
+        this.element.appendChild(cell);
+      }
+    }
+  }
+  
+  render() {
+    // 盤面の状態に応じてセルを更新
+    const board = this.gameManager.board;
+    
+    for (let y = 0; y  {
+      const pieceElement = document.createElement('div');
+      pieceElement.className = `piece ${piece.player} ${piece.constructor.name.toLowerCase()}`;
+      pieceElement.textContent = this.getPieceSymbol(piece);
+      player1CapturedElement.appendChild(pieceElement);
+    });
+    
+    this.gameManager.player2Captured.forEach(piece => {
+      const pieceElement = document.createElement('div');
+      pieceElement.className = `piece ${piece.player} ${piece.constructor.name.toLowerCase()}`;
+      pieceElement.textContent = this.getPieceSymbol(piece);
+      player2CapturedElement.appendChild(pieceElement);
+    });
+  }
+  
+  highlightValidMoves(moves) {
+    // 移動可能なセルをハイライト
+    this.clearHighlights();
+    
+    moves.forEach(move => {
+      const cell = this.getCellElement(move.x, move.y);
+      cell.classList.add('highlighted');
+      this.highlightedCells.push(cell);
+    });
+  }
+  
+  clearHighlights() {
+    this.highlightedCells.forEach(cell => {
+      cell.classList.remove('highlighted');
+    });
+    this.highlightedCells = [];
+  }
+  
+  handleCellClick(x, y) {
+    const clickedPiece = this.gameManager.board.getPieceAt({x, y});
+    
+    if (this.selectedPiece) {
+      // 駒が選択されている場合、移動を試みる
+      if (this.gameManager.currentState.handleBoardClick({x, y})) {
+        this.selectedPiece = null;
+        this.clearHighlights();
+      }
+    } else if (clickedPiece && this.gameManager.currentState.handlePieceSelection(clickedPiece)) {
+      // 新しい駒を選択
+      this.selectedPiece = clickedPiece;
+      const validMoves = clickedPiece.getValidMoves(this.gameManager.board);
+      this.highlightValidMoves(validMoves);
+    }
+  }
+  
+  getCellElement(x, y) {
+    return this.element.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+  }
+  
+  getPieceSymbol(piece) {
+    // 駒の種類に応じた日本語表記を返す
+    const symbols = {
+      King: '王',
+      Rook: '飛',
+      Bishop: '角',
+      Gold: '金',
+      Silver: '銀',
+      Knight: '桂',
+      Lance: '香',
+      Pawn: '歩'
+    };
+    
+    let symbol = symbols[piece.constructor.name];
+    if (piece.promoted) {
+      if (piece.constructor.name === 'Rook') return '龍';
+      if (piece.constructor.name === 'Bishop') return '馬';
+      return '成' + symbol;
+    }
+    return symbol;
+  }
+  
+  updateTurnDisplay(player) {
+    const turnDisplay = document.getElementById('turn-display');
+    turnDisplay.textContent = `現在の手番: ${player === 'player1' ? 'プレイヤー1' : 'プレイヤー2'}`;
+  }
+  
+  updateMoveCount(count) {
+    const moveCountDisplay = document.getElementById('move-count');
+    moveCountDisplay.textContent = `手数: ${count}`;
+  }
+}
+```
+
+最後に、HTML ファイルを作成して、ゲームの基本的な構造を設定します。
+
+```html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>将棋ゲーム</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="board-container">
+            <div id="shogi-board"></div>
+        </div>
+        <div id="game-info">
+            <div id="turn-display"></div>
+            <div id="move-count"></div>
+        </div>
+        <div id="captured-pieces">
+            <div id="player1-captured" class="captured-area"></div>
+            <div id="player2-captured" class="captured-area"></div>
+        </div>
+    </div>
+    <script src="js/main.js" type="module"></script>
+</body>
+</html>
+```
+
+これらのコンポーネントを組み合わせることで、2人のプレイヤーが交互に操作する将棋ゲームの基本的な機能を実装できます。ゲームの状態管理、駒の移動ルール、UI の更新などが含まれています。
+
+次のステップとしては、以下の機能を追加することができます：
+
+1. 成り駒の選択ダイアログの実装
+2. 詰みの判定ロジックの追加
+3. ゲーム終了時の処理（勝者表示など）
+4. リセット/新規ゲーム機能の実装
+
+これらの機能を順次追加していくことで、より完全な将棋ゲームを作成できます。
