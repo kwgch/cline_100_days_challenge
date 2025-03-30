@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>フォント変換ツール</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Google Fontsなどの外部リソース（オプション） -->
+</head>
+<body>
+    <div class="container">
+        <h1>フォント変換ツール</h1>
+        
+        <div class="control-panel">
+            <!-- フォント選択 -->
+            <div class="form-group">
+                <label for="font-selector">フォント:</label>
+                <select id="font-selector"></select>
+            </div>
+            
+            <!-- フォントサイズ調整 -->
+            <div class="form-group">
+                <label for="font-size">サイズ: <span id="size-value">16</span>px</label>
+                <input type="range" id="font-size" min="8" max="72" value="16">
+            </div>
+        </div>
+        
+        <!-- テキスト入力エリア -->
+        <div class="input-area">
+            <label for="input-text">テキストを入力:</label>
+            <textarea id="input-text" placeholder="ここにテキストを入力してください..."></textarea>
+        </div>
+        
+        <!-- プレビューエリア -->
+        <div class="preview-container">
+            <h2>プレビュー</h2>
+            <div id="preview" class="preview"></div>
+        </div>
+        
+        <!-- コピーボタン -->
+        <button id="copy-btn">テキストをコピー</button>
+    </div>
+
+    <script src="js/fonts.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

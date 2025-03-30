@@ -1,0 +1,410 @@
+# Mode: ACT
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+# フォント変換ツール 仕様書とアーキテクチャ設計書
+
+## 仕様書
+
+### 概要
+ユーザーが入力した文字列を、指定したフォントに変換して表示するWebアプリケーションです。HTML、JavaScript、CSSのみで構成され、ローカルファイルのみで動作します。サーバーサイドの処理は不要です。
+
+### 機能要件
+1. **テキスト入力**
+   - ユーザーがテキストを入力できるテキストエリアを提供
+   - 複数行のテキスト入力に対応
+
+2. **フォント選択**
+   - 複数のフォントからユーザーが選択できるドロップダウンメニューを提供
+   - 最低10種類のフォントを用意（システムフォントおよびGoogle Fontsなど）
+
+3. **フォントサイズ調整**
+   - フォントサイズをユーザーが調整できるスライダーまたは数値入力を提供
+   - 範囲：8px〜72px
+
+4. **プレビュー表示**
+   - 入力したテキストを選択したフォントでリアルタイムにプレビュー表示
+   - プレビュー領域は視認性の高いデザインにする
+
+5. **コピー機能**
+   - 変換後のテキストをクリップボードにコピーできるボタンを提供
+
+6. **レスポンシブデザイン**
+   - スマートフォンやタブレットなど様々な画面サイズに対応
+
+### 非機能要件
+1. **パフォーマンス**
+   - テキスト入力からプレビュー表示までのレスポンスは即時的であること
+   - 長文入力時も安定して動作すること
+
+2. **オフライン動作**
+   - インターネット接続なしで完全に動作すること
+   - ただし、Google Fontsなどを使用する場合は初回ロード時にダウンロードが必要
+
+3. **ブラウザ互換性**
+   - 最新のChrome、Firefox、Safari、Edgeで正常に動作すること
+
+4. **アクセシビリティ**
+   - WAI-ARIAガイドラインに準拠すること
+   - キーボード操作に対応すること
+
+## アーキテクチャ設計書
+
+### ファイル構成
+```
+font-converter/
+├── index.html      # メインのHTMLファイル
+├── css/
+│   └── style.css   # スタイルシート
+├── js/
+│   ├── app.js      # メインのJavaScriptファイル
+│   └── fonts.js    # フォント定義ファイル
+└── fonts/          # ローカルフォントファイル（必要に応じて）
+```
+
+### HTML構造
+```html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>フォント変換ツール</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Google Fontsなどの外部リソース（オプション） -->
+</head>
+<body>
+    <div class="container">
+        <h1>フォント変換ツール</h1>
+        
+        <div class="control-panel">
+            <!-- フォント選択 -->
+            <div class="form-group">
+                <label for="font-selector">フォント:</label>
+                <select id="font-selector"></select>
+            </div>
+            
+            <!-- フォントサイズ調整 -->
+            <div class="form-group">
+                <label for="font-size">サイズ: <span id="size-value">16</span>px</label>
+                <input type="range" id="font-size" min="8" max="72" value="16">
+            </div>
+        </div>
+        
+        <!-- テキスト入力エリア -->
+        <div class="input-area">
+            <label for="input-text">テキストを入力:</label>
+            <textarea id="input-text" placeholder="ここにテキストを入力してください..."></textarea>
+        </div>
+        
+        <!-- プレビューエリア -->
+        <div class="preview-container">
+            <h2>プレビュー</h2>
+            <div id="preview" class="preview"></div>
+        </div>
+        
+        <!-- コピーボタン -->
+        <button id="copy-btn">テキストをコピー</button>
+    </div>
+
+    <script src="js/fonts.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
+
+```
+
+### CSS設計
+```css
+/* 基本スタイル */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f5f5f5;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+/* コントロールパネル */
+.control-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+select, input[type="range"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* テキスト入力エリア */
+.input-area {
+    margin-bottom: 20px;
+}
+
+textarea {
+    width: 100%;
+    height: 150px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
+    font-size: 16px;
+}
+
+/* プレビューエリア */
+.preview-container {
+    margin-bottom: 20px;
+}
+
+.preview {
+    min-height: 150px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    overflow-wrap: break-word;
+}
+
+/* コピーボタン */
+button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 600px) {
+    .control-panel {
+        flex-direction: column;
+    }
+    
+    .form-group {
+        width: 100%;
+    }
+}
+```
+
+### JavaScript実装
+
+#### fonts.js
+```javascript
+// 利用可能なフォントの定義
+const availableFonts = [
+    {
+        name: "Arial",
+        family: "Arial, sans-serif",
+        type: "system"
+    },
+    {
+        name: "Times New Roman",
+        family: "Times New Roman, serif",
+        type: "system"
+    },
+    {
+        name: "Courier New",
+        family: "Courier New, monospace",
+        type: "system"
+    },
+    {
+        name: "Georgia",
+        family: "Georgia, serif",
+        type: "system"
+    },
+    {
+        name: "Verdana",
+        family: "Verdana, sans-serif",
+        type: "system"
+    },
+    {
+        name: "游ゴシック",
+        family: "Yu Gothic, sans-serif",
+        type: "system"
+    },
+    {
+        name: "メイリオ",
+        family: "Meiryo, sans-serif",
+        type: "system"
+    },
+    {
+        name: "MS Pゴシック",
+        family: "MS PGothic, sans-serif",
+        type: "system"
+    },
+    {
+        name: "游明朝",
+        family: "Yu Mincho, serif",
+        type: "system"
+    },
+    {
+        name: "MS P明朝",
+        family: "MS PMincho, serif",
+        type: "system"
+    }
+    // 必要に応じてGoogle Fontsなどを追加
+];
+```
+
+#### app.js
+```javascript
+document.addEventListener('DOMContentLoaded', () => {
+    // DOM要素の取得
+    const fontSelector = document.getElementById('font-selector');
+    const fontSizeSlider = document.getElementById('font-size');
+    const sizeValueDisplay = document.getElementById('size-value');
+    const inputText = document.getElementById('input-text');
+    const preview = document.getElementById('preview');
+    const copyBtn = document.getElementById('copy-btn');
+    
+    // フォントセレクタの初期化
+    initFontSelector();
+    
+    // イベントリスナーの設定
+    fontSelector.addEventListener('change', updatePreview);
+    fontSizeSlider.addEventListener('input', updateFontSizeDisplay);
+    fontSizeSlider.addEventListener('change', updatePreview);
+    inputText.addEventListener('input', updatePreview);
+    copyBtn.addEventListener('click', copyToClipboard);
+    
+    // 初期プレビューの表示
+    updatePreview();
+    
+    // フォントセレクタの初期化関数
+    function initFontSelector() {
+        availableFonts.forEach(font => {
+            const option = document.createElement('option');
+            option.value = font.family;
+            option.textContent = font.name;
+            fontSelector.appendChild(option);
+        });
+    }
+    
+    // フォントサイズ表示の更新
+    function updateFontSizeDisplay() {
+        sizeValueDisplay.textContent = fontSizeSlider.value;
+        updatePreview();
+    }
+    
+    // プレビューの更新
+    function updatePreview() {
+        const selectedFont = fontSelector.value;
+        const fontSize = fontSizeSlider.value;
+        const text = inputText.value || 'プレビューテキスト';
+        
+        preview.style.fontFamily = selectedFont;
+        preview.style.fontSize = `${fontSize}px`;
+        preview.textContent = text;
+    }
+    
+    // クリップボードにコピー
+    function copyToClipboard() {
+        const textToCopy = inputText.value;
+        
+        if (!textToCopy) {
+            alert('コピーするテキストがありません。');
+            return;
+        }
+        
+        // クリップボードAPIを使用
+        navigator.clipboard.writeText(textToCopy)
+            .then(() => {
+                // コピー成功時の処理
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = 'コピーしました！';
+                
+                // 2秒後に元のテキストに戻す
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                }, 2000);
+            })
+            .catch(err => {
+                // コピー失敗時の処理
+                console.error('クリップボードへのコピーに失敗しました:', err);
+                alert('コピーに失敗しました。');
+            });
+    }
+});
+```
+
+### 拡張可能性
+1. **フォントカテゴリ分類**
+   - システムフォント、Google Fontsなどのカテゴリ分けを実装可能
+
+2. **フォントスタイル設定**
+   - 太字、斜体、下線などのスタイル設定を追加可能
+
+3. **カラー設定**
+   - テキストカラーや背景色の設定機能を追加可能
+
+4. **エクスポート機能**
+   - 画像としてエクスポートする機能を追加可能
+
+5. **お気に入り機能**
+   - よく使うフォント設定を保存する機能をLocalStorageを使って実装可能
+
+以上の設計に基づいて、Clineにコーディングを指示することで、ローカルファイルのみで動作するフォント変換ツールを実装できます。
