@@ -20,7 +20,7 @@ fs.readFile('list.txt', 'utf8', (err, data) => {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>100-Day Programming Challenge with Cline</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header>
@@ -92,7 +92,7 @@ fs.readFile('list.txt', 'utf8', (err, data) => {
     <footer>
         <p>&copy; 2025 m.kwgch</p>
     </footer>
-    <script src="script.js"></script>
+    <script src="js/script.js"></script>
 </body>
 </html>`;
 
