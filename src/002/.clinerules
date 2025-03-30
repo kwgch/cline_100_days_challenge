@@ -1,0 +1,515 @@
+# Mode: ACT
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+# ポーカーゲーム開発仕様書（簡易版）
+
+## ゲーム概要
+
+このプロジェクトは、HTML、JavaScript、CSSのみを使用して、ローカルファイルで動作する2人用の簡易ポーカーゲームを開発するものです。プレイヤーはユーザー1名とNPC1名で構成されます。ベッティングの概念を省略し、カード交換のみのシンプルなゲームフローを実現します。
+
+## ポーカールール
+
+### 基本情報
+
+- **人数**: プレイヤー1名とNPC1名の2人
+- **使用カード**: ジョーカーを除く52枚のカード
+- **カードの強さ**: A（最強）、K、Q、J、10、9、8、7、6、5、4、3、2（最弱）
+- **スートの強さ**: ♠（スペード）、♥（ハート）、♦（ダイヤ）、♣（クラブ）
+
+### ポーカーハンド（役）
+
+強い順に以下の通りです：
+
+1. **ロイヤルストレートフラッシュ**: 同じスートの10、J、Q、K、Aの組み合わせ
+2. **ストレートフラッシュ**: 同じスートで数字が連続する5枚のカード
+3. **フォーカード**: 同じ数字のカードが4枚
+4. **フルハウス**: 同じ数字3枚と別の同じ数字2枚の組み合わせ
+5. **フラッシュ**: 同じスートのカード5枚
+6. **ストレート**: スートに関係なく、数字が連続する5枚のカード
+7. **スリーカード**: 同じ数字のカードが3枚
+8. **ツーペア**: 2枚ずつの同じ数字のカードが2組
+9. **ワンペア**: 同じ数字のカードが2枚
+10. **ハイカード**: 上記の役がない場合、最も高い数字のカード1枚で勝負
+
+### 同じ役の場合の勝敗判定
+
+- 同じ役の場合は、カードの数字の高いほうが勝ち
+- 数字も同じ場合は、スートの強いほうが勝ち
+- ツーペアの場合は、高いほうのペアで比較し、それも同じなら低いほうのペアで比較
+- ペアが完全に同じ場合は、ペアの中で♠を持っている人が勝ち
+
+## 簡易化されたゲームの流れ
+
+1. **ゲーム開始**: ゲームが開始され、デッキがシャッフルされます
+2. **配札**: 各プレイヤーに5枚ずつカードが配られます（**この時点では相手のカードは見えません**）
+3. **カード交換**: 
+   - **プレイヤーは交換したいカードを選択し、「交換」ボタンを押すと選択したカードが新しいカードに入れ替わります**
+   - **交換するカードがない場合は、何も選択せずに「交換完了」ボタンを押します**
+   - NPCも自動的にカードを交換します
+4. **ショーダウン**: 
+   - **カード交換完了後、すぐに相手のカードが表示されます**
+   - **両者の役と勝敗が画面に表示されます**
+   - **「次のゲーム」ボタンで新しいゲームを開始できます**
+
+## 機能要件
+
+### 基本機能
+
+1. **ゲーム初期化**:
+   - デッキの生成とシャッフル
+   - プレイヤーとNPCへのカード配布（5枚ずつ）
+   - **NPCのカードは裏向きで表示（見えない状態）**
+
+2. **ゲームプレイ**:
+   - **カード交換機能（選択したカードのみ交換、または交換しない選択も可能）**
+   - NPCの自動カード交換
+
+3. **ハンド評価**:
+   - 各プレイヤーの役の判定
+   - 勝者の決定
+   - 同じ役の場合の詳細な勝敗判定ロジック
+   - **役の名前と勝敗結果の表示**
+
+4. **ユーザーインターフェース**:
+   - カードの視覚的表示
+   - **カード選択のためのインタラクティブな操作**
+   - 交換ボタンと交換完了ボタン
+   - **結果表示画面（両者の役と勝敗）**
+   - 次のゲームボタン
+
+## アーキテクチャ設計
+
+### デザインパターン
+
+1. **Stateパターン**:
+   - ゲームの各状態（初期状態、カード交換、結果表示）を別々のクラスとして実装
+   - 各状態クラスは共通のインターフェースを実装し、状態に応じた振る舞いを定義
+   - ゲームコンテキストは現在の状態を保持し、状態に応じた処理を委譲
+
+2. **Observerパターン**:
+   - ゲーム状態の変化を監視し、UIを自動的に更新
+
+3. **Strategyパターン**:
+   - NPCのカード交換戦略を交換可能なアルゴリズムとして実装
+
+4. **Factoryパターン**:
+   - カードやプレイヤーオブジェクトの生成を担当
+
+### ファイル構造
+
+```
+poker-game/
+│
+├── index.html        # メインHTML
+├── css/
+│   └── style.css     # スタイルシート
+└── js/
+    ├── main.js       # メインゲームロジック
+    ├── models/
+    │   ├── deck.js   # カードデッキ管理
+    │   ├── card.js   # カードクラス
+    │   ├── player.js # プレイヤークラス
+    │   └── npc.js    # NPCクラス
+    ├── states/
+    │   ├── gameState.js          # 状態インターフェース
+    │   ├── initialState.js       # 初期状態
+    │   ├── cardExchangeState.js  # カード交換状態
+    │   └── resultState.js        # 結果表示状態
+    ├── strategies/
+    │   ├── npcStrategy.js        # NPC戦略インターフェース
+    │   └── basicStrategy.js      # 基本戦略
+    ├── utils/
+    │   ├── evaluator.js          # ハンド評価ロジック
+    │   └── eventEmitter.js       # イベント管理
+    └── ui/
+        ├── uiManager.js          # UI管理
+        ├── cardView.js           # カード表示
+        └── resultView.js         # 結果表示
+```
+
+### クラス設計
+
+#### GameContext クラス
+- 現在のゲーム状態を管理
+- 状態の遷移を制御
+- ゲームの全体的な流れを管理
+
+#### GameState インターフェース
+- すべての状態クラスが実装するインターフェース
+- `enter()`: 状態に入ったときの処理
+- `handleAction(action)`: プレイヤーのアクションを処理
+- `update()`: 状態の更新処理
+- `exit()`: 状態から出るときの処理
+
+#### Card クラス
+- スート（ハート、ダイヤ、クラブ、スペード）
+- ランク（2〜10、J、Q、K、A）
+- 表示メソッド
+- 表裏状態の管理（表向き/裏向き）
+
+#### Deck クラス
+- カードデッキの生成
+- シャッフル機能
+- カードの配布と交換機能
+
+#### Player クラス
+- 手札管理
+- カード交換メソッド
+
+#### NPC クラス（Player クラスを継承）
+- 戦略パターンを利用した意思決定
+- 自動カード交換ロジック
+
+#### NPCStrategy インターフェース
+- すべてのNPC戦略が実装するインターフェース
+- `decideExchangeCards(hand)`: 交換するカードを決定
+
+#### HandEvaluator クラス
+- 役の判定機能
+- 役の強さ比較
+- 同じ役の場合の詳細な勝敗判定
+
+#### EventEmitter クラス
+- イベントの登録と発行を管理
+- UI更新のトリガーとして使用
+
+#### UIManager クラス
+- DOM操作の一元管理
+- 各種ビューの連携
+
+## 実装ステップ
+
+### ステップ1: 基本構造の実装
+1. プロジェクトディレクトリ構造の作成
+2. 基本的なHTMLとCSSの実装
+3. モジュール読み込みの設定
+
+### ステップ2: モデルの実装
+1. Card クラスの実装
+2. Deck クラスの実装
+3. Player クラスの実装
+4. NPC クラスの基本実装
+
+### ステップ3: 状態パターンの実装
+1. GameState インターフェースの定義
+2. 各状態クラスの基本実装
+3. GameContext クラスの実装
+
+### ステップ4: ハンド評価ロジックの実装
+1. 各役の判定ロジックの実装
+2. 役の比較ロジックの実装
+3. 同じ役の場合の詳細判定ロジックの実装
+
+### ステップ5: UI基本コンポーネントの実装
+1. カード表示コンポーネントの実装
+2. カード選択機能の実装
+3. 交換ボタンと完了ボタンの実装
+
+### ステップ6: ゲーム初期状態の実装
+1. カードの配布と表示
+2. 初期状態からカード交換状態への遷移
+
+### ステップ7: カード交換機能の実装
+1. カード選択UIの実装
+2. 選択カードの交換処理
+3. NPCのカード交換ロジックの実装
+4. カード交換状態から結果表示状態への遷移
+
+### ステップ8: 結果表示の実装
+1. NPCカードの表示切り替え
+2. 役の判定と表示
+3. 勝敗判定と結果表示
+4. 次のゲームボタンの実装
+
+### ステップ9: ゲームフロー完成
+1. 全状態の連携テスト
+2. エッジケースの処理実装
+3. 次のゲームへのリセット機能
+
+### ステップ10: UI改善とポリッシュ
+1. アニメーションの追加
+2. 視覚的フィードバックの強化
+3. 操作性の向上
+
+## HTML構造
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>シンプルポーカー</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="game-info">
+            <div id="game-state">ゲーム開始</div>
+        </div>
+        
+        <div id="npc-area">
+            <div id="npc-cards" class="cards-container">
+                <!-- NPCのカード -->
+            </div>
+        </div>
+        
+        <div id="game-message"></div>
+        
+        <div id="player-area">
+            <div id="player-cards" class="cards-container">
+                <!-- プレイヤーのカード -->
+            </div>
+        </div>
+        
+        <div id="action-area">
+            <div id="exchange-actions" class="action-buttons">
+                <button id="exchange-button">交換</button>
+                <button id="exchange-done-button">交換完了</button>
+            </div>
+        </div>
+        
+        <div id="result-display" class="hidden">
+            <div id="npc-hand-result"></div>
+            <div id="player-hand-result"></div>
+            <div id="game-result"></div>
+            <button id="next-game-button">次のゲーム</button>
+        </div>
+    </div>
+    
+    <!-- モジュール読み込み -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
+```
+
+## CSS実装ポイント
+
+```css
+/* 基本スタイル */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #006400; /* ポーカーテーブルの緑 */
+    color: white;
+}
+
+#game-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* カードスタイル */
+.cards-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.card {
+    width: 80px;
+    height: 120px;
+    background-color: white;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    position: relative;
+    cursor: pointer;
+    color: black;
+}
+
+.card.selected {
+    transform: translateY(-10px);
+    box-shadow: 0 5px 15px rgba(255, 255, 0, 0.5);
+    border: 2px solid yellow;
+}
+
+.card.hidden {
+    background-image: url('card-back.png');
+    background-size: cover;
+}
+
+/* スートと数字のスタイル */
+.card-top, .card-bottom {
+    display: flex;
+    justify-content: space-between;
+}
+
+.spade, .club {
+    color: black;
+}
+
+.heart, .diamond {
+    color: red;
+}
+
+/* ボタンスタイル */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* 結果表示 */
+#result-display {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+#game-result {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+#next-game-button {
+    background-color: #2196F3;
+}
+
+#next-game-button:hover {
+    background-color: #0b7dda;
+}
+
+/* ゲームメッセージ */
+#game-message {
+    text-align: center;
+    font-size: 18px;
+    margin: 10px 0;
+    min-height: 30px;
+}
+```
+
+## JavaScript実装ポイント
+
+### main.js
+```javascript
+// メインゲームロジック
+import { GameContext } from './states/gameContext.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+    const game = new GameContext();
+    game.start();
+});
+```
+
+### gameContext.js
+```javascript
+// ゲームコンテキスト
+import { InitialState } from './initialState.js';
+import { CardExchangeState } from './cardExchangeState.js';
+import { ResultState } from './resultState.js';
+import { EventEmitter } from '../utils/eventEmitter.js';
+
+export class GameContext {
+    constructor() {
+        this.states = {
+            initial: new InitialState(this),
+            cardExchange: new CardExchangeState(this),
+            result: new ResultState(this)
+        };
+        this.currentState = this.states.initial;
+        this.player = null;
+        this.npc = null;
+        this.deck = null;
+        this.events = new EventEmitter();
+    }
+
+    start() {
+        this.currentState.enter();
+    }
+
+    setState(stateName) {
+        this.currentState.exit();
+        this.currentState = this.states[stateName];
+        this.currentState.enter();
+    }
+
+    handleAction(action, data) {
+        this.currentState.handleAction(action, data);
+    }
+}
+```
+
+### 各状態クラスの基本実装例
+
+```javascript
+// initialState.js
+export class InitialState {
+    constructor(context) {
+        this.context = context;
+    }
+
+    enter() {
+        // デッキの生成、シャッフル、カード配布
+        document.getElementById('game-state').textContent = 'カードを配ります';
+        // プレイヤーとNPCの初期化
+        // カードの表示
+        // カード交換状態への遷移準備
+        setTimeout(() => {
+            this.context.setState('cardExchange');
+        }, 1000);
+    }
+
+    handleAction() {
+        // 初期状態ではアクションは受け付けない
+    }
+
+---

@@ -29,17 +29,6 @@ fs.readFile('list.txt', 'utf8', (err, data) => {
     </header>
 
     <main>
-        <section id="goals">
-            <h2>Goals</h2>
-            <ul>
-                <li><strong>Master AI Coding Agents</strong>: Learn how to effectively use AI tools for coding and boost development efficiency.</li>
-                <li><strong>Create a Variety of Programs</strong>: Develop different types of applications, including games and utilities, to acquire a broad range of skills.</li>
-                <li><strong>Enhance Code Quality</strong>: Utilize AI suggestions to write high-quality and efficient code.</li>
-                <li><strong>Explore and Evaluate AI Capabilities</strong>: Assess the strengths and limitations of Cline and Gemini-2.0-Flash-001 in software development.</li>
-                <li><strong>Improve Problem-Solving Skills</strong>: Use AI-generated suggestions to tackle coding challenges more effectively.</li>
-            </ul>
-        </section>
-
         <section id="challenges">
             <h2>Challenges</h2>
             <div class="challenge-grid">`;
@@ -55,6 +44,17 @@ fs.readFile('list.txt', 'utf8', (err, data) => {
 
   html += `
             </div>
+        </section>
+
+        <section id="goals">
+            <h2>Goals</h2>
+            <ul>
+                <li><strong>Master AI Coding Agents</strong>: Learn how to effectively use AI tools for coding and boost development efficiency.</li>
+                <li><strong>Create a Variety of Programs</strong>: Develop different types of applications, including games and utilities, to acquire a broad range of skills.</li>
+                <li><strong>Enhance Code Quality</strong>: Utilize AI suggestions to write high-quality and efficient code.</li>
+                <li><strong>Explore and Evaluate AI Capabilities</strong>: Assess the strengths and limitations of Cline and Gemini-2.0-Flash-001 in software development.</li>
+                <li><strong>Improve Problem-Solving Skills</strong>: Use AI-generated suggestions to tackle coding challenges more effectively.</li>
+            </ul>
         </section>
 
         <section id="rules">
