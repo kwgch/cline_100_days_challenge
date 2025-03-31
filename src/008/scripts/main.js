@@ -108,6 +108,12 @@ canvas.addEventListener('mousemove', (event) => {
   }
 });
 
+canvas.addEventListener('mousedown', (event) => {
+  if (event.button === 0) {
+    createBullet();
+  }
+});
+
 // Game loop
 function gameLoop() {
   // Update game state
@@ -213,7 +219,7 @@ function draw() {
   // Draw invaders
   invaders.forEach(invader => invader.draw(ctx));
 
-   // Draw bullets
+  // Draw bullets
   bullets.forEach(bullet => bullet.draw(ctx));
 
   // Draw score
