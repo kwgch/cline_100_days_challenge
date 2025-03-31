@@ -1,0 +1,239 @@
+# Mode: ACT
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+
+# ローカルファイル翻訳アプリケーション仕様書（改訂版）
+
+## 1. 概要
+
+本アプリケーションは、ユーザーがローカルテキストファイルを選択し、指定した言語に翻訳できるウェブベースのツールです。HTML、JavaScript、CSSのみを使用し、すべての処理をクライアントサイドで行います。翻訳にはGoogle翻訳の非公式APIを利用します。
+
+## 2. 機能要件
+
+- **ファイル選択**: ユーザーがローカルテキストファイルをブラウザで選択できる
+- **翻訳設定**: 翻訳先言語の選択（元言語は自動検出）
+- **プレビュー表示**:
+  - 元のファイルのプレビュー表示
+  - 翻訳結果のプレビュー表示
+- **翻訳実行**: ボタン押下で翻訳処理を実行
+- **翻訳結果の保存**: 翻訳されたテキストをファイルとしてダウンロード可能
+
+## 3. 対応ファイル形式
+
+- テキストファイル (.txt)
+- その他のテキストベースのファイル（内容をテキストとして読み込める形式）
+
+## 4. ユーザーインターフェース
+
+- シンプルで直感的なUI
+- レスポンシブデザイン
+- 分割表示による原文と翻訳結果の比較
+
+## 5. 非機能要件
+
+- **セキュリティ**: すべての処理はクライアントサイドで実行され、ファイルはサーバーにアップロードされない
+- **パフォーマンス**: 大きなファイルでも効率的に処理
+- **オフライン対応**: 翻訳API以外の機能はオフラインでも動作
+
+# アーキテクチャ設計書（改訂版）
+
+## 1. 全体構成
+
+本アプリケーションは、純粋なフロントエンド技術（HTML、CSS、JavaScript）のみで構築されます。翻訳機能はGoogle翻訳の非公式APIを利用します。
+
+```
+index.html  -- メインのHTMLファイル
+│
+├── css/
+│   └── styles.css  -- スタイル定義
+│
+├── js/
+│   ├── main.js     -- メインのアプリケーションロジック
+│   ├── fileHandler.js  -- ファイル読み込み・保存処理
+│   └── translator.js  -- 翻訳処理
+```
+
+## 2. コンポーネント設計
+
+### 2.1 ファイルハンドラーモジュール
+
+ローカルファイルの読み込みと保存を担当します。
+
+**主な機能**:
+- FileReader APIを使用したファイル読み込み
+- Blob APIとURL.createObjectURLを使用したファイル保存
+- テキストファイルの内容を文字列として処理
+
+### 2.2 翻訳モジュール
+
+Google翻訳の非公式APIを使用した翻訳処理を担当します。
+
+**主な機能**:
+- 非公式Google翻訳APIへのリクエスト送信
+- 翻訳結果の処理
+- エラーハンドリング
+
+### 2.3 メインアプリケーションロジック
+
+ユーザーインターフェースの制御と各モジュールの連携を担当します。
+
+**主な機能**:
+- ファイル選択インターフェースの制御
+- 翻訳言語の選択処理
+- プレビュー表示の制御（分割ビュー）
+- 進行状況の表示
+
+## 3. データフロー
+
+1. ユーザーがファイルを選択
+2. ファイルハンドラーがファイルを読み込み、内容を文字列としてメモリに保持
+3. メインアプリケーションが元ファイルのプレビューを表示
+4. ユーザーが翻訳先言語を選択
+5. ユーザーが翻訳ボタンを押下
+6. 翻訳モジュールがGoogle翻訳の非公式APIを使用して翻訳を実行
+7. 翻訳結果をメインアプリケーションが表示
+8. 必要に応じて、ユーザーが翻訳結果をダウンロード
+
+## 4. 技術的詳細
+
+### 4.1 ファイル読み込み
+
+```javascript
+function readFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => resolve(event.target.result);
+    reader.onerror = (error) => reject(error);
+    reader.readAsText(file);
+  });
+}
+```
+
+### 4.2 翻訳API連携
+
+```javascript
+async function translateText(text, targetLang) {
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return data[0].map(sentence => sentence[0]).join(" ");
+}
+```
+
+### 4.3 ファイル保存
+
+```javascript
+function saveAsFile(text, filename) {
+  const blob = new Blob([text], {type: "text/plain"});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+}
+```
+
+### 4.4 UIレイアウト
+
+分割ビューを実現するためにFlexboxまたはGridレイアウトを使用します。
+
+```css
+.preview-container {
+  display: flex;
+  height: 70vh;
+}
+
+.source-preview, .translation-preview {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+}
+```
+
+## 5. セキュリティ考慮事項
+
+- ファイルはクライアントサイドでのみ処理され、サーバーにアップロードされない
+- 非公式APIの利用に関する制限事項の考慮（リクエスト数制限など）
+- Content Security Policyの適用によるXSSの防止
+
+## 6. 将来の拡張性
+
+- 複数ファイルの一括翻訳
+- 翻訳結果のキャッシュ機能
+- 公式翻訳APIへの移行オプション
+- 翻訳履歴の保存機能
+
+## 7. 実装サンプル
+
+以下は、アプリケーションの基本的な実装例です：
+
+```html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>テキストファイル翻訳ツール</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>テキストファイル翻訳ツール</h1>
+    
+    <div class="controls">
+      <input type="file" id="file-input" accept=".txt,text/plain">
+      
+      <select id="target-language">
+        <option value="en">英語</option>
+        <option value="fr">フランス語</option>
+        <option value="de">ドイツ語</option>
+        <option value="es">スペイン語</option>
+        <option value="ja">日本語</option>
+      </select>
+      
+      <button id="translate-button">翻訳</button>
+      <button id="download-button" disabled>翻訳結果をダウンロード</button>
+    </div>
+    
+    <div class="preview-container">
+      <div class="source-preview">
+        <h2>元テキスト</h2>
+        <pre id="source-content"></pre>
+      </div>
+      <div class="translation-preview">
+        <h2>翻訳結果</h2>
+        <pre id="translation-content"></pre>
+      </div>
+    </div>
+  </div>
+  
+  <script src="js/fileHandler.js"></script>
+  <script src="js/translator.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
+```
+
+## Project Intelligence
+
+*   The project uses a modular structure with separate files for HTML, CSS, and JavaScript.
+*   The Google Translate API is used for translation, but it is an unofficial API and may be subject to change.
+*   The application is client-side only, which provides privacy and security but may limit performance for large files.
+*   The memory bank files (projectbrief.md, productContext.md, systemPatterns.md, techContext.md, activeContext.md, progress.md) are used to store project information and track progress.

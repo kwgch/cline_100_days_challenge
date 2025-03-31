@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>テキストファイル翻訳ツール</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>テキストファイル翻訳ツール</h1>
+    
+    <div class="controls">
+      <input type="file" id="file-input" accept=".txt,text/plain">
+      
+      <select id="target-language">
+        <option value="en">英語</option>
+        <option value="fr">フランス語</option>
+        <option value="de">ドイツ語</option>
+        <option value="es">スペイン語</option>
+        <option value="ja">日本語</option>
+      </select>
+      
+      <button id="translate-button">翻訳</button>
+      <button id="download-button" disabled>翻訳結果をダウンロード</button>
+    </div>
+    
+    <div class="preview-container">
+      <div class="source-preview">
+        <h2>元テキスト</h2>
+        <pre id="source-content"></pre>
+      </div>
+      <div class="translation-preview">
+        <h2>翻訳結果</h2>
+        <pre id="translation-content"></pre>
+      </div>
+    </div>
+  </div>
+  
+  <script src="js/fileHandler.js"></script>
+  <script src="js/translator.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
