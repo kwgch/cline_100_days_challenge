@@ -1,0 +1,244 @@
+# Mode: ACT
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+## スペースインベーダーゲーム仕様書
+
+### 概要
+
+HTML、JavaScript、CSSを使用してローカルファイルのみで動作するスペースインベーダーゲームを作成します。
+
+### ゲーム要素
+
+1. プレイヤーの宇宙船
+2. 敵のインベーダー
+3. プレイヤーの弾
+4. 敵の弾
+5. スコア表示
+6. ライフ表示
+
+### ゲームルール
+
+- プレイヤーは画面下部で左右に移動し、弾を発射して敵を倒します。
+- 敵は上から下に向かって移動し、ランダムに弾を発射します。
+- プレイヤーが敵に当たるか、敵の弾に当たるとライフが減少します。
+- 全ての敵を倒すとレベルアップし、次のステージに進みます。
+- ライフがゼロになるとゲームオーバーです。
+
+### 操作方法
+
+- 左矢印キー: 左に移動
+- 右矢印キー: 右に移動
+- スペースキー: 弾を発射
+
+## スペースインベーダーゲーム 改良版設計書
+
+### 概要
+
+HTML、JavaScript、CSSを使用し、オブジェクト指向プログラミング（OOP）とデザインパターンを活用して、保守性の高いスペースインベーダーゲームを作成します。
+
+## アーキテクチャ設計
+
+### デザインパターン
+
+1. **Singleton**: ゲーム全体の状態管理
+2. **Factory**: ゲーム要素（プレイヤー、敵、弾）の生成
+3. **Observer**: ゲームイベントの通知
+4. **State**: ゲーム状態の管理
+5. **Command**: ユーザー入力の処理
+
+### クラス構造
+
+```
+Game (Singleton)
+├── GameState
+├── EntityFactory
+├── CollisionDetector
+├── ScoreManager
+├── InputHandler
+├── Renderer
+└── AudioManager
+
+Entity (Abstract)
+├── Player
+├── Invader
+└── Bullet
+
+EventManager (Observer)
+```
+
+### ファイル構成
+
+```
+space-invaders/
+│
+├── index.html
+├── styles/
+│   └── main.css
+├── scripts/
+│   ├── main.js
+│   ├── game/
+│   │   ├── Game.js
+│   │   ├── GameState.js
+│   │   ├── EntityFactory.js
+│   │   ├── CollisionDetector.js
+│   │   ├── ScoreManager.js
+│   │   ├── InputHandler.js
+│   │   ├── Renderer.js
+│   │   └── AudioManager.js
+│   ├── entities/
+│   │   ├── Entity.js
+│   │   ├── Player.js
+│   │   ├── Invader.js
+│   │   └── Bullet.js
+│   └── utils/
+│       ├── EventManager.js
+│       └── Constants.js
+└── assets/
+    ├── images/
+    └── sounds/
+```
+
+## クラス詳細
+
+### Game (Singleton)
+
+ゲーム全体を管理する中心的なクラス。
+
+```javascript
+class Game {
+  constructor() {
+    if (Game.instance) return Game.instance;
+    Game.instance = this;
+    
+    this.state = new GameState();
+    this.factory = new EntityFactory();
+    this.collisionDetector = new CollisionDetector();
+    this.scoreManager = new ScoreManager();
+    this.inputHandler = new InputHandler();
+    this.renderer = new Renderer();
+    this.audioManager = new AudioManager();
+    
+    this.init();
+  }
+
+  init() {
+    // ゲーム初期化ロジック
+  }
+
+  update() {
+    // ゲーム状態更新ロジック
+  }
+
+  draw() {
+    // 描画ロジック
+  }
+
+  start() {
+    // ゲーム開始ロジック
+  }
+}
+```
+
+### Entity (Abstract)
+
+ゲーム内の全てのエンティティの基底クラス。
+
+```javascript
+class Entity {
+  constructor(x, y, width, height) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+  }
+
+  update() {
+    // 抽象メソッド
+  }
+
+  draw() {
+    // 抽象メソッド
+  }
+}
+```
+
+### EntityFactory
+
+エンティティを生成するファクトリークラス。
+
+```javascript
+class EntityFactory {
+  createPlayer(x, y) {
+    return new Player(x, y);
+  }
+
+  createInvader(x, y) {
+    return new Invader(x, y);
+  }
+
+  createBullet(x, y, isPlayerBullet) {
+    return new Bullet(x, y, isPlayerBullet);
+  }
+}
+```
+
+### EventManager (Observer)
+
+ゲーム内のイベントを管理するオブザーバークラス。
+
+```javascript
+class EventManager {
+  constructor() {
+    this.listeners = {};
+  }
+
+  on(event, callback) {
+    if (!this.listeners[event]) {
+      this.listeners[event] = [];
+    }
+    this.listeners[event].push(callback);
+  }
+
+  emit(event, data) {
+    if (this.listeners[event]) {
+      this.listeners[event].forEach(callback => callback(data));
+    }
+  }
+}
+```
+
+## 実装の注意点
+
+1. **依存性注入**: クラス間の結合度を下げるために、依存性注入を活用します。
+
+2. **インターフェースの使用**: TypeScriptを使用する場合、インターフェースを定義して型安全性を高めます。
+
+3. **モジュール化**: 各クラスを別々のファイルに分割し、モジュール化を徹底します。
+
+4. **定数の管理**: ゲーム内で使用する定数は`Constants.js`で一元管理します。
+
+5. **エラー処理**: 適切な例外処理を実装し、エラーに強い設計にします。
+
+6. **テスト容易性**: ユニットテストが書きやすいように、各クラスの責務を明確に分離します。
+
+7. **拡張性**: 新しい機能や敵の種類を追加しやすいように、柔軟な設計を心がけます。
+
+この改良版設計書は、OOPとデザインパターンを活用して保守性と拡張性の高いアーキテクチャを提案しています。AIコーディングエージェントのclineに実装を指示する際は、この設計に基づいてより詳細な実装指示を行うことができます。
+
