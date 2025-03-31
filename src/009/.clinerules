@@ -1,0 +1,308 @@
+# Mode: Plan
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+# 簡易画像編集ソフト仕様書・アーキテクチャ設計書（OOP/デザインパターン版）
+
+## 1. 仕様書
+
+### 1.1 概要
+本ソフトウェアは、ブラウザ上で動作する簡易的な画像編集ツールです。HTML、JavaScript、CSSのみを使用し、サーバーとの通信を必要とせず、ローカルファイルのみで動作します。オブジェクト指向プログラミングとデザインパターンを活用し、保守性と拡張性の高い設計を採用しています。
+
+### 1.2 機能要件
+
+#### 1.2.1 基本機能
+- 画像のアップロード（ドラッグ＆ドロップ対応）
+- 編集した画像のダウンロード
+
+#### 1.2.2 編集機能
+- **透過処理**：特定の色や領域を透明化
+- **クリッピング**：画像の一部を切り抜き
+- **拡大/縮小**：画像サイズの変更
+
+### 1.3 非機能要件
+- ローカルファイルのみで動作（サーバー通信不要）
+- モダンブラウザ（Chrome、Firefox、Safari、Edge最新版）での動作保証
+- レスポンシブデザイン対応
+- 処理はクライアントサイドのみで完結
+- 保守性と拡張性を重視したオブジェクト指向設計
+
+### 1.4 ユーザーインターフェース要件
+- シンプルで直感的な操作性
+- 編集中の画像をプレビュー表示
+- 各編集機能へのアクセスが容易なUI
+- 操作履歴（元に戻す/やり直し）機能
+
+### 1.5 制約条件
+- 外部ライブラリの使用は最小限に抑える
+- ローカルストレージのみを使用（サーバーストレージなし）
+
+## 2. アーキテクチャ設計書
+
+### 2.1 全体構成
+本アプリケーションは複数のデザインパターンを組み合わせたオブジェクト指向設計を採用します。主要なパターンとして、MVCパターン、Commandパターン、Strategyパターン、Observerパターン、Singletonパターンを活用します。
+
+### 2.2 ファイル構成
+
+```
+/
+├── index.html        # メインHTML
+├── css/
+│   └── style.css     # スタイルシート
+└── js/
+    ├── app.js        # アプリケーションのエントリーポイント
+    ├── core/
+    │   ├── Editor.js       # エディタのメインクラス（Singleton）
+    │   ├── Canvas.js       # キャンバス管理クラス
+    │   └── EventBus.js     # イベント管理（Observer実装）
+    ├── model/
+    │   ├── ImageModel.js   # 画像データモデル
+    │   └── HistoryModel.js # 履歴管理モデル
+    ├── view/
+    │   ├── EditorView.js   # メインビュー
+    │   ├── ToolbarView.js  # ツールバービュー
+    │   └── CanvasView.js   # キャンバスビュー
+    ├── controller/
+    │   └── EditorController.js # メインコントローラ
+    ├── commands/
+    │   ├── CommandFactory.js   # コマンドファクトリ
+    │   ├── CommandHistory.js   # コマンド履歴管理
+    │   ├── Command.js          # 基底コマンドクラス
+    │   ├── TransparencyCommand.js # 透過処理コマンド
+    │   ├── ClippingCommand.js     # クリッピングコマンド
+    │   └── ResizeCommand.js       # リサイズコマンド
+    ├── tools/
+    │   ├── ToolManager.js      # ツール管理クラス
+    │   ├── Tool.js             # 基底ツールクラス
+    │   ├── TransparencyTool.js # 透過ツール
+    │   ├── ClippingTool.js     # クリッピングツール
+    │   └── ResizeTool.js       # リサイズツール
+    ├── strategies/
+    │   ├── TransparencyStrategy.js # 透過処理戦略
+    │   ├── ClippingStrategy.js     # クリッピング戦略
+    │   └── ResizeStrategy.js       # リサイズ戦略
+    └── utils/
+        ├── FileHandler.js      # ファイル入出力処理
+        ├── ImageProcessor.js   # 画像処理ユーティリティ
+        └── DOMUtils.js         # DOM操作ユーティリティ
+```
+
+### 2.3 デザインパターンの適用
+
+#### 2.3.1 Singletonパターン
+- `Editor` クラスをシングルトンとして実装し、アプリケーション全体で一貫したエディタインスタンスを提供
+- グローバルな状態管理を一元化し、複数のコンポーネント間での状態共有を容易にする
+
+```javascript
+// Editor.js (Singleton実装例)
+class Editor {
+  constructor() {
+    if (Editor.instance) {
+      return Editor.instance;
+    }
+    Editor.instance = this;
+    this.canvas = null;
+    this.currentTool = null;
+    this.commandHistory = new CommandHistory();
+    // その他の初期化
+  }
+  
+  static getInstance() {
+    if (!Editor.instance) {
+      Editor.instance = new Editor();
+    }
+    return Editor.instance;
+  }
+  
+  // その他のメソッド
+}
+```
+
+#### 2.3.2 Commandパターン
+- 各編集操作をコマンドオブジェクトとしてカプセル化
+- 操作の履歴管理（Undo/Redo）を実現
+- 新しい編集機能の追加が容易
+
+```javascript
+// Command.js (基底コマンドクラス)
+class Command {
+  constructor() {
+    this.previousState = null;
+  }
+  
+  execute(canvas) {
+    // 実行前の状態を保存
+    this.previousState = canvas.getImageData();
+    // サブクラスで実装
+  }
+  
+  undo(canvas) {
+    if (this.previousState) {
+      canvas.putImageData(this.previousState);
+    }
+  }
+}
+
+// TransparencyCommand.js
+class TransparencyCommand extends Command {
+  constructor(color, tolerance) {
+    super();
+    this.color = color;
+    this.tolerance = tolerance;
+  }
+  
+  execute(canvas) {
+    super.execute(canvas);
+    // 透過処理の実装
+    const strategy = new TransparencyStrategy(this.color, this.tolerance);
+    strategy.apply(canvas);
+  }
+}
+```
+
+#### 2.3.3 Strategyパターン
+- 異なる画像処理アルゴリズムを戦略として実装
+- 処理ロジックの切り替えを容易にする
+
+```javascript
+// TransparencyStrategy.js
+class TransparencyStrategy {
+  constructor(targetColor, tolerance) {
+    this.targetColor = targetColor;
+    this.tolerance = tolerance;
+  }
+  
+  apply(canvas) {
+    const imageData = canvas.getImageData();
+    const data = imageData.data;
+    
+    // 透過処理のアルゴリズム実装
+    // targetColorに近い色をtoleranceの範囲で透明化
+    
+    canvas.putImageData(imageData);
+  }
+}
+```
+
+#### 2.3.4 Observerパターン
+- UIコンポーネント間の通信を疎結合に実現
+- モデルの変更を各ビューに通知
+
+```javascript
+// EventBus.js (Observer実装)
+class EventBus {
+  constructor() {
+    this.listeners = {};
+  }
+  
+  subscribe(event, callback) {
+    if (!this.listeners[event]) {
+      this.listeners[event] = [];
+    }
+    this.listeners[event].push(callback);
+  }
+  
+  publish(event, data) {
+    if (this.listeners[event]) {
+      this.listeners[event].forEach(callback => callback(data));
+    }
+  }
+}
+```
+
+#### 2.3.5 MVCパターン
+- Model: 画像データと状態を管理
+- View: ユーザーインターフェースの表示
+- Controller: ユーザー操作の処理とモデル更新
+
+### 2.4 主要クラスの責務
+
+#### 2.4.1 Core
+- **Editor**: アプリケーション全体を管理するシングルトンクラス
+- **Canvas**: キャンバス操作とレンダリングを担当
+- **EventBus**: コンポーネント間の通信を管理
+
+#### 2.4.2 Model
+- **ImageModel**: 画像データの保持と操作
+- **HistoryModel**: 編集履歴の管理
+
+#### 2.4.3 View
+- **EditorView**: 全体のUIレイアウト
+- **ToolbarView**: 編集ツールの表示
+- **CanvasView**: キャンバス表示と操作UI
+
+#### 2.4.4 Controller
+- **EditorController**: ユーザー操作とモデル更新の連携
+
+#### 2.4.5 Commands
+- **CommandFactory**: 適切なコマンドオブジェクトを生成
+- **CommandHistory**: コマンドの履歴を管理（Undo/Redo）
+- 各種コマンドクラス: 特定の編集操作を実装
+
+#### 2.4.6 Tools
+- **ToolManager**: 利用可能なツールを管理
+- 各種ツールクラス: ユーザーインタラクションを処理
+
+#### 2.4.7 Strategies
+- 各種戦略クラス: 画像処理アルゴリズムを実装
+
+#### 2.4.8 Utils
+- **FileHandler**: ファイルの読み込みと保存
+- **ImageProcessor**: 画像処理のユーティリティ関数
+- **DOMUtils**: DOM操作のヘルパー関数
+
+### 2.5 データフロー
+
+1. ユーザーがツールを選択 → ToolManagerが対応するToolをアクティブ化
+2. ユーザーがキャンバス上で操作 → アクティブなToolがイベントを処理
+3. Toolが適切なCommandを生成 → CommandFactoryを通じてインスタンス化
+4. CommandがStrategyを使用して画像処理を実行 → ImageModelが更新される
+5. EventBusを通じて変更が通知される → 各Viewが更新
+
+### 2.6 拡張性の確保
+
+- 新しい編集機能の追加: 新しいCommand、Tool、Strategyクラスを追加するだけで対応可能
+- UIの変更: ViewとControllerを修正するだけでモデルに影響を与えない
+- 画像処理アルゴリズムの改善: Strategyクラスのみを修正
+
+### 2.7 実装上の注意点
+
+- 各クラスの単一責任の原則を守る
+- インターフェースを明確に定義し、実装の詳細を隠蔽する
+- 依存性注入を活用して、テスト可能性を高める
+- パフォーマンスを考慮し、大きな画像の処理は最適化する
+
+## 3. 実装ステップ
+
+1. コアクラス（Editor、Canvas、EventBus）の実装
+2. モデルクラスの実装
+3. ビューとコントローラの基本実装
+4. コマンドパターンとコマンド履歴の実装
+5. 基本ツール（選択、移動など）の実装
+6. 各編集機能の実装
+   - 拡大/縮小機能
+   - クリッピング機能
+   - 透過処理機能
+7. ファイル入出力の実装
+8. UI/UXの改善
+9. バグ修正とパフォーマンス最適化
+10. ブラウザ互換性テスト
+
+この設計により、保守性と拡張性に優れた画像編集ソフトウェアを実現できます。オブジェクト指向設計とデザインパターンの活用により、将来の機能追加や変更に柔軟に対応できる構造となっています。
+

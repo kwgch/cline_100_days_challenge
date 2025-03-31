@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Image Editor</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <h1>Simple Image Editor</h1>
+    <input type="file" id="imageUpload" accept="image/*">
+    <canvas id="imageCanvas"></canvas>
+    <div id="toolbar">
+        <button data-tool="clipping">Clipping</button>
+        <button data-tool="resize">Resize</button>
+        <button data-tool="transparency">Transparency</button>
+    </div>
+    <div id="resizeOptions" style="display:none;">
+        Width: <input type="number" id="resizeWidth" value="500">
+        Height: <input type="number" id="resizeHeight" value="500">
+        <button id="applyResize">Apply Resize</button>
+    </div>
+    <div id="transparencyOptions" style="display:none;">
+        Color: <input type="color" id="transparencyColor" value="#ff0000">
+        Tolerance: <input type="number" id="transparencyTolerance" value="20">
+        <button id="applyTransparency">Apply Transparency</button>
+    </div>
+    <div id="clippingOverlay"></div>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
