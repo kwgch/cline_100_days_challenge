@@ -1,0 +1,344 @@
+# Mode: ACT
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+
+# キャッチゲームの仕様書とアーキテクチャ設計書
+
+## 仕様書
+
+### ゲーム概要
+「キャッチゲーム」は、画面上部から落ちてくるボールをプレイヤーがマウスで操作するキャッチャーで受け止めるシンプルなブラウザゲームです。ローカルファイルのみで動作し、HTML、JavaScript、CSSで実装されます。全体的に中間色を基調としたかわいい雰囲気のデザインを採用します。
+
+### 機能要件
+
+#### 基本ゲームプレイ
+1. **ゲーム開始**
+   - ページ読み込み時にゲームが自動的に開始する
+   - スタート画面からスタートボタンを押してゲームを開始することもできる
+
+2. **ゲームメカニクス**
+   - 画面上部からランダムな位置でボールが落下する
+   - プレイヤーはマウスでキャッチャー（バスケットまたはパドル）を左右に動かせる
+   - ボールをキャッチすると得点が加算される
+   - ボールを逃すとライフが減少する
+   - ライフがゼロになるとゲームオーバー
+
+3. **難易度**
+   - ゲームが進行するにつれてボールの落下速度が徐々に上昇する（200点ごとに10%上昇）
+   - 得点に応じてボールのサイズが徐々に小さくなる（500点ごとに5%縮小、最小サイズあり）
+   - 一定スコア毎に複数のボールが同時に落下するようになる
+   - ボールの色が得点に応じて変化する（100点ごとに色が変わる）
+
+4. **特殊アイテム**
+   - **ハート（♡）**：キャッチするとライフが1回復する（出現確率5%）
+   - **「拡」**：キャッチするとバーの幅が一時的に広くなる（20%増加、30秒間）（出現確率3%）
+   - **「縮」**：キャッチするとバーの幅が一時的に狭くなる（20%減少、30秒間）（出現確率3%）
+
+5. **スコアとライフ**
+   - 初期ライフは3つ
+   - ボールをキャッチするごとに10点加算
+   - 現在のスコアとライフを画面上に常に表示
+
+6. **ゲームオーバー**
+   - ライフがゼロになったらゲームオーバー画面を表示
+   - 最終スコアを表示
+   - リスタートボタンでゲームを再開可能
+
+### 非機能要件
+
+1. **パフォーマンス**
+   - 60FPSでの滑らかな動作を目指す
+   - 低スペックデバイスでも動作するよう最適化
+
+2. **互換性**
+   - 主要ブラウザ（Chrome、Firefox、Safari、Edge）で動作
+   - レスポンシブデザインで様々な画面サイズに対応
+
+3. **技術スタック**
+   - HTML5
+   - CSS3
+   - バニラJavaScript（外部ライブラリなし）
+
+4. **ローカル動作**
+   - サーバー不要でローカルファイルとして実行可能
+
+5. **視覚的デザイン**
+   - パステルカラーを中心とした配色
+   - 丸みを帯びた形状のUIエレメント
+   - やわらかい印象のフォント使用
+
+## アーキテクチャ設計書
+
+### ファイル構成
+```
+./
+├── index.html      # メインHTMLファイル
+├── css/
+│   └── style.css   # スタイルシート
+└── js/
+    ├── game.js     # ゲームのメインロジック
+    ├── ball.js     # ボールの管理
+    ├── catcher.js  # キャッチャーの管理
+    ├── item.js     # 特殊アイテムの管理
+    ├── scoreManager.js  # スコア管理
+    └── uiManager.js     # UI管理
+```
+
+### コンポーネント設計
+
+#### HTMLの構造
+- ゲームキャンバス要素
+- スコア表示領域
+- ライフ表示領域
+- スタート画面
+- ゲームオーバー画面
+
+#### CSSの役割
+- ゲーム全体のレイアウト
+- ゲーム要素のスタイリング
+- アニメーションとトランジション
+- レスポンシブデザイン
+- パステルカラーを基調としたかわいいデザイン
+
+#### JavaScriptのクラス構造
+
+1. **Game クラス**（game.js）
+   - ゲーム全体の状態管理
+   - ゲームループの実装
+   - 入力処理
+   - 衝突検出
+   - 特殊アイテムの生成と管理
+
+2. **Ball クラス**（ball.js）
+   - ボールの位置、速度、加速度の管理
+   - 描画メソッド
+   - 更新メソッド
+   - サイズと速度の動的調整機能
+   - 色変更メソッド
+
+3. **Catcher クラス**（catcher.js）
+   - キャッチャーの位置と動きの管理
+   - マウス入力との連携
+   - 描画メソッド
+   - サイズ変更メソッド
+   - サイズ変更の一時的効果を管理するタイマー機能
+
+4. **Item クラス**（item.js）
+   - 特殊アイテム（ハート、拡、縮）の管理
+   - アイテムの動き、描画、効果適用を担当
+
+5. **ScoreManager クラス**（scoreManager.js）
+   - スコアとライフの管理
+   - 表示の更新
+   - 難易度調整ロジック（ボールの速度、サイズ変更のトリガー）
+
+6. **UIManager クラス**（uiManager.js）
+   - ゲーム画面、スタート画面、ゲームオーバー画面の切り替え
+   - ボタンイベントの処理
+   - 新しいビジュアルスタイルの適用
+   - 特殊アイテムの視覚的表現の管理
+
+### ゲームループの実装
+
+```javascript
+// 擬似コード
+function gameLoop() {
+  // 1. 状態の更新
+  updateBalls();
+  updateCatcher();
+  updateItems();
+  checkCollisions();
+  
+  // 2. 描画
+  clearCanvas();
+  drawBalls();
+  drawItems();
+  drawCatcher();
+  updateUI();
+  
+  // 3. 次のフレームをリクエスト
+  if (!gameOver) {
+    requestAnimationFrame(gameLoop);
+  } else {
+    showGameOverScreen();
+  }
+}
+```
+
+### イベント処理
+
+1. **マウス移動イベント**
+   - キャッチャーの位置をマウスのX座標に合わせる
+   - 画面端での位置制限を実装
+
+2. **クリックイベント**
+   - スタートボタンとリスタートボタンの処理
+
+### 衝突検出アルゴリズム
+
+```javascript
+// 擬似コード
+function checkCollision(object, catcher) {
+  // オブジェクト（ボールまたはアイテム）の底部がキャッチャーの上部に接触しているか
+  if (object.y + object.radius >= catcher.y && 
+      object.y + object.radius = catcher.x && 
+        object.x  {
+      item.update();
+      if (this.checkCollision(item, this.catcher)) {
+        this.applyItemEffect(item);
+      }
+    });
+  }
+
+  applyItemEffect(item) {
+    switch(item.type) {
+      case 'heart':
+        this.scoreManager.increaseLife();
+        break;
+      case 'expand':
+        this.catcher.expand();
+        break;
+      case 'shrink':
+        this.catcher.shrink();
+        break;
+    }
+  }
+}
+```
+
+### ボールの動的調整
+
+```javascript
+// Ball クラス内（擬似コード）
+class Ball {
+  // ...既存のコード...
+
+  updateProperties(score) {
+    this.speed = this.baseSpeed * (1 + Math.floor(score / 200) * 0.1);
+    this.size = Math.max(this.baseSize * (1 - Math.floor(score / 500) * 0.05), this.minSize);
+    this.color = this.getColorByScore(score);
+  }
+
+  getColorByScore(score) {
+    const colors = ['#FFB3BA', '#BAFFC9', '#BAE1FF', '#FFFFBA', '#FFDFBA'];
+    return colors[Math.floor(score / 100) % colors.length];
+  }
+}
+```
+
+### キャッチャー（バー）のサイズ変更
+
+```javascript
+// Catcher クラス内（擬似コード）
+class Catcher {
+  // ...既存のコード...
+
+  expand() {
+    this.width *= 1.2;
+    this.startSizeChangeTimer();
+  }
+
+  shrink() {
+    this.width *= 0.8;
+    this.startSizeChangeTimer();
+  }
+
+  startSizeChangeTimer() {
+    clearTimeout(this.sizeChangeTimer);
+    this.sizeChangeTimer = setTimeout(() => {
+      this.resetSize();
+    }, 30000); // 30秒後にリセット
+  }
+
+  resetSize() {
+    this.width = this.originalWidth;
+  }
+}
+```
+
+### 難易度調整メカニズム
+
+```javascript
+// ScoreManager クラス内（擬似コード）
+class ScoreManager {
+  // ...既存のコード...
+
+  updateDifficulty() {
+    // ボールの速度と大きさを調整
+    this.game.balls.forEach(ball => {
+      ball.updateProperties(this.score);
+    });
+    
+    // 200点ごとに同時に落下するボールの数を増やす
+    if (this.score % 200 === 0 && this.score > 0) {
+      this.game.addNewBall();
+    }
+  }
+}
+```
+
+### UIスタイルの実装
+
+```css
+/* style.css */
+body {
+  font-family: 'Comic Sans MS', cursive;
+  background-color: #FFF0F5;
+}
+
+#game-canvas {
+  border-radius: 15px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.button {
+  background-color: #FFB3BA;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 20px;
+  font-size: 18px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.button:hover {
+  background-color: #FF69B4;
+  transform: scale(1.05);
+}
+```
+
+### ローカルストレージの活用
+
+```javascript
+// 擬似コード
+function saveHighScore() {
+  const currentHighScore = localStorage.getItem('highScore') || 0;
+  if (score > currentHighScore) {
+    localStorage.setItem('highScore', score);
+  }
+}
+
+function loadHighScore() {
+  return localStorage.getItem('highScore') || 0;
+}
+```
+
+このアーキテクチャ設計に基づいて実装することで、シンプルながらも楽しく、視覚的に魅力的なキャッチゲームを作成できます。設計はモジュール化されており、将来的な機能拡張（例：追加の特殊アイテム、複数のレベル、サウンドエフェクトなど）も容易に行えます。
