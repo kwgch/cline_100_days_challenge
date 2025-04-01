@@ -18,3 +18,4 @@ Implementing the core game mechanics and improving the user experience.
 - Balancing the game's difficulty.
 - Choosing appropriate sound effects and music.
 - Optimizing the game for performance.
+- Implementing mobile compatibility with viewport meta tag and touch controls.

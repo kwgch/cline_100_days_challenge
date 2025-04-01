@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Space Invaders</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       margin: 0;
@@ -11,6 +12,14 @@
     canvas {
       display: block;
       margin: 0 auto;
+    }
+
+    /* Media queries for responsive design */
+    @media (max-width: 640px) {
+      canvas {
+        width: 100%;
+        height: auto;
+      }
     }
   </style>
 </head>

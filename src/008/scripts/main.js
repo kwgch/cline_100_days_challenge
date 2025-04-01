@@ -93,6 +93,29 @@ document.addEventListener('keyup', (event) => {
   }
 });
 
+// Touch input handling
+canvas.addEventListener('touchstart', (event) => {
+  if (gameOver) return;
+  event.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const touchX = event.touches[0].clientX - rect.left;
+  player.x = touchX - player.width / 2;
+  spacePressed = true;
+  createBullet();
+});
+
+canvas.addEventListener('touchmove', (event) => {
+  if (gameOver) return;
+  event.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const touchX = event.touches[0].clientX - rect.left;
+  player.x = touchX - player.width / 2;
+});
+
+canvas.addEventListener('touchend', (event) => {
+  spacePressed = false;
+});
+
 canvas.addEventListener('mousemove', (event) => {
   if (gameOver) return;
   const rect = canvas.getBoundingClientRect();
