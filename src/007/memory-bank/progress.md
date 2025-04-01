@@ -6,11 +6,12 @@
 *   File reading functionality.
 *   Translation logic using the Google Translate API.
 *   Main application logic to handle user interactions.
+*   Responsive design for mobile devices.
+*   README.md file to describe the application.
 
 **What's left to build:**
 
 *   File saving functionality.
-*   Improved user interface.
 *   Error handling.
 *   Progress indicators for long translations.
 

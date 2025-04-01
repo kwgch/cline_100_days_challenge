@@ -2,21 +2,17 @@
 
 **Current work focus:**
 
-Completing the initial implementation of the local file translation application.
+Improving the application for mobile devices and documenting the project.
 
 **Recent changes:**
 
-*   Created the basic HTML structure in `index.html`.
-*   Added basic CSS styling in `css/styles.css`.
-*   Implemented file reading functionality in `js/fileHandler.js`.
-*   Implemented translation logic in `js/translator.js`.
-*   Implemented main application logic in `js/main.js`.
+*   Made the application responsive for mobile devices.
+*   Created a README.md file to describe the application and how to use it.
 
 **Next steps:**
 
-*   Test the application thoroughly.
-*   Implement file saving functionality.
-*   Improve the user interface.
+*   Test the application thoroughly on different mobile devices.
+*   Consider alternative translation APIs.
 *   Add error handling.
 
 **Active decisions and considerations:**
