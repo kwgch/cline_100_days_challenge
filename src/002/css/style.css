@@ -6,7 +6,7 @@ body {
 }
 
 #game-container {
-    max-width: 800px;
+    width: 90vw;
     margin: 0 auto;
     padding: 20px;
 }
@@ -20,8 +20,8 @@ body {
 }
 
 .card {
-    width: 80px;
-    height: 120px;
+    width: 12vw;
+    height: 18vw;
     background-color: white;
     border-radius: 5px;
     display: flex;
@@ -32,7 +32,7 @@ body {
     position: relative;
     cursor: pointer;
     color: black;
-    font-size: 20px; /* Adjust font size as needed */
+    font-size: 3vw; /* Adjust font size as needed */
 }
 
 .card.selected {
