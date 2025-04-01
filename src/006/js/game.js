@@ -2,6 +2,11 @@ class Game {
   constructor(canvasId) {
     this.canvas = document.getElementById(canvasId);
     this.ctx = this.canvas.getContext('2d');
+
+    // Set canvas dimensions based on screen size
+    this.canvas.width = Math.min(window.innerWidth, 480); // Maximum width of 480px
+    this.canvas.height = Math.min(window.innerHeight, 320); // Maximum height of 320px
+
     this.score = 0;
     this.lives = 3;
     this.balls = [];

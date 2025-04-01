@@ -9,7 +9,9 @@ class Catcher {
     this.originalWidth = 80;
     this.sizeChangeTimer = null;
 
+    this.handleTouchMove = this.handleTouchMove.bind(this);
     document.addEventListener('mousemove', this.handleMouseMove.bind(this));
+    document.addEventListener('touchmove', this.handleTouchMove, { passive: false });
   }
 
   update() {
@@ -29,6 +31,12 @@ class Catcher {
 
   handleMouseMove(event) {
     this.x = event.clientX - this.game.canvas.offsetLeft - this.width / 2;
+  }
+
+  handleTouchMove(event) {
+    event.preventDefault();
+    const touch = event.touches[0];
+    this.x = touch.clientX - this.game.canvas.offsetLeft - this.width / 2;
   }
 
   expand() {
