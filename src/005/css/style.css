@@ -14,12 +14,38 @@ body {
 }
 
 .container {
-    max-width: 800px;
+    max-width: 100%;
     margin: 0 auto;
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-group {
+        min-width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+    .control-panel {
+        flex-direction: column;
+    }
+    
+    .form-group {
+        width: 100%;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
 }
 
 h1 {
