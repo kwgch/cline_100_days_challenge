@@ -3,6 +3,9 @@
 ## What Works
 - Created the initial memory bank files.
 - Set up the project structure.
+- Made the game responsive for mobile devices.
+- Implemented touch controls for the catcher.
+- Created a README.md file.
 
 ## What's Left to Build
 - Implement the game logic and UI.
@@ -12,7 +15,8 @@
 - Implement game over screen and restart functionality.
 
 ## Current Status
-- Initial project setup complete.
+- Mobile responsiveness and touch controls implemented.
+- README.md file created.
 
 ## Known Issues
 - None

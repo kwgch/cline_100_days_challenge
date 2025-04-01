@@ -1,18 +1,17 @@
 # Active Context
 
 ## Current Work Focus
-Creating the initial memory bank files and setting up the project structure.
+Making the game playable on mobile devices and creating a README.md file.
 
 ## Recent Changes
-- Created the `memory-bank` directory.
-- Created `projectbrief.md` and `productContext.md` files.
+- Added viewport meta tag to index.html for mobile responsiveness.
+- Added touch event listener to js/catcher.js for mobile controls.
+- Created README.md file with game information.
 
 ## Next Steps
-- Create the remaining memory bank files: `systemPatterns.md`, `techContext.md`, and `progress.md`.
-- Read all memory bank files to gain a comprehensive understanding of the project.
-- Develop a strategy for implementing the catch game based on the specifications and architecture design.
+- Review all memory bank files to ensure they are up-to-date.
+- Test the game on different mobile devices to ensure compatibility.
 
 ## Active Decisions and Considerations
-- How to best structure the JavaScript code into modules.
-- How to implement the game loop and collision detection efficiently.
-- How to create a visually appealing and engaging user interface.
+- How to further improve the game's responsiveness and performance on mobile devices.
+- Whether to add additional features or enhancements to the game.
