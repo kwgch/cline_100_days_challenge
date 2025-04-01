@@ -17,12 +17,12 @@ class Canvas {
         this.ctx.putImageData(imageData, 0, 0);
     }
 
-    drawImage(img) {
+    drawImage(img, width, height) {
         const fixedWidth = 500; // Set the fixed width here
         const aspectRatio = img.width / img.height;
-        this.canvas.width = fixedWidth;
-        this.canvas.height = fixedWidth / aspectRatio;
-        this.ctx.drawImage(img, 0, 0, fixedWidth, fixedWidth / aspectRatio);
+        this.canvas.width = width || fixedWidth;
+        this.canvas.height = height || (fixedWidth / aspectRatio);
+        this.ctx.drawImage(img, 0, 0, width || fixedWidth, height || (fixedWidth / aspectRatio));
     }
 }
 

@@ -15,7 +15,7 @@ class Editor {
         this.eventBus = new EventBus();
         this.toolManager = new ToolManager();
         this.fileHandler = new FileHandler();
-        this.currentImage = null;
+        this.currentImage = null; // Store the image object
     }
 
     executeCommand(command) {
@@ -45,11 +45,11 @@ class Editor {
         });
     }
 
-    handleImageUpload(file) {
+    handleImageUpload(file, width, height) {
         this.fileHandler.loadImage(file)
             .then(img => {
                 this.currentImage = img;
-                this.canvas.drawImage(img);
+                this.canvas.drawImage(img, width, height);
             })
             .catch(error => {
                 console.error('Error loading image:', error);

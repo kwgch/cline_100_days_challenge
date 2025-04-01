@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Responsive viewport meta tag -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Simple Image Editor</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -14,6 +15,7 @@
         <button data-tool="clipping">Clipping</button>
         <button data-tool="resize">Resize</button>
         <button data-tool="transparency">Transparency</button>
+		<button id="downloadButton">Download</button>
     </div>
     <div id="resizeOptions" style="display:none;">
         Width: <input type="number" id="resizeWidth" value="500">
