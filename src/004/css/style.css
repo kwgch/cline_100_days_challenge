@@ -3,37 +3,43 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh; /* Use min-height instead of height */
     margin: 0;
-    background-color: #f0f0f0;
+    background-color: #deb887; /* Light Brown */
 }
 
 #game-container {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%; /* Make the game container responsive */
+    max-width: 600px; /* Limit the maximum width */
+    padding: 20px;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
 #board-container {
     margin-bottom: 20px;
+    width: 100%; /* Make the board container responsive */
 }
 
 #shogi-board {
     display: grid;
-    grid-template-columns: repeat(9, 50px);
-    grid-template-rows: repeat(9, 50px);
+    grid-template-columns: repeat(9, 1fr); /* Use fr units for flexible columns */
+    grid-template-rows: repeat(9, 1fr); /* Use fr units for flexible rows */
     border: 2px solid #333;
+    width: 100%; /* Make the board responsive */
+    aspect-ratio: 1 / 1; /* Maintain a 1:1 aspect ratio */
+    background-color: #d2b48c; /* Tan */
 }
 
 #shogi-board > div {
-    width: 50px;
-    height: 50px;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 24px;
+    font-size: calc(16px + 1vw); /* Responsive font size */
     border: 1px solid #ccc;
-    background-color: #fff;
+    background-color: #f5f5dc; /* Beige */
     color: #333;
     cursor: pointer;
 }
@@ -58,21 +64,38 @@ body {
 #captured-pieces {
     display: flex;
     justify-content: space-around;
-    width: 300px;
+    width: 100%; /* Make the captured pieces area responsive */
+    max-width: 400px;
 }
 
 .captured-area {
-    width: 140px;
+    width: 45%;
     padding: 10px;
     border: 1px solid #ccc;
     text-align: center;
+    box-sizing: border-box;
 }
 
 .piece {
-    font-size: 20px;
+    font-size: calc(14px + 1vw);
     margin: 2px;
 }
 
 .player2 {
     transform: rotate(180deg);
+}
+
+/* Media queries for smaller screens */
+@media (max-width: 480px) {
+    #game-info {
+        font-size: 0.8em;
+    }
+
+    .captured-area {
+        padding: 5px;
+    }
+
+    .piece {
+        font-size: 1em;
+    }
 }
