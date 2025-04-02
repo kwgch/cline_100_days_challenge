@@ -1,0 +1,20 @@
+/* スマートフォン向けのスタイル */
+@media (max-width: 768px) {
+    .sudoku-board {
+        width: 100%;
+        max-width: 450px; /* Adjust max-width to match the original width in style.css */
+        margin: 0 auto; /* Center the board */
+    }
+
+    .cell {
+        font-size: 1.2rem;
+    }
+
+    .controls {
+        flex-direction: column;
+    }
+
+    .controls button {
+        margin: 5px;
+    }
+}

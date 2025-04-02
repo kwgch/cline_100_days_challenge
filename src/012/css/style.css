@@ -1,0 +1,108 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+    padding: 10px;
+}
+
+.container {
+    text-align: center;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    max-width: 90vw;
+}
+
+.sudoku-board {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    width: 90vw;
+    height: 90vw;
+    border: 2px solid #000;
+    margin: 0 auto; /* 水平方向の中央揃え */
+}
+
+.cell {
+    border: 1px solid #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    user-select: none;
+    box-sizing: border-box;
+    min-height: calc(90vw / 9);
+}
+
+.cell:nth-child(3n) {
+    border-right: 2px solid #000;
+}
+
+.cell.selected {
+    background-color: #ffff99;
+}
+
+.cell.given {
+    color: #000;
+    font-weight: bold;
+    cursor: default;
+}
+
+/* .cell:nth-child(9n) {
+    border-right: 2px solid #000;
+}
+
+.sudoku-board > *:nth-child(27n + 1) {
+    border-top: 2px solid #000;
+}
+
+.sudoku-board > *:nth-child(27n) {
+    border-bottom: 2px solid #000;
+} */
+
+.controls {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.controls button {
+    margin: 0 5px;
+    padding: 10px 10px;
+    font-size: 1rem;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+}
+
+.controls button:hover {
+    background-color: #0056b3;
+}
+
+.timer {
+    margin-top: 20px;
+    font-size: 1.2rem;
+}
+
+/* PC向けスタイル */
+@media (min-width: 768px) {
+    .sudoku-board {
+        width: 450px;
+        height: 450px;
+        min-height: auto;
+        margin: 0 auto; /* PCでも中央揃え */
+    }
+
+    .cell {
+        min-height: 50px;
+    }
+
+    .container {
+        max-width: 600px;
+    }
+}

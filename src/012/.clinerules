@@ -1,0 +1,367 @@
+# Mode: Plan
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+# 数独パズル開発仕様書
+
+## 1. 概要
+
+数独パズルをブラウザ上で遊べるウェブアプリケーションを開発します。HTML、JavaScript、CSSのみを使用し、ローカルファイルのみで動作する設計とします。オブジェクト指向プログラミングとデザインパターンを活用し、保守性の高いコードを目指します。
+
+## 2. 機能要件
+
+- 9x9のグリッドで数独パズルを表示
+- 難易度選択機能（初級、中級、上級）
+- 新しいパズルの生成機能
+- 数字入力機能（1〜9）
+- 候補数字のメモ機能
+- ヒント機能
+- タイマー機能
+- 間違いチェック機能
+- パズル保存機能（ローカルストレージ使用）
+- レスポンシブデザイン（スマートフォン対応必須）
+
+## 3. 技術スタック
+
+- HTML5
+- CSS3（Flexbox/Grid使用）
+- JavaScript（ES6+）
+- ローカルストレージAPI（ゲーム状態保存用）
+
+## 4. アーキテクチャ設計
+
+### 設計原則
+
+- **MVCパターン**：Model（データ）、View（UI）、Controller（ロジック）の分離
+- **モジュール化**：機能ごとに独立したモジュールに分割
+- **シングルトンパターン**：ゲーム状態管理に使用
+- **オブザーバーパターン**：UIの更新に使用
+- **ファクトリーパターン**：パズル生成に使用
+
+### コンポーネント構成
+
+```
+sudoku/
+├── index.html
+├── css/
+│   ├── style.css
+│   └── responsive.css
+└── js/
+    ├── app.js
+    ├── models/
+    │   ├── SudokuModel.js
+    │   ├── CellModel.js
+    │   └── GameStateModel.js
+    ├── views/
+    │   ├── BoardView.js
+    │   ├── ControlView.js
+    │   └── TimerView.js
+    ├── controllers/
+    │   ├── GameController.js
+    │   ├── InputController.js
+    │   └── StorageController.js
+    └── utils/
+        ├── SudokuGenerator.js
+        ├── SudokuSolver.js
+        └── EventEmitter.js
+```
+
+## 5. 詳細設計
+
+### モデル（Models）
+
+#### SudokuModel
+数独の盤面データとゲームロジックを管理します。
+
+```javascript
+class SudokuModel {
+  constructor() {
+    this.grid = []; // 9x9の二次元配列
+    this.solution = []; // 解答
+    this.difficulty = 'medium'; // 難易度
+  }
+  
+  initialize(difficulty) { /* ... */ }
+  isCellValid(row, col, num) { /* ... */ }
+  isSolved() { /* ... */ }
+  // その他のメソッド
+}
+```
+
+#### CellModel
+各セルの状態を管理します。
+
+```javascript
+class CellModel {
+  constructor(value = 0, isGiven = false) {
+    this.value = value; // セルの値（0は空）
+    this.isGiven = isGiven; // 初期値かどうか
+    this.notes = new Set(); // メモ用の候補数字
+  }
+  
+  setValue(value) { /* ... */ }
+  toggleNote(num) { /* ... */ }
+  clear() { /* ... */ }
+}
+```
+
+#### GameStateModel
+ゲームの状態（時間、スコアなど）を管理します。
+
+```javascript
+class GameStateModel {
+  constructor() {
+    this.startTime = null;
+    this.elapsedTime = 0;
+    this.isRunning = false;
+    this.mistakes = 0;
+    this.hintsUsed = 0;
+  }
+  
+  startTimer() { /* ... */ }
+  stopTimer() { /* ... */ }
+  resetGame() { /* ... */ }
+}
+```
+
+### ビュー（Views）
+
+#### BoardView
+数独の盤面UIを管理します。
+
+```javascript
+class BoardView {
+  constructor(container, controller) {
+    this.container = container;
+    this.controller = controller;
+    this.cells = []; // DOMの参照を保持
+  }
+  
+  render() { /* ... */ }
+  updateCell(row, col, value) { /* ... */ }
+  highlightCell(row, col) { /* ... */ }
+  // その他のメソッド
+}
+```
+
+#### ControlView
+コントロールパネル（数字ボタン、機能ボタンなど）のUIを管理します。
+
+```javascript
+class ControlView {
+  constructor(container, controller) {
+    this.container = container;
+    this.controller = controller;
+  }
+  
+  render() { /* ... */ }
+  updateDifficultySelection(difficulty) { /* ... */ }
+  // その他のメソッド
+}
+```
+
+#### TimerView
+タイマー表示を管理します。
+
+```javascript
+class TimerView {
+  constructor(container) {
+    this.container = container;
+  }
+  
+  updateTime(seconds) { /* ... */ }
+}
+```
+
+### コントローラー（Controllers）
+
+#### GameController
+ゲーム全体の流れを制御します。
+
+```javascript
+class GameController {
+  constructor() {
+    this.sudokuModel = new SudokuModel();
+    this.gameState = new GameStateModel();
+    this.eventEmitter = new EventEmitter();
+    
+    // ビューの初期化
+    this.boardView = new BoardView(document.getElementById('board'), this);
+    this.controlView = new ControlView(document.getElementById('controls'), this);
+    this.timerView = new TimerView(document.getElementById('timer'));
+    
+    this.inputController = new InputController(this);
+    this.storageController = new StorageController(this);
+  }
+  
+  initGame(difficulty) { /* ... */ }
+  handleCellClick(row, col) { /* ... */ }
+  handleNumberInput(num) { /* ... */ }
+  checkSolution() { /* ... */ }
+  // その他のメソッド
+}
+```
+
+#### InputController
+ユーザー入力を処理します。
+
+```javascript
+class InputController {
+  constructor(gameController) {
+    this.gameController = gameController;
+    this.selectedCell = { row: -1, col: -1 };
+    this.isNoteMode = false;
+  }
+  
+  selectCell(row, col) { /* ... */ }
+  inputNumber(num) { /* ... */ }
+  toggleNoteMode() { /* ... */ }
+  // その他のメソッド
+}
+```
+
+#### StorageController
+ローカルストレージを使用してゲーム状態を保存・読み込みします。
+
+```javascript
+class StorageController {
+  constructor(gameController) {
+    this.gameController = gameController;
+    this.storageKey = 'sudoku_game_state';
+  }
+  
+  saveGame() { /* ... */ }
+  loadGame() { /* ... */ }
+  clearSavedGame() { /* ... */ }
+}
+```
+
+### ユーティリティ（Utils）
+
+#### SudokuGenerator
+数独パズルを生成します。
+
+```javascript
+class SudokuGenerator {
+  static generate(difficulty) { /* ... */ }
+  static removeNumbers(grid, difficulty) { /* ... */ }
+  // その他のメソッド
+}
+```
+
+#### SudokuSolver
+数独パズルを解きます。
+
+```javascript
+class SudokuSolver {
+  static solve(grid) { /* ... */ }
+  static isValid(grid, row, col, num) { /* ... */ }
+  // その他のメソッド
+}
+```
+
+#### EventEmitter
+イベント管理のためのシンプルな実装です。
+
+```javascript
+class EventEmitter {
+  constructor() {
+    this.events = {};
+  }
+  
+  on(event, listener) { /* ... */ }
+  emit(event, ...args) { /* ... */ }
+  off(event, listener) { /* ... */ }
+}
+```
+
+## 6. 実装ステップ
+
+### ステップ1: 基本構造の構築
+1. プロジェクトフォルダ構造を作成
+2. 基本的なHTML構造を作成（index.html）
+3. 基本的なCSSスタイルを適用（style.css）
+4. モジュール読み込み用のapp.jsを作成
+
+### ステップ2: モデル層の実装
+1. CellModelクラスの実装
+2. SudokuModelクラスの実装
+3. GameStateModelクラスの実装
+
+### ステップ3: ユーティリティの実装
+1. EventEmitterクラスの実装
+2. SudokuGeneratorクラスの実装
+3. SudokuSolverクラスの実装
+
+### ステップ4: ビュー層の実装
+1. BoardViewクラスの実装
+2. ControlViewクラスの実装
+3. TimerViewクラスの実装
+
+### ステップ5: コントローラー層の実装
+1. InputControllerクラスの実装
+2. StorageControllerクラスの実装
+3. GameControllerクラスの実装
+
+### ステップ6: スタイリングとレスポンシブデザイン
+1. 詳細なCSSスタイルの適用
+2. レスポンシブデザインの実装（responsive.css）
+3. タッチ操作の最適化
+
+### ステップ7: テストと最適化
+1. 各機能のテスト
+2. パフォーマンス最適化
+3. バグ修正
+
+## 7. レスポンシブデザイン対応
+
+スマートフォン対応は必須要件です。以下の点に注意して実装します：
+
+- メディアクエリを使用した画面サイズ別のレイアウト調整
+- タッチ操作に最適化したUI（ボタンサイズ、間隔）
+- 縦向き・横向き両方の画面に対応
+- 仮想キーボードが表示された場合のレイアウト調整
+
+```css
+/* スマートフォン向けの例 */
+@media (max-width: 768px) {
+  .sudoku-board {
+    width: 100%;
+    max-width: 500px;
+  }
+  
+  .cell {
+    font-size: 1.2rem;
+  }
+  
+  .controls {
+    flex-direction: column;
+  }
+}
+```
+
+## 8. 拡張性と保守性
+
+- 各モジュールは単一責任の原則に従い、特定の機能のみを担当
+- イベント駆動型アーキテクチャにより、コンポーネント間の疎結合を実現
+- 設定値は定数として分離し、簡単に変更可能
+- 将来の機能拡張（複数のパズルサイズ、異なるルールなど）に対応できる設計
+
+この設計に基づいて実装を進めることで、保守性が高く、拡張性のある数独パズルアプリケーションを構築できます。
+
