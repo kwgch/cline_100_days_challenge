@@ -1,0 +1,135 @@
+# Mode: ACT
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+以下に、ELOレーティングシステムの仕様書とアーキテクチャ設計書を提供します。
+
+## 仕様書
+
+### 1. 機能要件
+
+#### 1.1 ユーザー登録
+- ユーザー名のみで登録
+- ユーザー名の重複チェック
+- 初期レーティングは1500とする
+
+#### 1.2 勝敗登録
+- 勝者と敗者を選択
+- 勝敗結果に基づいてレーティングを更新
+
+#### 1.3 レーティング更新
+- ELOレーティングアルゴリズムを使用
+- K値は32とする
+- 最小2ポイント、最大32ポイントの範囲でレーティング変動
+
+#### 1.4 ユーザー一覧表示
+- 順位、ユーザー名、レーティングを表示
+- レーティング降順でソート
+
+### 2. 非機能要件
+
+#### 2.1 データ保存
+- LocalStorageを使用してデータを永続化
+
+#### 2.2 レスポンシブデザイン
+- スマートフォンを含む様々な画面サイズに対応
+
+#### 2.3 オフライン動作
+- ローカルファイルのみで完結し、インターネット接続不要
+
+## アーキテクチャ設計書
+
+### 1. 全体構造
+
+```
+/
+├── index.html
+├── css/
+│   └── styles.css
+└── js/
+    ├── app.js
+    ├── models/
+    │   ├── User.js
+    │   └── EloRating.js
+    ├── views/
+    │   ├── UserView.js
+    │   └── MatchView.js
+    └── controllers/
+        ├── UserController.js
+        └── MatchController.js
+```
+
+### 2. モジュール説明
+
+#### 2.1 Models
+
+##### User.js
+- ユーザー情報を管理するクラス
+- プロパティ: id, name, rating
+
+##### EloRating.js
+- ELOレーティング計算ロジックを提供するクラス
+- メソッド: calculateNewRatings(winner, loser)
+
+#### 2.2 Views
+
+##### UserView.js
+- ユーザー関連のUI要素を管理するクラス
+- メソッド: renderUserList(), renderUserForm()
+
+##### MatchView.js
+- 試合結果入力のUI要素を管理するクラス
+- メソッド: renderMatchForm()
+
+#### 2.3 Controllers
+
+##### UserController.js
+- ユーザー関連の操作を制御するクラス
+- メソッド: addUser(), getUsers()
+
+##### MatchController.js
+- 試合結果の処理を制御するクラス
+- メソッド: recordMatch()
+
+### 3. データフロー
+
+1. ユーザーがフォームに入力
+2. コントローラーがイベントをキャッチ
+3. モデルでデータ処理
+4. LocalStorageにデータ保存
+5. ビューを更新
+
+### 4. 実装ステップ
+
+1. HTML構造の作成
+2. CSSでレスポンシブデザインの実装
+3. モデルの実装（User.js, EloRating.js）
+4. ビューの実装（UserView.js, MatchView.js）
+5. コントローラーの実装（UserController.js, MatchController.js）
+6. app.jsでモジュールの統合
+7. LocalStorage機能の実装
+8. テストとデバッグ
+
+### 5. デザインパターン
+
+- MVCパターン: モデル、ビュー、コントローラーの分離
+- オブザーバーパターン: ビューの自動更新
+- シングルトンパターン: コントローラーインスタンスの管理
+
+この設計により、モジュール性が高く、保守しやすいコードベースを実現できます。step-by-stepのアプローチで、各コンポーネントを順番に実装し、テストすることで、着実に開発を進めることができます[1][2][3][4]。</file_content>
