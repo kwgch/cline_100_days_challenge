@@ -1,0 +1,162 @@
+# Mode: Plan
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+## 架空の名簿作成ツール 仕様書
+
+### 概要
+ローカルファイルのみで動作する架空の個人情報自動生成ツールです。HTML、JavaScript、CSSを使用し、スマートフォンでも快適に動作します。生成された情報はブラウザ上に一覧表示され、CSVやJSONとしてエクスポートすることも可能です。
+
+### 機能要件
+1. **個人情報の自動生成**
+   - ID: 連番または任意形式の一意識別子
+   - 名前: 日本人の氏名（漢字・ひらがな・カタカナ対応）
+   - 年齢: 任意の範囲で設定可能（デフォルト: 18〜80歳）
+   - 性別: 男性/女性/その他
+   - 電話番号: 日本の電話番号形式に準拠
+   - メールアドレス: 一般的なドメインを使用した架空のアドレス
+
+2. **生成設定のカスタマイズ**
+   - 生成件数の指定: 1〜1000件
+   - 年齢範囲の指定
+   - 性別比率の調整
+   - 電話番号の市外局番の地域指定（任意）
+
+3. **データ表示と操作**
+   - ページネーション機能（10/20/50件ごとの表示）
+   - ソート機能（各項目ごとに昇順/降順）
+   - 検索/フィルタリング機能
+
+4. **データエクスポート**
+   - CSV形式でのエクスポート
+   - JSON形式でのエクスポート
+
+5. **レスポンシブデザイン**
+   - スマートフォン、タブレット、PCに対応したレイアウト
+
+### 非機能要件
+1. **パフォーマンス**
+   - 1000件の生成でも3秒以内に完了
+   - スクロールやソートの操作がスムーズに動作
+
+2. **セキュリティ**
+   - 外部サーバーとの通信は一切行わない
+   - すべての処理はクライアントサイドで完結
+
+3. **互換性**
+   - 主要なモバイルブラウザ（Safari、Chrome）で動作
+   - iOS 13以上、Android 8.0以上をサポート
+
+## アーキテクチャ設計書
+
+### 全体構成
+- **Single Page Application (SPA)方式**
+- **外部ライブラリの最小限使用**（必要に応じてCDN経由で読み込み）
+- **モジュール分割による保守性の確保**
+
+### ファイル構成
+```
+/
+├── index.html        # メインHTML
+├── css/
+│   ├── style.css     # メインスタイル
+│   └── mobile.css    # モバイル用スタイル
+└── js/
+    ├── app.js        # アプリケーションのメインロジック
+    ├── generator.js  # 個人情報生成モジュール
+    ├── ui.js         # UI操作関連
+    └── export.js     # データエクスポート機能
+```
+
+### コンポーネント設計
+
+#### 1. データ生成モジュール (generator.js)
+- **名前生成機能**
+  - 日本人の姓名データベース（配列）を内蔵
+  - ランダムに姓と名を組み合わせて生成
+- **年齢生成機能**
+  - 指定された範囲内でランダム生成
+- **性別生成機能**
+  - 指定された比率に基づいてランダム生成
+- **電話番号生成機能**
+  - 実在する市外局番リストを内蔵
+  - 残りの番号はランダム生成
+- **メールアドレス生成機能**
+  - 名前を元にしたローカル部分の生成
+  - 一般的なドメインリストからランダム選択
+
+#### 2. UI管理モジュール (ui.js)
+- **フォーム処理**
+  - 生成条件の入力と検証
+  - イベントリスナーの管理
+- **テーブル表示管理**
+  - データの表形式での表示
+  - ページネーション処理
+  - ソート機能の実装
+- **レスポンシブ対応**
+  - 画面サイズに応じた表示切替
+  - タッチ操作の最適化
+
+#### 3. エクスポートモジュール (export.js)
+- **CSV変換機能**
+  - 生成データをCSV形式に変換
+  - ダウンロード処理
+- **JSON変換機能**
+  - 生成データをJSON形式に変換
+  - ダウンロード処理
+
+#### 4. メインアプリケーション (app.js)
+- **モジュール間の連携**
+- **状態管理**
+  - 生成されたデータの保持
+  - 表示状態の管理
+- **初期化処理**
+
+### データフロー
+1. ユーザーが生成条件を入力
+2. 生成ボタンクリックでgenerator.jsが個人情報を生成
+3. 生成されたデータがapp.jsの状態として保存
+4. ui.jsがデータをテーブルとして表示
+5. ユーザーの操作（ソート、ページ切替など）に応じてui.jsが表示を更新
+6. エクスポート操作時にexport.jsが現在のデータを変換してダウンロード提供
+
+### レスポンシブデザイン戦略
+- **CSS Grid/Flexboxの活用**
+- **メディアクエリによる表示切替**
+  - 768px未満: モバイル向けレイアウト
+  - 768px以上: タブレット/PC向けレイアウト
+- **タッチ操作の最適化**
+  - ボタンサイズの拡大
+  - スワイプ操作のサポート
+
+### パフォーマンス最適化
+- **遅延読み込み (Lazy Loading)**
+  - 大量データの場合は表示中の部分のみ処理
+- **メモリ管理**
+  - 大量データ生成時のメモリ使用量の最適化
+- **イベント処理の最適化**
+  - デバウンス/スロットリング技術の活用
+
+### 拡張性
+- **モジュール設計による機能追加の容易さ**
+- **設定のローカルストレージ保存**
+- **将来的な機能拡張の考慮**
+  - 住所生成
+  - プロフィール画像生成
+  - データの永続化
