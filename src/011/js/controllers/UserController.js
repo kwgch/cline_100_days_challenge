@@ -5,6 +5,7 @@ class UserController {
     this.users = this.getUsers() || [];
     this.nextId = this.users.length > 0 ? Math.max(...this.users.map(user => user.id)) + 1 : 1;
     this.matchView = matchView;
+    this.dummyUsersAdded = localStorage.getItem('dummyUsersAdded') === 'true';
   }
 
   addUser(name) {
@@ -12,6 +13,7 @@ class UserController {
     this.users.push(newUser);
     this.nextId++;
     this.saveUsers();
+    this.matchView.updateMatchFormOptions(this.users);
     return this.users;
   }
 
@@ -19,6 +21,8 @@ class UserController {
     localStorage.clear();
     this.users = [];
     this.nextId = 1;
+    this.dummyUsersAdded = false;
+    localStorage.setItem('dummyUsersAdded', 'false');
     this.saveUsers();
     this.matchView.updateMatchFormOptions(this.users);
   }
@@ -33,6 +37,10 @@ class UserController {
   }
 
   addDummyUsers() {
+    if (this.dummyUsersAdded) {
+      return this.users;
+    }
+
     const dummyUsers = [
       { id: this.nextId++, name: 'Alice', rating: 1500 },
       { id: this.nextId++, name: 'Bob', rating: 1600 },
@@ -41,6 +49,8 @@ class UserController {
     this.users.push(...dummyUsers.map(user => new User(user.id, user.name, user.rating)));
     this.saveUsers();
     this.matchView.updateMatchFormOptions(this.users);
+    this.dummyUsersAdded = true;
+    localStorage.setItem('dummyUsersAdded', 'true');
     return this.users;
   }
 }
