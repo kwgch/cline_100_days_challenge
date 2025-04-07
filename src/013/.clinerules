@@ -1,0 +1,1259 @@
+# Mode: Act
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+# 15パズルゲーム開発仕様書
+
+## 1. 概要
+
+15パズルは、4×4のグリッドに1から15までの数字タイルと1つの空白を配置し、タイルをスライドさせて正しい順序に並べるパズルゲームです。このゲームはHTML、JavaScript、CSSのみを使用し、ローカルファイルとしてスマートフォンで動作するように設計します。
+
+## 2. 機能要件
+
+- 4×4のグリッドに1〜15の数字タイルをランダムに配置
+- タイルをタップ/クリックして空白スペースに移動
+- 移動できるのは空白に隣接するタイルのみ
+- ゲームクリア判定（1〜15が正しい順序に並んだ時）
+- リセット機能（新しいランダム配置でゲーム再開）
+- 移動回数のカウント表示
+- 経過時間の表示
+- スマートフォンに最適化されたレスポンシブデザイン
+- ローカルストレージによるハイスコア保存
+
+## 3. 技術仕様
+
+### 3.1 ファイル構成
+
+```
+15puzzle/
+├── index.html      # メインHTMLファイル
+├── css/
+│   └── style.css   # スタイルシート
+└── js/
+    ├── main.js     # メインアプリケーション
+    ├── models/
+    │   ├── Game.js       # ゲームロジック
+    │   ├── Board.js      # ボード状態管理
+    │   └── Tile.js       # タイル管理
+    ├── views/
+    │   ├── BoardView.js  # ボード表示
+    │   └── UIView.js     # UI表示
+    └── controllers/
+        └── GameController.js  # ゲーム制御
+```
+
+### 3.2 技術スタック
+
+- **HTML5**: ゲームの基本構造
+- **CSS3**: レスポンシブデザイン、アニメーション
+- **JavaScript (ES6+)**: ゲームロジック、イベント処理
+- **LocalStorage API**: ハイスコア保存
+
+## 4. アーキテクチャ設計
+
+MVCパターンを採用し、コードの保守性と拡張性を高めます。
+
+### 4.1 モデル (Models)
+
+#### Game.js
+```javascript
+class Game {
+  constructor() {
+    this.board = new Board();
+    this.moveCount = 0;
+    this.startTime = null;
+    this.elapsedTime = 0;
+    this.timerInterval = null;
+    this.isGameOver = false;
+  }
+  
+  // ゲーム初期化
+  init() { ... }
+  
+  // タイル移動処理
+  moveTile(tileId) { ... }
+  
+  // ゲームクリア判定
+  checkWinCondition() { ... }
+  
+  // タイマー関連メソッド
+  startTimer() { ... }
+  stopTimer() { ... }
+  
+  // ハイスコア管理
+  saveScore() { ... }
+  getHighScores() { ... }
+}
+```
+
+#### Board.js
+```javascript
+class Board {
+  constructor() {
+    this.tiles = [];
+    this.emptyPos = { row: 3, col: 3 };
+    this.size = 4;
+  }
+  
+  // ボード初期化（ランダム配置）
+  initialize() { ... }
+  
+  // 解決可能な配置を生成
+  generateSolvableBoard() { ... }
+  
+  // タイルが移動可能かチェック
+  canMoveTile(row, col) { ... }
+  
+  // タイル移動
+  moveTile(row, col) { ... }
+  
+  // 現在のボード状態が正解かチェック
+  isSolved() { ... }
+}
+```
+
+#### Tile.js
+```javascript
+class Tile {
+  constructor(value, row, col) {
+    this.value = value;
+    this.row = row;
+    this.col = col;
+    this.correctRow = (value - 1) / 4 | 0;
+    this.correctCol = (value - 1) % 4;
+  }
+  
+  // タイルが正しい位置にあるかチェック
+  isInCorrectPosition() { ... }
+}
+```
+
+### 4.2 ビュー (Views)
+
+#### BoardView.js
+```javascript
+class BoardView {
+  constructor(containerElement, controller) {
+    this.container = containerElement;
+    this.controller = controller;
+    this.tileElements = [];
+  }
+  
+  // ボード表示の初期化
+  initialize() { ... }
+  
+  // ボード状態の更新
+  update(board) { ... }
+  
+  // タイル移動アニメーション
+  animateTileMove(tile, oldPos, newPos) { ... }
+  
+  // イベントリスナー設定
+  setupEventListeners() { ... }
+}
+```
+
+#### UIView.js
+```javascript
+class UIView {
+  constructor(controller) {
+    this.controller = controller;
+    this.moveCountElement = document.getElementById('move-count');
+    this.timerElement = document.getElementById('timer');
+    this.resetButton = document.getElementById('reset-button');
+  }
+  
+  // UI初期化
+  initialize() { ... }
+  
+  // 移動回数表示更新
+  updateMoveCount(count) { ... }
+  
+  // タイマー表示更新
+  updateTimer(time) { ... }
+  
+  // ゲームクリア表示
+  showGameOverMessage(moveCount, time) { ... }
+  
+  // イベントリスナー設定
+  setupEventListeners() { ... }
+}
+```
+
+### 4.3 コントローラ (Controllers)
+
+#### GameController.js
+```javascript
+class GameController {
+  constructor() {
+    this.game = new Game();
+    this.boardView = null;
+    this.uiView = null;
+  }
+  
+  // ゲーム初期化
+  initialize() { ... }
+  
+  // タイルクリック処理
+  handleTileClick(row, col) { ... }
+  
+  // リセットボタン処理
+  handleReset() { ... }
+  
+  // ゲーム状態更新
+  updateGameState() { ... }
+}
+```
+
+## 5. 実装ステップ
+
+### ステップ1: 基本構造の作成
+1. プロジェクトフォルダ構造を作成
+2. HTML基本構造の実装
+3. 基本的なCSSスタイルの適用
+
+### ステップ2: モデルの実装
+1. Tile.jsの実装
+2. Board.jsの実装
+3. Game.jsの実装
+
+### ステップ3: ビューの実装
+1. BoardView.jsの実装
+2. UIView.jsの実装
+
+### ステップ4: コントローラの実装
+1. GameController.jsの実装
+2. イベント処理の実装
+
+### ステップ5: ゲームロジックの実装
+1. タイル移動ロジックの実装
+2. ゲームクリア判定の実装
+3. タイマー機能の実装
+
+### ステップ6: UIの改善
+1. レスポンシブデザインの最適化
+2. アニメーションの追加
+3. ゲームクリア表示の実装
+
+### ステップ7: ローカルストレージ機能
+1. ハイスコア保存機能の実装
+2. スコア表示機能の実装
+
+### ステップ8: テストとデバッグ
+1. 各デバイスでのテスト
+2. バグ修正
+3. パフォーマンス最適化
+
+## 6. レスポンシブデザイン対応
+
+- ビューポート設定: ``
+- メディアクエリを使用したレイアウト調整
+- タッチイベントの最適化
+- フレックスボックスまたはグリッドレイアウトの使用
+
+## 7. パフォーマンス最適化
+
+- アニメーションにはCSS transitionを使用
+- イベントデリゲーションの活用
+- 不要なDOM操作の最小化
+- requestAnimationFrameの使用
+
+## 8. 拡張性
+
+将来的な機能拡張を考慮した設計:
+- 難易度レベルの追加（3×3、5×5など）
+- テーマ切り替え機能
+- サウンドエフェクト
+- オンラインランキング
+
+このアーキテクチャはオブジェクト指向プログラミングの原則に従い、各コンポーネントが単一責任を持つように設計されています。MVCパターンの採用により、ビジネスロジック、表示、制御が分離され、保守性と拡張性が向上します。
+
+15パズルのタイル移動ロジックに問題があるようですね。より具体的な指示を含めた仕様書を作成し直します。
+
+# 15パズルゲーム開発仕様書（改訂版）
+
+## 1. 概要
+
+15パズルは4×4のグリッドに1から15までの数字タイルと1つの空白を配置し、タイルをスライドさせて正しい順序に並べるパズルゲームです。本仕様書では特にタイル移動ロジックに焦点を当て、正確な動作を実現します。
+
+## 2. タイル移動ロジックの詳細設計
+
+### 2.1 基本原則
+
+- タイルは隣接する空白マスにのみ移動可能
+- 斜めの移動は不可
+- 一度に移動できるタイルは1つのみ
+
+### 2.2 Board.jsの移動ロジック
+
+```javascript
+class Board {
+  constructor() {
+    this.tiles = []; // 2次元配列で表現 [row][col]
+    this.emptyPos = { row: 3, col: 3 };
+    this.size = 4;
+  }
+  
+  // タイルが移動可能かチェック
+  canMoveTile(row, col) {
+    // 空白マスと同じ行または列にあり、かつ隣接している場合のみ移動可能
+    return (
+      // 同じ行で隣接する列
+      (row === this.emptyPos.row && Math.abs(col - this.emptyPos.col) === 1) ||
+      // 同じ列で隣接する行
+      (col === this.emptyPos.col && Math.abs(row - this.emptyPos.row) === 1)
+    );
+  }
+  
+  // タイル移動処理
+  moveTile(row, col) {
+    // 移動可能かチェック
+    if (!this.canMoveTile(row, col)) {
+      return false;
+    }
+    
+    // タイルを空白位置に移動
+    const tile = this.tiles[row][col];
+    
+    // 空白位置にタイルを移動
+    this.tiles[this.emptyPos.row][this.emptyPos.col] = tile;
+    
+    // 元のタイル位置を空白に
+    this.tiles[row][col] = null;
+    
+    // タイルの位置情報を更新
+    tile.row = this.emptyPos.row;
+    tile.col = this.emptyPos.col;
+    
+    // 空白位置を更新
+    const oldEmptyPos = { ...this.emptyPos };
+    this.emptyPos.row = row;
+    this.emptyPos.col = col;
+    
+    return { tile, oldPos: { row, col }, newPos: oldEmptyPos };
+  }
+}
+```
+
+### 2.3 Game.jsのタイル移動処理
+
+```javascript
+class Game {
+  constructor() {
+    this.board = new Board();
+    this.moveCount = 0;
+    this.startTime = null;
+    this.elapsedTime = 0;
+    this.timerInterval = null;
+    this.isGameOver = false;
+  }
+  
+  // タイル移動処理
+  moveTile(row, col) {
+    // ゲームが終了している場合は何もしない
+    if (this.isGameOver) {
+      return false;
+    }
+    
+    // タイマーが動いていなければ開始
+    if (!this.startTime) {
+      this.startTimer();
+    }
+    
+    // ボードにタイル移動を依頼
+    const moveResult = this.board.moveTile(row, col);
+    
+    // 移動が成功した場合
+    if (moveResult) {
+      // 移動回数をカウントアップ
+      this.moveCount++;
+      
+      // ゲームクリア判定
+      if (this.board.isSolved()) {
+        this.gameOver();
+      }
+      
+      return moveResult;
+    }
+    
+    return false;
+  }
+}
+```
+
+### 2.4 BoardView.jsのタイル移動表示
+
+```javascript
+class BoardView {
+  constructor(containerElement, controller) {
+    this.container = containerElement;
+    this.controller = controller;
+    this.tileElements = {}; // タイルIDをキーとした要素の連想配列
+  }
+  
+  // ボード表示の初期化
+  initialize(board) {
+    this.container.innerHTML = '';
+    this.tileElements = {};
+    
+    // ボードのサイズに合わせてCSSグリッドを設定
+    this.container.style.gridTemplateColumns = `repeat(${board.size}, 1fr)`;
+    this.container.style.gridTemplateRows = `repeat(${board.size}, 1fr)`;
+    
+    // タイル要素の作成
+    for (let row = 0; row  {
+            this.controller.handleTileClick(tile.row, tile.col);
+          });
+          
+          this.container.appendChild(tileElement);
+          this.tileElements[tile.value] = tileElement;
+        }
+      }
+    }
+  }
+  
+  // タイル移動アニメーション
+  updateTilePosition(moveResult) {
+    if (!moveResult) return;
+    
+    const { tile, newPos } = moveResult;
+    const tileElement = this.tileElements[tile.value];
+    
+    // CSSグリッドの位置を更新
+    tileElement.style.gridRow = newPos.row + 1;
+    tileElement.style.gridColumn = newPos.col + 1;
+  }
+}
+```
+
+## 3. 実装ステップ（タイル移動ロジック修正）
+
+### ステップ1: Board.jsの修正
+1. `tiles`配列を2次元配列として初期化
+2. `canMoveTile`メソッドを上記の実装に修正
+3. `moveTile`メソッドを上記の実装に修正
+
+### ステップ2: Game.jsの修正
+1. `moveTile`メソッドを上記の実装に修正
+2. 移動成功時の処理を追加
+
+### ステップ3: BoardView.jsの修正
+1. タイル要素の管理方法を連想配列に変更
+2. `updateTilePosition`メソッドを実装
+3. タイル要素のクリックイベントを修正
+
+### ステップ4: テストとデバッグ
+1. 各タイルが正しく移動するか確認
+2. 移動不可能なタイルがクリックされた場合の動作確認
+3. 移動後のゲームクリア判定が正しく動作するか確認
+
+## 4. 実装時の注意点
+
+1. **タイル配列の初期化**:
+   ```javascript
+   // 正しい初期化方法
+   this.tiles = Array(this.size).fill().map(() => Array(this.size).fill(null));
+   ```
+
+2. **タイル移動のアニメーション**:
+   - CSSトランジションを使用して滑らかな移動を実現
+   ```css
+   .tile {
+     transition: all 0.2s ease-in-out;
+   }
+   ```
+
+3. **空白位置の管理**:
+   - 常に最新の空白位置を`emptyPos`で追跡
+   - タイル移動時に必ず更新
+
+4. **デバッグ用コンソール出力**:
+   ```javascript
+   console.log(`Attempting to move tile at [${row},${col}]`);
+   console.log(`Empty position: [${this.emptyPos.row},${this.emptyPos.col}]`);
+   console.log(`Can move: ${this.canMoveTile(row, col)}`);
+   ```
+
+5. **タッチイベントの最適化**:
+   ```javascript
+   tileElement.addEventListener('touchstart', (e) => {
+     e.preventDefault(); // デフォルトのスクロール動作を防止
+     this.controller.handleTileClick(tile.row, tile.col);
+   }, { passive: false });
+   ```
+
+この改訂版仕様書に従って実装することで、15パズルのタイル移動ロジックが正確に動作するようになります。特に重要なのは、タイルの移動可能条件のチェックと、移動後の状態更新を確実に行うことです。
+
+
+# 15パズルゲーム開発仕様書（改訂版 2.0）
+
+## 1. 概要
+
+15パズルは4×4のグリッドに1から15までの数字タイルと1つの空白を配置し、タイルをスライドさせて正しい順序に並べるパズルゲームです。本仕様書では、スマホ対応の強化、複数タイル移動機能、ゲームクリア演出、デバッグ機能を追加します。
+
+## 2. 機能要件（追加・改善項目）
+
+### 2.1 スマホ対応の強化
+- ビューポート設定の最適化
+- タイルサイズの動的調整
+- タッチ操作の最適化
+
+### 2.2 複数タイル移動機能
+- 空白と同じ行または列にあるタイルをクリックした場合、間にあるタイルも含めて移動
+- クリックしたタイルが空白位置になるよう移動
+
+### 2.3 ゲームクリア演出
+- クリア時のアニメーション効果
+- 祝福メッセージの表示
+- 移動回数と経過時間の表示
+
+### 2.4 デバッグ機能
+- Ctrl+Dキー押下で隠しデバッグボタンを表示
+- クリア直前の状態にセットするボタン
+
+## 3. 詳細設計
+
+### 3.1 スマホ対応の強化
+
+#### HTML修正
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<div id="game-container">
+  <div id="board-container"></div>
+  <div id="controls">
+    <div id="stats">
+      <div id="move-count">移動: 0</div>
+      <div id="timer">時間: 00:00</div>
+    </div>
+    <button id="reset-button">リセット</button>
+  </div>
+  <div id="debug-panel" style="display: none;">
+    <button id="almost-solved-button">クリア直前状態</button>
+  </div>
+</div>
+```
+
+#### CSS修正
+```css
+:root {
+  --tile-size: min(20vw, 20vh, 80px);
+  --board-size: calc(var(--tile-size) * 4);
+  --border-radius: calc(var(--tile-size) * 0.1);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  font-family: Arial, sans-serif;
+}
+
+#game-container {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+}
+
+#board-container {
+  width: var(--board-size);
+  height: var(--board-size);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 2px;
+  background-color: #888;
+  border-radius: var(--border-radius);
+  padding: 2px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.tile {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8f8f8;
+  border-radius: var(--border-radius);
+  font-size: calc(var(--tile-size) * 0.4);
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.tile:hover {
+  background-color: #e8e8e8;
+}
+
+#controls {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+#stats {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+#reset-button {
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+#reset-button:hover {
+  background-color: #45a049;
+}
+
+/* ゲームクリア演出 */
+.game-clear-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.game-clear-message {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 80%;
+}
+
+.game-clear-message h2 {
+  color: #4CAF50;
+  margin-top: 0;
+}
+
+/* タイルアニメーション */
+@keyframes celebrateTile {
+  0% { transform: scale(1); background-color: #f8f8f8; }
+  50% { transform: scale(1.1); background-color: #ffeb3b; }
+  100% { transform: scale(1); background-color: #f8f8f8; }
+}
+
+.celebrate {
+  animation: celebrateTile 0.5s ease-in-out;
+}
+
+/* メディアクエリ */
+@media (max-width: 480px) {
+  :root {
+    --tile-size: min(22vw, 22vh, 80px);
+  }
+  
+  #game-container {
+    padding: 5px;
+  }
+  
+  #controls {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  #stats {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+}
+```
+
+### 3.2 複数タイル移動機能
+
+#### Board.js 修正
+```javascript
+class Board {
+  // 既存のメソッドに加えて以下を追加
+  
+  // 複数タイル移動処理
+  moveMultipleTiles(targetRow, targetCol) {
+    // 移動可能かチェック（同じ行または列にあるか）
+    if (targetRow !== this.emptyPos.row && targetCol !== this.emptyPos.col) {
+      return false; // 空白と同じ行または列にない場合は移動不可
+    }
+    
+    const moveResults = [];
+    
+    if (targetRow === this.emptyPos.row) {
+      // 同じ行にある場合
+      const direction = targetCol  0 ? moveResults : false;
+  }
+}
+```
+
+#### Game.js 修正
+```javascript
+class Game {
+  // 既存のメソッドに加えて以下を修正
+  
+  // 複数タイル移動処理
+  moveMultipleTiles(row, col) {
+    if (this.isGameOver) {
+      return false;
+    }
+    
+    if (!this.startTime) {
+      this.startTimer();
+    }
+    
+    // 単一タイルの移動可能性をチェック
+    if (this.board.canMoveTile(row, col)) {
+      const moveResult = this.board.moveTile(row, col);
+      if (moveResult) {
+        this.moveCount++;
+        if (this.board.isSolved()) {
+          this.gameOver();
+        }
+        return [moveResult];
+      }
+    } else {
+      // 複数タイル移動を試行
+      const moveResults = this.board.moveMultipleTiles(row, col);
+      if (moveResults) {
+        this.moveCount += moveResults.length;
+        if (this.board.isSolved()) {
+          this.gameOver();
+        }
+        return moveResults;
+      }
+    }
+    
+    return false;
+  }
+  
+  // ゲームクリア処理
+  gameOver() {
+    this.isGameOver = true;
+    this.stopTimer();
+    this.showGameClearAnimation();
+    this.saveScore();
+  }
+  
+  // ゲームクリア演出
+  showGameClearAnimation() {
+    // 各タイルに順番にアニメーションを適用
+    setTimeout(() => {
+      const event = new CustomEvent('gameClear', {
+        detail: {
+          moveCount: this.moveCount,
+          time: this.elapsedTime
+        }
+      });
+      document.dispatchEvent(event);
+    }, 500);
+  }
+  
+  // クリア直前状態の設定
+  setAlmostSolved() {
+    // 正解状態を作成
+    this.board.initialize();
+    for (let i = 0; i  {
+      this.updateTilePosition(result);
+    });
+  }
+  
+  // ゲームクリア演出
+  showGameClearAnimation() {
+    // タイルを順番にアニメーション
+    const tiles = Array.from(this.container.querySelectorAll('.tile'));
+    
+    tiles.forEach((tile, index) => {
+      setTimeout(() => {
+        tile.classList.add('celebrate');
+        setTimeout(() => {
+          tile.classList.remove('celebrate');
+        }, 500);
+      }, index * 100);
+    });
+  }
+}
+```
+
+### 3.3 UIView.js 修正（ゲームクリア演出）
+
+```javascript
+class UIView {
+  constructor(controller) {
+    this.controller = controller;
+    this.moveCountElement = document.getElementById('move-count');
+    this.timerElement = document.getElementById('timer');
+    this.resetButton = document.getElementById('reset-button');
+    this.debugPanel = document.getElementById('debug-panel');
+    this.almostSolvedButton = document.getElementById('almost-solved-button');
+    
+    // ゲームクリアイベントのリスナー
+    document.addEventListener('gameClear', this.handleGameClear.bind(this));
+    
+    // デバッグパネル表示用キーボードイベント
+    document.addEventListener('keydown', this.handleKeyDown.bind(this));
+  }
+  
+  // ゲームクリア処理
+  handleGameClear(event) {
+    const { moveCount, time } = event.detail;
+    
+    // オーバーレイ作成
+    const overlay = document.createElement('div');
+    overlay.className = 'game-clear-overlay';
+    
+    // メッセージコンテナ
+    const messageContainer = document.createElement('div');
+    messageContainer.className = 'game-clear-message';
+    
+    // タイトル
+    const title = document.createElement('h2');
+    title.textContent = 'ゲームクリア！';
+    
+    // 結果表示
+    const results = document.createElement('p');
+    results.innerHTML = `移動回数: ${moveCount}経過時間: ${this.formatTime(time)}`;
+    
+    // 閉じるボタン
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '閉じる';
+    closeButton.onclick = () => {
+      document.body.removeChild(overlay);
+    };
+    
+    // 新しいゲームボタン
+    const newGameButton = document.createElement('button');
+    newGameButton.textContent = '新しいゲーム';
+    newGameButton.onclick = () => {
+      document.body.removeChild(overlay);
+      this.controller.handleReset();
+    };
+    
+    // 要素を追加
+    messageContainer.appendChild(title);
+    messageContainer.appendChild(results);
+    messageContainer.appendChild(closeButton);
+    messageContainer.appendChild(newGameButton);
+    overlay.appendChild(messageContainer);
+    
+    // ボディに追加
+    document.body.appendChild(overlay);
+  }
+  
+  // キーボードイベント処理
+  handleKeyDown(event) {
+    // Ctrl+D でデバッグパネル表示切替
+    if (event.ctrlKey && event.key === 'd') {
+      event.preventDefault();
+      this.debugPanel.style.display = 
+        this.debugPanel.style.display === 'none' ? 'block' : 'none';
+    }
+  }
+  
+  // 時間のフォーマット
+  formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+  
+  // イベントリスナー設定
+  setupEventListeners() {
+    this.resetButton.addEventListener('click', () => {
+      this.controller.handleReset();
+    });
+    
+    this.almostSolvedButton.addEventListener('click', () => {
+      this.controller.handleAlmostSolved();
+    });
+  }
+}
+```
+
+### 3.4 GameController.js 修正
+
+```javascript
+class GameController {
+  constructor() {
+    this.game = new Game();
+    this.boardView = null;
+    this.uiView = null;
+  }
+  
+  // タイルクリック処理
+  handleTileClick(row, col) {
+    return this.game.moveMultipleTiles(row, col);
+  }
+  
+  // リセットボタン処理
+  handleReset() {
+    this.game.init();
+    this.boardView.initialize(this.game.board);
+    this.uiView.updateMoveCount(0);
+    this.uiView.updateTimer(0);
+  }
+  
+  // クリア直前状態設定
+  handleAlmostSolved() {
+    const board = this.game.setAlmostSolved();
+    this.boardView.initialize(board);
+    this.uiView.updateMoveCount(0);
+    this.uiView.updateTimer(0);
+  }
+}
+```
+
+## 4. 実装ステップ
+
+### ステップ1: スマホ対応の強化
+1. HTMLのビューポート設定を修正
+2. CSSを可変サイズに対応するよう修正
+3. メディアクエリの追加
+4. タッチイベントの最適化
+
+### ステップ2: 複数タイル移動機能の実装
+1. Board.jsに`moveMultipleTiles`メソッドを追加
+2. Game.jsの移動処理を修正
+3. BoardView.jsに複数タイル更新メソッドを追加
+
+### ステップ3: ゲームクリア演出の実装
+1. CSSにアニメーション定義を追加
+2. Game.jsにクリア演出メソッドを追加
+3. UIView.jsにクリア表示メソッドを追加
+4. カスタムイベントの実装
+
+### ステップ4: デバッグ機能の実装
+1. HTMLにデバッグパネルを追加
+2. UIView.jsにキーボードイベント処理を追加
+3. Game.jsにクリア直前状態設定メソッドを追加
+4. GameController.jsにデバッグ機能ハンドラを追加
+
+### ステップ5: テストとデバッグ
+1. スマホでの表示・操作テスト
+2. 複数タイル移動のテスト
+3. ゲームクリア演出のテスト
+4. デバッグ機能のテスト
+
+## 5. 実装時の注意点
+
+1. **複数タイル移動のアニメーション**:
+   - 複数タイルを移動する場合は、アニメーションを連続して行う必要があります
+   - 各タイルの移動アニメーションは短く設定し（0.1〜0.2秒程度）、スムーズな体験を提供します[2]
+
+2. **シャッフル処理の最適化**:
+   - シャッフル中はユーザー操作を無効にするフラグを設定します[2]
+   - シャッフル処理は非同期で実装し、一定間隔でタイルを移動させます[2][7]
+   - 前回移動したタイルと同じタイルを連続して移動しないよう制御します[2]
+
+3. **ゲームクリア判定の実装**:
+   - 各タイルが正しい位置にあるかを効率的に判定する方法を実装します[1][3]
+   - 全てのタイルが正しい位置にあるかを確認する方法として、配列の値とインデックスを比較する方法が効果的です[2][6]
+
+4. **解決可能なパズル生成**:
+   - 15パズルはランダムに配置すると解決不可能な状態になることがあります[4]
+   - パリティチェックを実装し、解決可能な状態のみを生成します[4]
+   - 解決不可能な場合は再シャッフルを行います[4]
+
+## 6. デバッグと最適化のポイント
+
+### 6.1 パフォーマンス最適化
+
+```javascript
+// タイル移動のアニメーション最適化
+function animateTileMove(tile, newPos) {
+  // requestAnimationFrameを使用したアニメーション
+  const startTime = performance.now();
+  const duration = 200; // 200ms
+  const startPos = { x: tile.style.gridColumn, y: tile.style.gridRow };
+  const endPos = { x: newPos.col + 1, y: newPos.row + 1 };
+  
+  function animate(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    
+    // イージング関数を適用（オプション）
+    const eased = progress  
+    row.map(tile => tile ? tile.value : 'empty')
+  ));
+  
+  console.log(`Empty position: [${board.emptyPos.row}, ${board.emptyPos.col}]`);
+  console.log(`Is solved: ${board.isSolved()}`);
+}
+
+// クリア直前状態のボード配置を生成
+function generateAlmostSolvedBoard(board) {
+  // 正解状態を生成
+  const size = board.size;
+  const tiles = Array(size).fill().map(() => Array(size).fill(null));
+  
+  for (let row = 0; row  {
+    const button = document.createElement('button');
+    button.textContent = level.charAt(0).toUpperCase() + level.slice(1);
+    button.addEventListener('click', () => {
+      game.shuffle(difficultyLevels[level]);
+    });
+    selector.appendChild(button);
+  });
+  
+  return selector;
+}
+```
+
+### 7.2 テーマ切り替え機能
+
+```javascript
+// テーマの定義
+const themes = {
+  default: {
+    boardBg: '#888',
+    tileBg: '#f8f8f8',
+    tileColor: '#333',
+    tileHover: '#e8e8e8',
+    correctTileBorder: '2px solid #4CAF50'
+  },
+  dark: {
+    boardBg: '#333',
+    tileBg: '#555',
+    tileColor: '#fff',
+    tileHover: '#666',
+    correctTileBorder: '2px solid #8BC34A'
+  },
+  colorful: {
+    boardBg: '#3F51B5',
+    tileBg: '#E91E63',
+    tileColor: '#fff',
+    tileHover: '#C2185B',
+    correctTileBorder: '2px solid #FFEB3B'
+  }
+};
+
+// テーマ適用関数
+function applyTheme(themeName) {
+  const theme = themes[themeName] || themes.default;
+  const root = document.documentElement;
+  
+  Object.entries(theme).forEach(([property, value]) => {
+    root.style.setProperty(`--${property}`, value);
+  });
+  
+  localStorage.setItem('puzzleTheme', themeName);
+}
+```
+
+## 8. ユーザビリティの向上
+
+1. **ヒント機能**:
+   - 一時的に完成図を表示するボタンを追加
+   - 正しい位置にあるタイルを視覚的に強調表示[5]
+
+2. **操作ガイド**:
+   - 初回プレイ時にチュートリアルを表示
+   - タイル移動方法の説明を含める
+
+3. **アクセシビリティ対応**:
+   - キーボード操作のサポート
+   - 色覚異常に配慮した配色設定
+
+4. **プログレス表示**:
+   - 正しい位置に配置されたタイルの数/割合を表示
+   - 残りの操作回数の目安を提供
+
+これらの追加機能と最適化により、15パズルゲームはより使いやすく、楽しいものになります。ステップバイステップで実装を進めることで、確実に機能を追加していくことができます。
+
+# 15パズルゲーム開発仕様書（改訂版 3.0）
+
+## 1. 概要
+
+15パズルは4×4のグリッドに1から15までの数字タイルと1つの空白を配置し、タイルをスライドさせて正しい順序に並べるパズルゲームです。本仕様書では、スマホ対応の強化、複数タイル移動機能、ゲームクリア演出、デバッグ機能に加え、解決可能な配置の生成に重点を置いています。
+
+## 2. 機能要件
+
+### 2.1 基本機能
+- 4×4のグリッドに1〜15の数字タイルをランダムに配置（解決可能な配置のみ）
+- タイルをタップ/クリックして空白スペースに移動
+- 複数タイル同時移動（空白と同じ行または列）
+- ゲームクリア判定と演出
+- リセット機能
+- 移動回数のカウント表示
+- 経過時間の表示
+
+### 2.2 追加機能
+- スマートフォンに最適化されたレスポンシブデザイン
+- ローカルストレージによるハイスコア保存
+- デバッグ用のクリア直前状態設定機能（Ctrl+Dで表示）
+
+## 3. 技術仕様
+
+### 3.1 使用技術
+- HTML5
+- CSS3 (Flexbox, Grid Layout)
+- JavaScript (ES6+)
+
+### 3.2 ファイル構成
+```
+15puzzle/
+├── index.html
+├── css/
+│   └── style.css
+└── js/
+    ├── main.js
+    ├── models/
+    │   ├── Game.js
+    │   ├── Board.js
+    │   └── Tile.js
+    ├── views/
+    │   ├── BoardView.js
+    │   └── UIView.js
+    └── controllers/
+        └── GameController.js
+```
+
+## 4. 解決可能な配置の生成
+
+### 4.1 パリティチェック
+解決可能な配置を保証するために、パリティチェックを実装します。
+
+```javascript
+class Board {
+  // ... 他のメソッド ...
+
+  isSolvable() {
+    let inversionCount = 0;
+    const flatTiles = this.tiles.flat().filter(tile => tile !== null);
+    
+    for (let i = 0; i  flatTiles[j].value) {
+          inversionCount++;
+        }
+      }
+    }
+    
+    const emptyRowFromBottom = this.size - this.emptyPos.row;
+    
+    // パリティチェック
+    return (inversionCount % 2 === 0) === (emptyRowFromBottom % 2 === 1);
+  }
+
+  generateSolvableBoard() {
+    do {
+      this.shuffleTiles();
+    } while (!this.isSolvable());
+  }
+
+  shuffleTiles() {
+    const flatTiles = this.tiles.flat().filter(tile => tile !== null);
+    for (let i = flatTiles.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [flatTiles[i], flatTiles[j]] = [flatTiles[j], flatTiles[i]];
+    }
+    
+    let index = 0;
+    for (let row = 0; row ゲームクリア！
+      移動回数: ${moveCount}
+      経過時間: ${this.formatTime(time)}
+      新しいゲーム
+    `;
+    
+    overlay.appendChild(message);
+    document.body.appendChild(overlay);
+    
+    document.getElementById('new-game').addEventListener('click', () => {
+      document.body.removeChild(overlay);
+      this.controller.handleReset();
+    });
+  }
+}
+```
+
+## 7. デバッグ機能
+
+```javascript
+class UIView {
+  // ... 他のメソッド ...
+
+  setupDebugPanel() {
+    const debugPanel = document.createElement('div');
+    debugPanel.id = 'debug-panel';
+    debugPanel.style.display = 'none';
+    
+    const almostSolvedButton = document.createElement('button');
+    almostSolvedButton.textContent = 'クリア直前状態';
+    almostSolvedButton.addEventListener('click', () => {
+      this.controller.handleAlmostSolved();
+    });
+    
+    debugPanel.appendChild(almostSolvedButton);
+    document.body.appendChild(debugPanel);
+    
+    document.addEventListener('keydown', (event) => {
+      if (event.ctrlKey && event.key === 'd') {
+        debugPanel.style.display = debugPanel.style.display === 'none' ? 'block' : 'none';
+      }
+    });
+  }
+}
+```
+
+## 8. 実装ステップ
+
+1. 基本的なゲーム構造の実装（HTML, CSS, JavaScript）
+2. Board クラスの実装（タイル管理、移動ロジック）
+3. 解決可能な配置生成機能の実装
+4. Game クラスの実装（ゲーム状態管理）
+5. BoardView クラスの実装（ボード表示、タイル移動アニメーション）
+6. UIView クラスの実装（UI要素、ゲームクリア演出）
+7. GameController クラスの実装（ゲーム制御）
+8. 複数タイル移動機能の実装
+9. デバッグ機能の実装
+10. レスポンシブデザインの最適化
+11. ローカルストレージによるハイスコア保存機能の実装
+12. テストとバグ修正
+
+## 9. パフォーマンス最適化
+
+- requestAnimationFrame を使用したアニメーション
+- イベントデリゲーションの活用
+- 不要なDOM操作の最小化
+
+## 10. 今後の拡張性
+
+- 難易度レベルの追加（3x3, 5x5 など）
+- カスタムテーマ機能
+- オンラインランキング機能
+- タイマーモード（制限時間内でのクリア）
+
+この仕様書に基づいて実装することで、解決可能な配置のみを生成し、スマートフォンでも快適に遊べる15パズルゲームを作成できます。MVCアーキテクチャを採用することで、将来の機能拡張や保守性の向上も期待できます。

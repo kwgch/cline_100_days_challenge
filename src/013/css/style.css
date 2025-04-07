@@ -1,0 +1,106 @@
+body {
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+    margin: 0; /* Reset default body margin */
+    touch-action: manipulation; /* Prevent double-tap zoom */
+}
+
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 90%; /* Adjust container width for smaller screens */
+    max-width: 600px; /* Limit container width on larger screens */
+}
+
+#board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* Use fr units for flexible sizing */
+    grid-template-rows: repeat(4, 1fr); /* Use fr units for flexible sizing */
+    gap: 5px;
+    margin: 20px auto;
+    width: 100%; /* Make the board fill the container */
+    max-width: 400px; /* Limit board width on larger screens */
+    height: auto; /* Adjust height automatically */
+}
+
+.tile {
+    background-color: #4CAF50;
+    color: white;
+    font-size: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease-in-out;
+    width: 100%; /* Make tiles fill their grid cells */
+    height: 100%; /* Make tiles fill their grid cells */
+    aspect-ratio: 1 / 1; /* Make tiles square */
+}
+
+.tile:hover {
+    background-color: #388E3C;
+}
+
+.empty {
+    background-color: #fff;
+    border: 1px solid #ccc;
+}
+
+.info {
+    margin-top: 20px;
+}
+
+.info p {
+    margin: 5px 0;
+}
+
+#reset-button {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#reset-button:hover {
+    background-color: #1976D2;
+}
+
+.game-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+/* Media query for smaller screens (e.g., smartphones) */
+@media (max-width: 480px) {
+    .container {
+        width: 100%; /* Make container full width */
+        padding: 10px;
+    }
+
+    #board {
+        max-width: 100%; /* Make board full width */
+    }
+
+    .tile {
+        font-size: 18px; /* Reduce font size on smaller screens */
+    }
+}
