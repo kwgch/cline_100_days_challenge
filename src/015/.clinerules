@@ -1,0 +1,114 @@
+# Mode: Plan
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+以下に、砲弾を撃つゲームの仕様書とアーキテクチャ設計書をMarkdown形式で記載します。
+
+## 仕様書
+
+### ゲーム概要
+- HTML、JavaScript、CSSを使用したローカルファイルのみで動作する砲弾発射ゲーム
+- スマートフォンでの操作に最適化
+
+### 機能要件
+1. ゲーム画面
+   - 砲台、目標、背景を表示
+   - スコア表示
+   - 発射角度と力の調整UI
+
+2. ゲームプレイ
+   - タッチ操作で砲弾の発射角度と力を調整
+   - 砲弾の軌道をアニメーション表示
+   - 目標への命中判定
+   - スコアの計算と表示
+
+3. ゲームロジック
+   - 重力と風の影響を考慮した砲弾の軌道計算
+   - ランダムな位置に目標を配置
+   - 難易度の段階的な上昇
+
+4. UI/UX
+   - レスポンシブデザインでスマートフォン画面に最適化
+   - タッチ操作に適したコントロール
+   - ゲーム開始、リスタート、終了の操作
+
+### 非機能要件
+- パフォーマンス：スムーズなアニメーションと即時的な反応
+- 互換性：主要なモバイルブラウザでの動作保証
+- オフライン動作：インターネット接続なしで完全に動作
+
+## アーキテクチャ設計書
+
+### ファイル構成
+```
+./
+  ├── index.html
+  ├── styles/
+  │   └── main.css
+  └── scripts/
+      ├── game.js
+      ├── cannon.js
+      ├── projectile.js
+      ├── target.js
+      └── utils.js
+```
+
+### コンポーネント設計
+1. `game.js`: メインゲームロジック、他のコンポーネントの統合
+   - ゲームループの管理
+   - スコア管理
+   - 難易度調整
+
+2. `cannon.js`: 砲台の制御
+   - 角度と力の調整
+   - 発射機能
+
+3. `projectile.js`: 砲弾の挙動
+   - 軌道計算
+   - アニメーション
+
+4. `target.js`: 目標の管理
+   - 配置
+   - 命中判定
+
+5. `utils.js`: ユーティリティ関数
+   - 数学計算
+   - ランダム生成
+
+### レンダリング
+- HTML5 Canvasを使用してゲーム要素を描画
+- requestAnimationFrameを使用してアニメーションを最適化
+
+### イベント処理
+- タッチイベントリスナーを使用してユーザー入力を処理
+- カスタムイベントを使用してコンポーネント間の通信を管理
+
+### データフロー
+1. ユーザー入力 → `cannon.js`
+2. 発射命令 → `game.js` → `projectile.js`
+3. 軌道計算 → `projectile.js` → `game.js`
+4. 命中判定 → `game.js` → `target.js`
+5. スコア更新 → `game.js` → UI更新
+
+### 最適化戦略
+- スプライトシートを使用してグラフィックスのロードを最適化
+- オブジェクトプーリングを実装して、メモリ使用量を削減
+- Web Workersを使用して複雑な計算を別スレッドで実行（オプション）
+
+この設計に基づいて、Clineに具体的な実装指示を出すことができます。各コンポーネントの詳細な機能やインターフェースの設計が必要な場合は、さらに詳細な仕様を追加することができます。
