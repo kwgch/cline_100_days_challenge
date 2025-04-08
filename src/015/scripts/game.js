@@ -10,7 +10,7 @@ canvas.width = canvas.offsetWidth;
 canvas.height = canvas.offsetHeight;
 
 const cannon = new Cannon(canvas.width, canvas.height);
-const target = new Target(canvas.width, canvas.height);
+const target = new Target(canvas.width, canvas.height, cannon.x);
 const projectiles = [];
 
 let mouseDownTime = 0;

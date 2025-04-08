@@ -1,7 +1,7 @@
 export class Cannon {
     constructor(canvasWidth, canvasHeight) {
         this.x = 50;
-        this.y = canvasHeight - 50;
+        this.y = canvasHeight - 20;
         this.angle = -Math.PI / 4;
         this.power = 50;
         this.angleControl = document.getElementById('angle');
