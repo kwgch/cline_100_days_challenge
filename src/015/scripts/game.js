@@ -14,6 +14,7 @@ const target = new Target(canvas.width, canvas.height, cannon.x);
 const projectiles = [];
 
 let mouseDownTime = 0;
+let score = 0;
 
 canvas.addEventListener('mousedown', (event) => {
     if (event.button === 0) {
@@ -42,12 +43,16 @@ function gameLoop() {
             projectiles.splice(i, 1);
             target.x = Math.random() * (canvas.width - target.width);
             target.y = canvas.height - 50;
+            score += 10;
             console.log('Hit!');
         }
     }
 
     // Draw game elements
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'black';
+    ctx.font = '20px Arial';
+    ctx.fillText('Score: ' + score, 10, 30);
     cannon.draw(ctx);
     target.draw(ctx);
 
