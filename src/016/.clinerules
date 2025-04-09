@@ -91,7 +91,7 @@ MVCパターンを採用し、以下のコンポーネントに分割します�
 ### 5. ファイル構造
 
 ```
-translation-bot/
+./
 │
 ├── index.html
 ├── css/
@@ -110,7 +110,20 @@ translation-bot/
 │   │   └── LanguageSelectorView.js
 │   └── controllers/
 │       └── TranslationController.js
-└── README.md
+├── memory-bank/
+│   ├── projectbrief.md
+│   ├── productContext.md
+│   ├── activeContext.md
+│   ├── systemPatterns.md
+│   ├── techContext.md
+│   └── progress.md
+└── .clinerules
 ```
+
+### 6. Project Intelligence
+
+*   The user prefers a simple and intuitive UI.
+*   The user values responsiveness and a good smartphone experience.
+*   The user provides feedback iteratively, focusing on small details and improvements.
 
 この設計により、保守性が高く、拡張性のあるコードベースを実現できます。各コンポーネントは単一責任の原則に従い、依存性注入を通じて疎結合を維持します。また、ステップバイステップの実装アプローチにより、着実に開発を進めることができます。
