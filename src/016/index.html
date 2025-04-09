@@ -2,15 +2,21 @@
 <html>
 <head>
     <title>Translation Bot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
     <div id="app">
-        <div id="language-selector-container"></div>
-        <div id="chat-container"></div>
-        <div id="input-container"></div>
+        <div id="header-container">
+            <h1>Translation Bot</h1>
+            <div id="language-selector-container"></div>
+        </div>
+        <div id="chat-container">
+            <div id="chat-area"></div>
+        </div>
     </div>
+    <div id="input-container"></div>
     <script src="js/main.js" type="module"></script>
 </body>
 </html>
