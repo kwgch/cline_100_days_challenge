@@ -1,0 +1,116 @@
+# Mode: Plan
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+以下に、翻訳Botの仕様書とアーキテクチャ設計書をmarkdownで記載します。
+
+## 仕様書
+
+### 1. 概要
+ローカルファイルのみで動作する翻訳Botを作成します。HTMLとJavaScript、CSSを使用し、スマートフォンでの動作を前提とします。
+
+### 2. 機能要件
+- チャット風のUI
+- テキスト入力と送信機能
+- 翻訳言語の選択機能
+- Google翻訳の非公式APIを使用した翻訳機能
+- スマートフォン対応のレスポンシブデザイン
+
+### 3. 技術要件
+- HTML5
+- CSS3
+- JavaScript (ES6+)
+- Google翻訳非公式API
+
+### 4. UI/UXデザイン
+- チャットインターフェース
+- 言語選択ドロップダウン
+- テキスト入力欄
+- 送信ボタン
+- 翻訳結果表示エリア
+
+## アーキテクチャ設計書
+
+### 1. 全体構造
+MVCパターンを採用し、以下のコンポーネントに分割します：
+
+- Model: 翻訳ロジックと言語データを管理
+- View: UIコンポーネントを管理
+- Controller: ModelとViewの橋渡しを行う
+
+### 2. クラス設計
+
+#### 2.1 Model
+- `TranslationModel`: 翻訳APIとの通信を管理
+- `LanguageModel`: 言語データを管理
+
+#### 2.2 View
+- `ChatView`: チャットUIを管理
+- `InputView`: 入力フォームを管理
+- `LanguageSelectorView`: 言語選択UIを管理
+
+#### 2.3 Controller
+- `TranslationController`: ModelとViewの連携を管理
+
+### 3. モジュール設計
+- `config.js`: アプリケーション設定を管理
+- `api.js`: API通信を管理
+- `utils.js`: ユーティリティ関数を管理
+
+### 4. 実装ステップ
+
+1. プロジェクト構造のセットアップ
+2. 基本的なHTMLとCSSの実装
+3. `LanguageModel`の実装
+4. `TranslationModel`の実装
+5. `ChatView`の実装
+6. `InputView`の実装
+7. `LanguageSelectorView`の実装
+8. `TranslationController`の実装
+9. モジュール（config.js, api.js, utils.js）の実装
+10. コンポーネントの統合とテスト
+11. レスポンシブデザインの調整
+12. 最終テストとデバッグ
+
+### 5. ファイル構造
+
+```
+translation-bot/
+│
+├── index.html
+├── css/
+│   └── styles.css
+├── js/
+│   ├── main.js
+│   ├── config.js
+│   ├── api.js
+│   ├── utils.js
+│   ├── models/
+│   │   ├── TranslationModel.js
+│   │   └── LanguageModel.js
+│   ├── views/
+│   │   ├── ChatView.js
+│   │   ├── InputView.js
+│   │   └── LanguageSelectorView.js
+│   └── controllers/
+│       └── TranslationController.js
+└── README.md
+```
+
+この設計により、保守性が高く、拡張性のあるコードベースを実現できます。各コンポーネントは単一責任の原則に従い、依存性注入を通じて疎結合を維持します。また、ステップバイステップの実装アプローチにより、着実に開発を進めることができます。
