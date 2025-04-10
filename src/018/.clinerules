@@ -1,0 +1,151 @@
+# Mode: Plan
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+## 英単語帖アプリ仕様書
+
+### 概要
+ローカルファイルのみで動作する英単語学習アプリを開発します。HTML、JavaScript、CSSを使用し、スマートフォンでの利用に最適化されています。単語の登録と学習の2つの主要モードを提供します。
+
+### 機能要件
+
+#### 1. 基本機能
+- ローカルファイルのみで動作（インターネット接続不要）
+- スマートフォン対応のレスポンシブデザイン
+- データはローカルストレージに保存
+
+#### 2. 登録モード
+- 英単語と日本語の意味を入力するフォーム
+- 登録ボタンで単語をローカルストレージに保存
+- 登録済み単語の一覧表示
+- 登録済み単語の編集・削除機能
+
+#### 3. 学習モード
+- 登録済み単語からランダムに出題
+- 英語→日本語、日本語→英語の両方の出題形式
+- 正解・不正解の判定機能
+- 学習進捗の記録（オプション）
+
+#### 4. その他
+- モード切替機能（登録モード⇔学習モード）
+- 初期状態で10個程度のサンプル単語を登録
+- シンプルで使いやすいUI
+
+### 非機能要件
+- オフライン環境での動作保証
+- 高速な読み込みと動作
+- データの永続性（ブラウザを閉じても保存データが維持される）
+- スマートフォンの画面サイズに最適化されたレイアウト
+
+## アーキテクチャ設計書
+
+### 1. ファイル構成
+```
+/
+├── index.html      # メインHTML
+├── css/
+│   └── style.css   # スタイルシート
+└── js/
+    ├── app.js      # メインアプリケーションロジック
+    ├── storage.js  # ストレージ操作関連
+    └── ui.js       # UI操作関連
+```
+
+### 2. データモデル
+
+#### 単語データ構造
+```javascript
+{
+  id: "一意のID（タイムスタンプなど）",
+  word: "英単語",
+  meaning: "日本語の意味",
+  createdAt: "作成日時",
+  lastStudied: "最後に学習した日時（オプション）",
+  correctCount: "正解回数（オプション）",
+  incorrectCount: "不正解回数（オプション）"
+}
+```
+
+### 3. ローカルストレージ設計
+- キー: `vocabApp_words` - 単語データの配列をJSON形式で保存
+- キー: `vocabApp_settings` - アプリ設定情報（オプション）
+
+### 4. コンポーネント設計
+
+#### HTML構造
+- ヘッダー: アプリタイトル、モード切替ボタン
+- メインコンテンツ:
+  - 登録モード: 単語入力フォーム、単語一覧
+  - 学習モード: 問題表示、解答入力、結果表示
+- フッター: 著作権情報など
+
+#### JavaScript モジュール
+1. **app.js**
+   - アプリケーションの初期化
+   - モード切替ロジック
+   - イベントリスナーの設定
+
+2. **storage.js**
+   - ローカルストレージへの保存・取得
+   - サンプルデータの初期ロード
+   - データの追加・編集・削除機能
+
+3. **ui.js**
+   - DOM操作
+   - 単語リストの表示
+   - 学習モードでの問題表示
+   - 結果のフィードバック表示
+
+### 5. 初期データ
+以下のようなサンプル単語を初期状態で登録:
+```javascript
+const sampleWords = [
+  { id: "1", word: "apple", meaning: "りんご" },
+  { id: "2", word: "book", meaning: "本" },
+  { id: "3", word: "cat", meaning: "猫" },
+  { id: "4", word: "dog", meaning: "犬" },
+  { id: "5", word: "elephant", meaning: "象" },
+  { id: "6", word: "flower", meaning: "花" },
+  { id: "7", word: "garden", meaning: "庭" },
+  { id: "8", word: "house", meaning: "家" },
+  { id: "9", word: "internet", meaning: "インターネット" },
+  { id: "10", word: "journey", meaning: "旅" }
+];
+```
+
+### 6. レスポンシブデザイン対応
+- ビューポート設定: ``
+- フレキシブルグリッドレイアウト
+- メディアクエリの使用
+- タッチ操作の最適化
+- 適切なフォントサイズと要素間のスペース
+
+### 7. 拡張性
+将来的な機能拡張の可能性:
+- 学習統計の表示
+- 難易度別の単語グループ
+- テスト機能
+- 発音機能
+- インポート/エクスポート機能
+
+### 8. セキュリティ考慮事項
+- ローカルストレージの制限（約5MB）を考慮したデータ設計
+- ユーザー入力のサニタイズ
+
+このアーキテクチャに基づいて実装することで、シンプルながらも機能的な英単語帖アプリをローカルファイルのみで実現できます。

@@ -1,0 +1,78 @@
+body {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fce4ec; /* Light pink background */
+}
+
+header {
+    background-color: #ff4081; /* Pink header */
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    border-bottom: 2px solid #f8bbd0;
+}
+
+main {
+    padding: 20px;
+    margin-bottom: 60px; /* Add margin to the bottom of the main section */
+}
+
+#registerMode, #studyMode {
+    margin-bottom: 20px;
+}
+
+#wordForm {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+#wordForm input {
+    margin-bottom: 10px;
+    padding: 8px;
+    border: 1px solid #f48fb1;
+    border-radius: 5px;
+}
+
+#wordForm button {
+    background-color: #f48fb1;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#wordList {
+    list-style: none;
+    padding: 0;
+}
+
+#wordList li {
+    background-color: #fff;
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#wordList li button {
+    background-color: #e91e63;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px; /* Rounded corners for edit/delete buttons */
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #ff4081;
+    color: #fff;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
