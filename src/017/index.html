@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>爆撃ゲーム</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="score-display">スコア: <span id="score">0</span></div>
+        <div id="game-area">
+            <div id="player"></div>
+            <div id="ground"></div>
+        </div>
+        <div id="controls">
+            <button id="start-button">ゲーム開始</button>
+            <div id="instructions">
+                <p>PC: マウスで移動、クリックで爆弾投下</p>
+                <p>スマホ: スワイプで移動、タップで爆弾投下</p>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+<!-- mo.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@mojs/core"></script>
+</html>

@@ -1,0 +1,124 @@
+/* 基本スタイル */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    touch-action: none; /* スマホでのスクロール防止 */
+}
+
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background-color: skyblue;
+}
+
+#game-area {
+    position: relative;
+    width: 100%;
+    height: 80%;
+    overflow: hidden;
+}
+
+/* プレイヤー機 */
+#player {
+    position: absolute;
+    width: 50px;
+    height: 30px;
+    background-color: blue;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+/* 地面 */
+#ground {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 50px;
+    background-color: green;
+}
+
+/* 爆弾 */
+.bomb {
+    position: absolute;
+    width: 10px;
+    height: 15px;
+    background-color: black;
+    border-radius: 50%;
+    z-index: 5;
+}
+
+/* 敵 */
+.enemy {
+    position: absolute;
+    width: 40px;
+    height: 20px;
+    background-color: red;
+    bottom: 50px; /* 地面の上 */
+    z-index: 8;
+}
+
+/* UI要素 */
+#score-display {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+    border-radius: 5px;
+    z-index: 20;
+}
+
+#controls {
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+    text-align: center;
+    z-index: 20;
+}
+
+#start-button {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#instructions {
+    margin-top: 10px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 5px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    #player {
+        width: 40px;
+        height: 24px;
+    }
+    
+    .enemy {
+        width: 30px;
+        height: 15px;
+    }
+    
+    #instructions {
+        font-size: 14px;
+    }
+}

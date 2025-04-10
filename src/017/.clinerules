@@ -1,0 +1,635 @@
+# Mode: Plan
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+## Memory Bank Review
+- Memory bank files have been reviewed and are up to date.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+# 爆撃ゲーム仕様書
+
+## ゲーム概要
+「爆撃ゲーム」は、プレイヤーが操作する飛行機が上空を飛び、地上の敵に爆弾を落とすシンプルなブラウザゲームです。HTML、JavaScript、CSSのみを使用し、ローカルファイルのみで動作します。PC・スマホの両方に対応しています。
+
+## 機能要件
+
+### プレイヤー機能
+- 自機は画面上部に表示され、左右のみ移動可能
+- 操作方法：
+  - PC：マウス移動で自機が左右に移動、クリックで爆弾投下
+  - スマホ：スワイプで自機が左右に移動、タップで爆弾投下
+- 画面外への移動は不可
+
+### 敵機能
+- 敵機は画面下部の地面上を左右に移動
+- 一定数の敵が常に画面上に存在
+- 敵の移動速度は一定
+
+### 爆弾機能
+- プレイヤーの操作により自機から爆弾を投下
+- 爆弾は重力に従って落下
+- 敵に命中すると爆発エフェクトを表示（mo.jsのburstを使用）
+- 命中時にスコアが加算される
+
+### スコアシステム
+- 敵への命中でスコア加算
+- 現在のスコアを画面上に常時表示
+
+### UI要素
+- スコア表示
+- ゲーム開始・リスタートボタン
+- 操作説明
+
+## 技術要件
+- HTML5、CSS3、JavaScript（ES6）のみを使用
+- 外部ライブラリはmo.js（CDN経由）のみ使用
+- レスポンシブデザインによるPC・スマホ対応
+- ローカルファイルのみで動作（サーバー不要）
+- 効果音・BGMなし
+
+# アーキテクチャ設計書
+
+## ファイル構成
+```
+bombing-game/
+├── index.html      # メインHTMLファイル
+├── styles.css      # スタイルシート
+└── script.js       # ゲームロジック
+```
+
+## HTML構造
+```html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>爆撃ゲーム</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- mo.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@mojs/core"></script>
+</head>
+<body>
+    <div id="game-container">
+        <div id="score-display">スコア: <span id="score">0</span></div>
+        <div id="game-area">
+            <div id="player"></div>
+            <div id="ground"></div>
+        </div>
+        <div id="controls">
+            <button id="start-button">ゲーム開始</button>
+            <div id="instructions">
+                <p>PC: マウスで移動、クリックで爆弾投下</p>
+                <p>スマホ: スワイプで移動、タップで爆弾投下</p>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+```
+
+## CSS設計
+```css
+/* 基本スタイル */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    touch-action: none; /* スマホでのスクロール防止 */
+}
+
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background-color: skyblue;
+}
+
+#game-area {
+    position: relative;
+    width: 100%;
+    height: 80%;
+    overflow: hidden;
+}
+
+/* プレイヤー機 */
+#player {
+    position: absolute;
+    width: 50px;
+    height: 30px;
+    background-image: url('data:image/svg+xml;utf8,');
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+/* 地面 */
+#ground {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 50px;
+    background-color: green;
+}
+
+/* 爆弾 */
+.bomb {
+    position: absolute;
+    width: 10px;
+    height: 15px;
+    background-color: black;
+    border-radius: 50%;
+    z-index: 5;
+}
+
+/* 敵 */
+.enemy {
+    position: absolute;
+    width: 40px;
+    height: 20px;
+    background-color: red;
+    bottom: 50px; /* 地面の上 */
+    z-index: 8;
+}
+
+/* UI要素 */
+#score-display {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+    border-radius: 5px;
+    z-index: 20;
+}
+
+#controls {
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+    text-align: center;
+    z-index: 20;
+}
+
+#start-button {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#instructions {
+    margin-top: 10px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 5px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    #player {
+        width: 40px;
+        height: 24px;
+    }
+    
+    .enemy {
+        width: 30px;
+        height: 15px;
+    }
+    
+    #instructions {
+        font-size: 14px;
+    }
+}
+```
+
+## JavaScript設計
+```javascript
+// ゲームの状態管理
+class GameState {
+    constructor() {
+        this.isRunning = false;
+        this.score = 0;
+        this.enemies = [];
+        this.bombs = [];
+        this.lastTime = 0;
+        this.enemySpawnInterval = 2000; // ミリ秒
+        this.lastEnemySpawn = 0;
+    }
+    
+    reset() {
+        this.isRunning = false;
+        this.score = 0;
+        this.enemies = [];
+        this.bombs = [];
+        document.getElementById('score').textContent = '0';
+        // 敵と爆弾の要素を削除
+        document.querySelectorAll('.enemy, .bomb').forEach(el => el.remove());
+    }
+}
+
+// プレイヤークラス
+class Player {
+    constructor() {
+        this.element = document.getElementById('player');
+        this.width = this.element.offsetWidth;
+        this.height = this.element.offsetHeight;
+        this.x = window.innerWidth / 2;
+        this.y = 50;
+        this.speed = 0.5; // 移動速度係数
+        
+        this.updatePosition();
+    }
+    
+    move(newX) {
+        // 画面外に出ないように制限
+        this.x = Math.max(this.width / 2, Math.min(newX, window.innerWidth - this.width / 2));
+        this.updatePosition();
+    }
+    
+    updatePosition() {
+        this.element.style.left = `${this.x - this.width / 2}px`;
+    }
+    
+    dropBomb() {
+        return new Bomb(this.x, this.y + this.height);
+    }
+}
+
+// 爆弾クラス
+class Bomb {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.width = 10;
+        this.height = 15;
+        this.speed = 5;
+        this.element = document.createElement('div');
+        this.element.className = 'bomb';
+        this.element.style.left = `${this.x - this.width / 2}px`;
+        this.element.style.top = `${this.y}px`;
+        document.getElementById('game-area').appendChild(this.element);
+    }
+    
+    update() {
+        this.y += this.speed;
+        this.element.style.top = `${this.y}px`;
+        
+        // 地面に着いたかチェック
+        const groundTop = window.innerHeight * 0.8 - 50; // ground要素の上端
+        if (this.y + this.height >= groundTop) {
+            return false; // 爆弾を削除
+        }
+        return true; // 爆弾を維持
+    }
+    
+    remove() {
+        this.element.remove();
+    }
+}
+
+// 敵クラス
+class Enemy {
+    constructor() {
+        this.width = 40;
+        this.height = 20;
+        this.x = Math.random() * (window.innerWidth - this.width);
+        this.y = window.innerHeight * 0.8 - 50 - this.height; // 地面の上
+        this.speed = (Math.random() > 0.5 ? 1 : -1) * (1 + Math.random() * 2); // ランダムな速度と方向
+        
+        this.element = document.createElement('div');
+        this.element.className = 'enemy';
+        this.element.style.left = `${this.x}px`;
+        this.element.style.bottom = `${50}px`; // 地面の上に配置
+        document.getElementById('game-area').appendChild(this.element);
+    }
+    
+    update() {
+        this.x += this.speed;
+        
+        // 画面端で反転
+        if (this.x = window.innerWidth) {
+            this.speed *= -1;
+        }
+        
+        this.element.style.left = `${this.x}px`;
+        return true; // 敵を維持
+    }
+    
+    checkCollision(bomb) {
+        return (
+            bomb.x + bomb.width / 2 > this.x &&
+            bomb.x - bomb.width / 2  this.y &&
+            bomb.y  {
+            if (this.gameState.isRunning) {
+                this.player.move(e.clientX);
+            }
+        });
+        
+        gameArea.addEventListener('click', (e) => {
+            if (this.gameState.isRunning) {
+                this.gameState.bombs.push(this.player.dropBomb());
+            }
+        });
+        
+        // スマホ操作
+        let touchStartX = 0;
+        
+        gameArea.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            
+            // タップで爆弾投下（短いタッチの場合）
+            if (this.gameState.isRunning) {
+                this.gameState.bombs.push(this.player.dropBomb());
+            }
+        });
+        
+        gameArea.addEventListener('touchmove', (e) => {
+            if (this.gameState.isRunning) {
+                e.preventDefault(); // スクロール防止
+                const touchX = e.touches[0].clientX;
+                const deltaX = touchX - touchStartX;
+                
+                this.player.move(this.player.x + deltaX);
+                touchStartX = touchX;
+            }
+        });
+        
+        // ゲーム開始ボタン
+        startButton.addEventListener('click', () => {
+            if (this.gameState.isRunning) {
+                this.gameState.reset();
+                startButton.textContent = 'ゲーム開始';
+            } else {
+                this.gameState.isRunning = true;
+                this.gameState.lastTime = performance.now();
+                startButton.textContent = 'リセット';
+                this.gameLoop();
+            }
+        });
+        
+        // リサイズ対応
+        window.addEventListener('resize', () => {
+            this.player.move(window.innerWidth / 2);
+        });
+    }
+    
+    gameLoop(timestamp) {
+        if (!this.gameState.isRunning) return;
+        
+        const deltaTime = timestamp - this.gameState.lastTime;
+        this.gameState.lastTime = timestamp;
+        
+        // 敵の生成
+        if (timestamp - this.gameState.lastEnemySpawn > this.gameState.enemySpawnInterval) {
+            this.gameState.enemies.push(new Enemy());
+            this.gameState.lastEnemySpawn = timestamp;
+        }
+        
+        // 爆弾の更新
+        this.gameState.bombs = this.gameState.bombs.filter(bomb => {
+            const isActive = bomb.update();
+            if (!isActive) {
+                bomb.remove();
+            }
+            return isActive;
+        });
+        
+        // 敵の更新と衝突判定
+        this.gameState.enemies = this.gameState.enemies.filter(enemy => {
+            enemy.update();
+            
+            // 爆弾との衝突判定
+            for (let i = 0; i  {
+    new GameController();
+});
+```
+
+## 実装上の注意点
+
+1. **レスポンシブ対応**
+   - ビューポート設定で`user-scalable=no`を使用し、スマホでのピンチズーム操作を防止
+   - CSSメディアクエリで画面サイズに応じた要素サイズの調整
+
+2. **タッチ操作の最適化**
+   - `touch-action: none`でブラウザのデフォルトタッチ動作を無効化
+   - タッチイベントの`preventDefault()`でスクロール防止
+
+3. **パフォーマンス最適化**
+   - `requestAnimationFrame`を使用したゲームループ
+   - DOM操作の最小化
+
+4. **衝突判定**
+   - シンプルな矩形衝突判定アルゴリズムを使用
+
+5. **mo.jsの活用**
+   - CDNからmo.jsを読み込み、爆発エフェクトに`burst`を使用
+
+6. **SVGインライン化**
+   - プレイヤー機体をData URLのSVGとして埋め込み、外部画像ファイルなしで実装
+
+## ゲームループの最適化
+
+ゲームループはゲーム開発の中核部分であり、適切な実装が必要です。現在の実装では基本的なrequestAnimationFrameを使用していますが、さらに以下の改良を検討できます：
+
+```javascript
+// 改良版ゲームループ
+function gameLoop(timestamp) {
+    if (!gameState.isRunning) return;
+    
+    // 前回のフレームからの経過時間を計算
+    const secondsPassed = (timestamp - gameState.lastTime) / 1000;
+    gameState.lastTime = timestamp;
+    
+    // FPSの計算（デバッグ用）
+    const fps = Math.round(1 / secondsPassed);
+    
+    // ゲーム状態の更新（経過時間を渡す）
+    updateGame(secondsPassed);
+    
+    // 描画処理
+    renderGame();
+    
+    // 次のフレームをリクエスト
+    requestAnimationFrame(gameLoop);
+}
+```
+
+この改良により、フレームレートに依存しない一貫したゲーム体験が実現できます[1][3]。
+
+## スコアシステムの強化
+
+現在のスコアシステムは基本的な実装ですが、以下の機能を追加することでユーザー体験を向上させることができます：
+
+### ローカルハイスコア保存
+
+```javascript
+// ローカルストレージにハイスコアを保存
+function saveHighScore(score) {
+    const currentHighScore = localStorage.getItem('bombingGameHighScore') || 0;
+    if (score > currentHighScore) {
+        localStorage.setItem('bombingGameHighScore', score);
+        return true; // 新記録
+    }
+    return false;
+}
+
+// ゲーム終了時のスコア処理
+function gameOver() {
+    gameState.isRunning = false;
+    const isNewRecord = saveHighScore(gameState.score);
+    
+    // 結果表示
+    const resultMessage = isNewRecord 
+        ? `新記録！ スコア: ${gameState.score}` 
+        : `ゲーム終了 スコア: ${gameState.score}`;
+    
+    // 結果表示用の要素を作成
+    const resultDiv = document.createElement('div');
+    resultDiv.id = 'result-display';
+    resultDiv.innerHTML = `
+        ${resultMessage}
+        ハイスコア: ${localStorage.getItem('bombingGameHighScore')}
+        もう一度プレイ
+    `;
+    
+    document.getElementById('game-container').appendChild(resultDiv);
+    document.getElementById('restart-button').addEventListener('click', resetGame);
+}
+```
+
+## 不正スコア対策
+
+オンラインランキングを実装する場合、不正スコア対策が重要になります。以下のような対策が考えられます[4]：
+
+1. プレイ履歴の検証：ユーザーの操作履歴を記録し、サーバー側で検証
+2. 決定論的な乱数生成：同じシード値から同じゲーム展開を再現できるようにする
+3. チェックサムの実装：ゲーム状態の整合性を検証するハッシュ値を生成
+
+## モバイル操作の最適化
+
+スマートフォンでの操作性を向上させるため、タッチ操作の処理を最適化します：
+
+```javascript
+// タッチ操作の最適化
+function setupTouchControls() {
+    const gameArea = document.getElementById('game-area');
+    let touchStartX = 0;
+    let touchStartTime = 0;
+    
+    gameArea.addEventListener('touchstart', (e) => {
+        e.preventDefault(); // デフォルトの動作を防止
+        touchStartX = e.touches[0].clientX;
+        touchStartTime = Date.now();
+        
+        // 短いタップの場合は爆弾投下と判断
+        if (gameState.isRunning) {
+            const touchDuration = Date.now() - touchStartTime;
+            if (touchDuration  {
+        if (gameState.isRunning) {
+            e.preventDefault();
+            const touchX = e.touches[0].clientX;
+            const deltaX = touchX - touchStartX;
+            
+            // 移動量に応じた感度調整
+            player.move(player.x + deltaX * 1.5);
+            touchStartX = touchX;
+        }
+    });
+}
+```
+
+## 敵の多様化
+
+ゲームの難易度と面白さを向上させるため、敵の種類を増やします：
+
+```javascript
+// 敵の種類を定義
+const ENEMY_TYPES = {
+    NORMAL: {
+        width: 40,
+        height: 20,
+        speed: 2,
+        color: 'red',
+        points: 100
+    },
+    FAST: {
+        width: 30,
+        height: 15,
+        speed: 4,
+        color: 'blue',
+        points: 200
+    },
+    LARGE: {
+        width: 60,
+        height: 30,
+        speed: 1,
+        color: 'purple',
+        points: 300
+    }
+};
+
+// 敵生成関数の改良
+function createEnemy() {
+    // ランダムに敵タイプを選択
+    const types = Object.keys(ENEMY_TYPES);
+    const randomType = types[Math.floor(Math.random() * types.length)];
+    const enemyConfig = ENEMY_TYPES[randomType];
+    
+    return new Enemy(randomType, enemyConfig);
+}
+
+// 敵クラスの改良
+class Enemy {
+    constructor(type, config) {
+        this.type = type;
+        this.width = config.width;
+        this.height = config.height;
+        this.x = Math.random() * (window.innerWidth - this.width);
+        this.y = window.innerHeight * 0.8 - 50 - this.height;
+        this.speed = (Math.random() > 0.5 ? 1 : -1) * config.speed;
+        this.points = config.points;
+        
+        this.element = document.createElement('div');
+        this.element.className = 'enemy';
+        this.element.style.width = `${this.width}px`;
+        this.element.style.height = `${this.height}px`;
+        this.element.style.backgroundColor = config.color;
+        this.element.style.left = `${this.x}px`;
+        this.element.style.bottom = `${50}px`;
+        
+        document.getElementById('game-area').appendChild(this.element);
+    }
+    
+    // 他のメソッドは同じ
+}
+```
