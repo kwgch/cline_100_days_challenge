@@ -96,7 +96,7 @@ class Enemy {
         this.element.style.left = `${this.x}px`;
         this.element.style.bottom = `${50}px`;
         document.getElementById('game-area').appendChild(this.element);
-        this.element.innerText = this.id;
+        // this.element.innerText = this.id;
     }
 
     update() {
@@ -144,7 +144,7 @@ class GameController {
         });
 
         gameArea.addEventListener('click', (e) => {
-            if (this.gameState.isRunning) {
+            if (this.gameState.isRunning && this.gameState.bombs.length < 1) {
                 this.gameState.bombs.push(this.player.dropBomb());
             }
         });
@@ -156,7 +156,7 @@ class GameController {
             touchStartX = e.touches[0].clientX;
 
             // タップで爆弾投下（短いタッチの場合）
-            if (this.gameState.isRunning) {
+            if (this.gameState.isRunning && this.gameState.bombs.length < 1) {
                 this.gameState.bombs.push(this.player.dropBomb());
             }
         });
@@ -191,6 +191,33 @@ class GameController {
         });
     }
 
+    gameOver() {
+        this.gameState.isRunning = false;
+        const gameArea = document.getElementById('game-area');
+        const gameOverDiv = document.createElement('div');
+        gameOverDiv.id = 'game-over';
+        gameOverDiv.innerHTML = `
+            <h1>Game Over!</h1>
+            <p>地上は占領されてしまった...</p>
+            <p>Score: ${this.gameState.score}</p>
+            <button id="restart-button">Restart</button>
+        `;
+        gameArea.appendChild(gameOverDiv);
+
+        const restartButton = document.getElementById('restart-button');
+        restartButton.addEventListener('click', () => {
+            gameOverDiv.remove();
+            this.gameState.reset();
+            this.start();
+        });
+    }
+
+    start() {
+        this.gameState.isRunning = true;
+        this.gameState.lastTime = performance.now();
+        requestAnimationFrame(this.gameLoop);
+    }
+
     gameLoop(timestamp) {
         if (!this.gameState.isRunning) return;
 
@@ -201,6 +228,9 @@ class GameController {
         if (timestamp - this.gameState.lastEnemySpawn > this.gameState.enemySpawnInterval) {
             this.gameState.enemies.push(new Enemy(++this.enemiesNum));
             this.gameState.lastEnemySpawn = timestamp;
+            if (this.gameState.enemies.length >= 10) {
+                this.gameOver();
+            }
         }
 
         // 爆弾の更新
