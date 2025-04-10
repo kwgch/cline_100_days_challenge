@@ -4,8 +4,7 @@ const studyMode = document.getElementById('studyMode');
 const wordForm = document.getElementById('wordForm');
 const wordList = document.getElementById('wordList');
 const question = document.getElementById('question');
-const answer = document.getElementById('answer');
-const checkAnswer = document.getElementById('checkAnswer');
+const choices = document.getElementById('choices');
 const result = document.getElementById('result');
 
 let words = [];
@@ -50,23 +49,42 @@ function updateWordList() {
 function showQuestion() {
     if (words.length === 0) {
         question.textContent = '単語を登録してください';
+        choices.style.display = 'none';
         return;
     }
+    choices.style.display = 'flex';
     const randomIndex = Math.floor(Math.random() * words.length);
     currentWord = words[randomIndex];
     question.textContent = currentWord.word;
+
+    // Generate random choices
+    const choiceButtons = choices.querySelectorAll('.choice');
+    const correctIndex = Math.floor(Math.random() * 4);
+    let usedIndexes = [randomIndex];
+
+    choiceButtons.forEach((button, index) => {
+        if (index === correctIndex) {
+            button.textContent = currentWord.meaning;
+            button.dataset.correct = 'true';
+        } else {
+            let wrongIndex = Math.floor(Math.random() * words.length);
+            while (usedIndexes.includes(wrongIndex)) {
+                wrongIndex = Math.floor(Math.random() * words.length);
+            }
+            usedIndexes.push(wrongIndex);
+            button.textContent = words[wrongIndex].meaning;
+            button.dataset.correct = 'false';
+        }
+    });
 }
 
 // Function to check the answer
-function checkAnswerFunc() {
-    if (!currentWord) return;
-    const userAnswer = answer.value.trim();
-    if (userAnswer === currentWord.meaning) {
+function checkAnswerFunc(e) {
+    if (e.target.dataset.correct === 'true') {
         result.textContent = '正解！';
     } else {
         result.textContent = `不正解。正解は ${currentWord.meaning} です。`;
     }
-    answer.value = '';
     showQuestion();
 }
 
@@ -125,7 +143,11 @@ wordForm.addEventListener('submit', function (e) {
         saveWords();
     }
 });
-checkAnswer.addEventListener('click', checkAnswerFunc);
+choices.addEventListener('click', function (e) {
+    if (e.target.classList.contains('choice')) {
+        checkAnswerFunc(e);
+    }
+});
 wordList.addEventListener('click', function (e) {
     if (e.target.classList.contains('delete')) {
         const id = e.target.dataset.id;

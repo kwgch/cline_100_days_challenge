@@ -67,6 +67,30 @@ main {
     margin-left: 5px;
 }
 
+#choices {
+    display: flex;
+    flex-direction: column; /* Stack choices vertically */
+}
+
+#choices button {
+    background-color: #f48fb1; /* Pink button color */
+    color: #fff;
+    border: none;
+    padding: 10px;
+    margin-bottom: 5px; /* Add spacing between buttons */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer;
+}
+
+header button {
+    background-color: #f48fb1;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
 footer {
     text-align: center;
     padding: 10px;
