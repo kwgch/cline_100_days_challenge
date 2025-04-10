@@ -83,18 +83,20 @@ class Bomb {
 
 // 敵クラス
 class Enemy {
-    constructor() {
+    constructor(i) {
+        this.id = i;
         this.width = 40;
         this.height = 20;
         this.x = Math.random() * (window.innerWidth - this.width);
-        this.y = window.innerHeight * 0.8 - 50 - this.height; // 地面の上
-        this.speed = (Math.random() > 0.5 ? 1 : -1) * (1 + Math.random() * 2); // ランダムな速度と方向
+        this.y = window.innerHeight * 0.8 - 50 - this.height;
+        this.speed = (Math.random() > 0.5 ? 1 : -1) * (1 + Math.random() * 2);
 
         this.element = document.createElement('div');
         this.element.className = 'enemy';
         this.element.style.left = `${this.x}px`;
-        this.element.style.bottom = `${50}px`; // 地面の上に配置
+        this.element.style.bottom = `${50}px`;
         document.getElementById('game-area').appendChild(this.element);
+        this.element.innerText = this.id;
     }
 
     update() {
@@ -197,7 +199,7 @@ class GameController {
 
         // 敵の生成
         if (timestamp - this.gameState.lastEnemySpawn > this.gameState.enemySpawnInterval) {
-            this.gameState.enemies.push(new Enemy());
+            this.gameState.enemies.push(new Enemy(++this.enemiesNum));
             this.gameState.lastEnemySpawn = timestamp;
         }
 
@@ -232,14 +234,12 @@ class GameController {
                         }
                     });
                     burst.play();
-
                     enemy.element.remove();
                     bomb.remove();
-                    this.gameState.enemies.splice(this.gameState.enemies.indexOf(enemy), 1);
                     this.gameState.bombs.splice(i, 1);
                     this.gameState.score += 100;
                     document.getElementById('score').textContent = this.gameState.score;
-                    break;
+                    return false; // 敵を削除
                 }
             }
             return true;
