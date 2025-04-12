@@ -22,6 +22,7 @@ canvas {
     justify-content: center;
     align-items: center;
     font-family: Arial, sans-serif;
+    font-size: 24px;
 }
 
 #startButton {
@@ -29,6 +30,6 @@ canvas {
     color: black;
     border: none;
     padding: 10px 20px;
-    font-size: 20px;
+    font-size: 30px;
     cursor: pointer;
 }

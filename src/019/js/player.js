@@ -4,7 +4,7 @@ class Player {
         this.y = y;
         this.width = 32;
         this.height = 32;
-        this.speed = 200;
+        this.speed = 100;
         this.weapons = [];
         this.lastFire = 0;
         this.fireRate = 250;
@@ -95,19 +95,27 @@ document.addEventListener('touchstart', function(e) {
     e.preventDefault();
     mouse.touchStartX = e.touches[0].clientX;
     mouse.touchStartY = e.touches[0].clientY;
-    mouse.x = e.touches[0].clientX;
-    mouse.y = e.touches[0].clientY;
 }, { passive: false });
 
 document.addEventListener('touchmove', function(e) {
     e.preventDefault();
-    mouse.x = e.touches[0].clientX;
-    mouse.y = e.touches[0].clientY;
-    
+    let touchX = e.touches[0].clientX;
+    let touchY = e.touches[0].clientY;
+
+    let deltaX = touchX - mouse.touchStartX;
+    let deltaY = touchY - mouse.touchStartY;
+
     if (game && game.player) {
-        game.player.x = e.touches[0].clientX - game.player.width / 2;
-        game.player.y = e.touches[0].clientY - game.player.height / 2;
+        game.player.x += deltaX * 0.1;
+        game.player.y += deltaY * 0.1;
+
+        // Keep player within bounds
+        if (game.player.x < 0) game.player.x = 0;
+        if (game.player.x > game.canvas.width - game.player.width) game.player.x = game.canvas.width - game.player.width;
+        if (game.player.y < 0) game.player.y = 0;
+        if (game.player.y > game.canvas.height - game.player.height) game.player.y = game.canvas.height - game.player.height;
     }
+
 }, { passive: false });
 
 document.addEventListener('touchend', function(e) {

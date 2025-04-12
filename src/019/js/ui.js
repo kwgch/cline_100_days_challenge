@@ -13,9 +13,9 @@ class UIManager {
 
     render(ctx) {
         ctx.fillStyle = 'white';
-        ctx.font = '20px Arial';
-        ctx.fillText('Score: ' + this.score, 10, 30);
-        ctx.fillText('Lives: ' + this.lives, 10, 50);
+        ctx.font = '30px Arial';
+        ctx.fillText('Score: ' + this.score, 10, 40);
+        ctx.fillText('Lives: ' + this.lives, 10, 70);
     }
 
     showGameOver(ctx) {
