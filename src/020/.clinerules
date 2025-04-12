@@ -1,0 +1,525 @@
+# Mode: Plan
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+# 2バック・メモリーゲーム 仕様書およびアーキテクチャ設計書
+
+## 1. 仕様書
+
+### 1.1 概要
+
+2バック・メモリーゲームは、ワーキングメモリを鍛えるための認知トレーニングゲームです。プレイヤーは連続して表示される刺激（数字、文字、画像など）を観察し、現在表示されている刺激が2つ前に表示されたものと同じかどうかを判断します。
+
+### 1.2 機能要件
+
+#### 1.2.1 基本機能
+- ゲーム開始画面の表示
+- ゲームルールの説明
+- 難易度選択（簡単、普通、難しい）
+- 刺激の表示（数字、文字、または画像）
+- ユーザー入力の受付（同じ/異なる）
+- スコアの計算と表示
+- ゲーム終了時の結果表示
+- ゲームのリスタート
+
+#### 1.2.2 詳細仕様
+- **刺激の種類**:
+  - 数字モード: 1-9の数字
+  - 文字モード: A-Zのアルファベット
+  - 画像モード: シンプルなアイコン（オプション）
+
+- **難易度レベル**:
+  - 簡単: 刺激表示間隔 2.5秒、20ラウンド
+  - 普通: 刺激表示間隔 2.0秒、30ラウンド
+  - 難しい: 刺激表示間隔 1.5秒、40ラウンド
+
+- **スコアリング**:
+  - 正解: +10点
+  - 不正解: -5点
+  - 無回答: 0点
+
+- **ゲームフロー**:
+  1. スタート画面でルール説明と難易度選択
+  2. ゲーム開始後、刺激が一定間隔で表示される
+  3. プレイヤーは「同じ」または「異なる」ボタンを押す
+  4. 最終ラウンド終了後、結果画面が表示される
+
+### 1.3 非機能要件
+
+- **レスポンシブデザイン**: スマートフォン、タブレット、デスクトップで適切に表示・操作可能
+- **オフライン動作**: インターネット接続なしで完全に動作
+- **パフォーマンス**: 刺激の表示とユーザー入力の処理にラグがないこと
+- **データ保存**: ローカルストレージを使用して最高スコアを保存
+- **アクセシビリティ**: 色覚異常のあるユーザーも識別できる色使い
+
+### 1.4 制約条件
+
+- HTML, CSS, JavaScriptのみを使用
+- 外部ライブラリやフレームワークは使用しない
+- ローカルファイルとして動作すること
+- モバイルデバイス（特にスマートフォン）での操作性を優先
+
+## 2. アーキテクチャ設計書
+
+### 2.1 ファイル構成
+
+```
+2back-memory-game/
+├── index.html          # メインHTMLファイル
+├── css/
+│   └── styles.css      # スタイルシート
+├── js/
+│   ├── game.js         # ゲームのコアロジック
+│   ├── ui.js           # UI操作関連の機能
+│   └── storage.js      # ローカルストレージ操作
+└── assets/
+    ├── images/         # ゲームで使用する画像（オプション）
+    └── sounds/         # ゲームで使用する音声（オプション）
+```
+
+### 2.2 コンポーネント設計
+
+#### 2.2.1 HTMLの構造
+
+```html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2バック・メモリーゲーム</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- スタート画面 -->
+    <div id="start-screen" class="screen">
+        <h1>2バック・メモリーゲーム</h1>
+        <div class="rules">
+            <!-- ゲームルールの説明 -->
+        </div>
+        <div class="difficulty-selection">
+            <!-- 難易度選択ボタン -->
+        </div>
+        <button id="start-button">ゲーム開始</button>
+    </div>
+
+    <!-- ゲーム画面 -->
+    <div id="game-screen" class="screen hidden">
+        <div class="game-info">
+            <div id="score">スコア: 0</div>
+            <div id="round">ラウンド: 0/20</div>
+        </div>
+        <div id="stimulus-container">
+            <!-- 刺激が表示される領域 -->
+        </div>
+        <div class="controls">
+            <button id="same-button">同じ</button>
+            <button id="different-button">異なる</button>
+        </div>
+    </div>
+
+    <!-- 結果画面 -->
+    <div id="result-screen" class="screen hidden">
+        <h2>ゲーム終了</h2>
+        <div id="final-score">最終スコア: 0</div>
+        <div id="accuracy">正答率: 0%</div>
+        <div id="high-score">最高スコア: 0</div>
+        <button id="restart-button">もう一度プレイ</button>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
+```
+
+#### 2.2.2 CSSの設計方針
+
+- モバイルファーストアプローチ
+- フレックスボックスを使用したレイアウト
+- タッチフレンドリーなUI（大きなボタン、適切な間隔）
+- メディアクエリによるレスポンシブデザイン
+- アニメーションによる視覚的フィードバック
+
+```css
+/* 基本スタイル */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+}
+
+.screen {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.hidden {
+    display: none;
+}
+
+/* ボタンスタイル */
+button {
+    padding: 15px 30px;
+    margin: 10px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* 刺激表示エリア */
+#stimulus-container {
+    width: 200px;
+    height: 200px;
+    margin: 30px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 5rem;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 600px) {
+    .screen {
+        padding: 15px;
+    }
+    
+    button {
+        padding: 12px 24px;
+        font-size: 1rem;
+    }
+    
+    #stimulus-container {
+        width: 150px;
+        height: 150px;
+        font-size: 4rem;
+    }
+}
+```
+
+#### 2.2.3 JavaScriptのモジュール設計
+
+**storage.js** - ローカルストレージ操作
+```javascript
+// ローカルストレージ操作のモジュール
+const Storage = {
+    // 最高スコアの保存
+    saveHighScore: function(score) {
+        const currentHighScore = this.getHighScore();
+        if (score > currentHighScore) {
+            localStorage.setItem('2backHighScore', score);
+            return true;
+        }
+        return false;
+    },
+    
+    // 最高スコアの取得
+    getHighScore: function() {
+        return parseInt(localStorage.getItem('2backHighScore') || 0);
+    }
+};
+```
+
+**ui.js** - UI操作関連
+```javascript
+// UI操作のモジュール
+const UI = {
+    // 画面切り替え
+    showScreen: function(screenId) {
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.classList.add('hidden');
+        });
+        document.getElementById(screenId).classList.remove('hidden');
+    },
+    
+    // スコア表示の更新
+    updateScore: function(score) {
+        document.getElementById('score').textContent = `スコア: ${score}`;
+    },
+    
+    // ラウンド表示の更新
+    updateRound: function(current, total) {
+        document.getElementById('round').textContent = `ラウンド: ${current}/${total}`;
+    },
+    
+    // 刺激の表示
+    showStimulus: function(stimulus) {
+        const container = document.getElementById('stimulus-container');
+        container.textContent = stimulus;
+        // アニメーション効果を追加
+        container.classList.add('show-stimulus');
+        setTimeout(() => {
+            container.classList.remove('show-stimulus');
+        }, 300);
+    },
+    
+    // 結果画面の更新
+    updateResults: function(score, accuracy, highScore) {
+        document.getElementById('final-score').textContent = `最終スコア: ${score}`;
+        document.getElementById('accuracy').textContent = `正答率: ${accuracy}%`;
+        document.getElementById('high-score').textContent = `最高スコア: ${highScore}`;
+    }
+};
+```
+
+**game.js** - ゲームのコアロジック
+```javascript
+// ゲームのコアロジック
+const Game = {
+    // ゲーム設定
+    settings: {
+        easy: { interval: 2500, rounds: 20 },
+        medium: { interval: 2000, rounds: 30 },
+        hard: { interval: 1500, rounds: 40 }
+    },
+    
+    // ゲーム状態
+    state: {
+        difficulty: 'medium',
+        stimuli: [],
+        currentRound: 0,
+        score: 0,
+        correctAnswers: 0,
+        wrongAnswers: 0,
+        timer: null
+    },
+    
+    // 刺激の生成（数字モード）
+    generateStimuli: function(rounds) {
+        const stimuli = [];
+        for (let i = 0; i = 2 && Math.random() = config.rounds) {
+            this.endGame();
+            return;
+        }
+        
+        // 現在の刺激を表示
+        const stimulus = this.state.stimuli[this.state.currentRound];
+        UI.showStimulus(stimulus);
+        
+        // ラウンド情報を更新
+        this.state.currentRound++;
+        UI.updateRound(this.state.currentRound, config.rounds);
+        
+        // 次のラウンドのタイマーをセット
+        this.state.timer = setTimeout(() => {
+            // 無回答の場合の処理
+            if (this.state.currentRound = 3) {
+            const currentStimulus = this.state.stimuli[this.state.currentRound - 1];
+            const twoBackStimulus = this.state.stimuli[this.state.currentRound - 3];
+            const isCorrect = (isSame === (currentStimulus === twoBackStimulus));
+            
+            if (isCorrect) {
+                this.state.score += 10;
+                this.state.correctAnswers++;
+            } else {
+                this.state.score = Math.max(0, this.state.score - 5);
+                this.state.wrongAnswers++;
+            }
+            
+            UI.updateScore(this.state.score);
+        }
+        
+        // 次のラウンドへ
+        this.nextRound();
+    },
+    
+    // ゲーム終了
+    endGame: function() {
+        const totalAnswers = this.state.correctAnswers + this.state.wrongAnswers;
+        const accuracy = totalAnswers > 0 ? Math.round((this.state.correctAnswers / totalAnswers) * 100) : 0;
+        
+        // 最高スコアを更新
+        const highScore = Storage.getHighScore();
+        const isNewHighScore = Storage.saveHighScore(this.state.score);
+        
+        // 結果画面を表示
+        UI.updateResults(this.state.score, accuracy, Math.max(highScore, this.state.score));
+        UI.showScreen('result-screen');
+    }
+};
+
+// イベントリスナーの設定
+document.addEventListener('DOMContentLoaded', function() {
+    // 難易度選択
+    const difficultyButtons = document.querySelectorAll('.difficulty-selection button');
+    difficultyButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            difficultyButtons.forEach(btn => btn.classList.remove('selected'));
+            this.classList.add('selected');
+            Game.state.difficulty = this.dataset.difficulty;
+        });
+    });
+    
+    // ゲーム開始ボタン
+    document.getElementById('start-button').addEventListener('click', function() {
+        Game.init(Game.state.difficulty);
+    });
+    
+    // 回答ボタン
+    document.getElementById('same-button').addEventListener('click', function() {
+        Game.processAnswer(true);
+    });
+    
+    document.getElementById('different-button').addEventListener('click', function() {
+        Game.processAnswer(false);
+    });
+    
+    // リスタートボタン
+    document.getElementById('restart-button').addEventListener('click', function() {
+        UI.showScreen('start-screen');
+    });
+    
+    // 初期画面表示
+    UI.showScreen('start-screen');
+});
+```
+
+### 2.3 データフロー
+
+1. ユーザーがゲームを開始すると、選択された難易度に基づいて刺激のシーケンスが生成されます。
+2. 刺激は一定間隔で表示され、ユーザーは「同じ」または「異なる」ボタンで回答します。
+3. 回答はゲームロジックで処理され、スコアが更新されます。
+4. ゲーム終了時、結果が計算され、最高スコアがローカルストレージに保存されます。
+
+### 2.4 レスポンシブデザインの考慮点
+
+- ビューポートメタタグを使用して、モバイルデバイスでの適切な表示を確保
+- フレックスボックスを使用した柔軟なレイアウト
+- メディアクエリによる画面サイズごとの調整
+- タッチフレンドリーなUI要素（十分な大きさと間隔）
+- フォントサイズと要素サイズの相対単位（rem, em, %）の使用
+
+### 2.5 パフォーマンス最適化
+
+- 画像の最適化（使用する場合）
+- CSSアニメーションの適切な使用
+- DOM操作の最小化
+- イベントリスナーの効率的な実装
+- requestAnimationFrameの使用（必要に応じて）
+
+### 2.6 拡張性
+
+将来的な機能拡張の可能性：
+
+- 異なる刺激モード（文字、画像）の追加
+- 難易度のカスタマイズ
+- 詳細な統計情報の表示
+- 3バック、4バックなどの高度なモードの追加
+
+これらの拡張機能は、既存のアーキテクチャを大きく変更することなく実装できるように設計されています。
+
+## 3. セキュリティとプライバシーの考慮事項
+
+### 3.1 ローカルストレージの使用
+
+- ローカルストレージには最高スコアのみを保存し、個人を特定できる情報は保存しない
+- ユーザーにローカルストレージの使用について通知し、必要に応じてクリアする方法を提供する
+
+### 3.2 オフライン動作
+
+- すべてのアセットをローカルに保存し、外部リソースへの依存を避ける
+- インターネット接続が不要であることをユーザーに明確に伝える
+
+## 4. テスト戦略
+
+### 4.1 ユニットテスト
+
+- 各JavaScriptモジュールの主要機能をテスト
+- 刺激生成アルゴリズムの正確性を確認
+- スコア計算ロジックの検証
+
+### 4.2 統合テスト
+
+- UIとゲームロジックの連携をテスト
+- 異なる難易度設定での動作確認
+
+### 4.3 ユーザビリティテスト
+
+- 様々な年齢層のユーザーによるテストプレイ
+- モバイルデバイスでの操作性確認
+- 長時間プレイ時の安定性チェック
+
+### 4.4 クロスブラウザテスト
+
+- 主要なモバイルブラウザ（Safari, Chrome, Firefox）での動作確認
+- 異なるOSバージョンでのテスト
+
+## 5. パフォーマンス最適化の詳細
+
+### 5.1 レンダリング最適化
+
+- CSSアニメーションを使用し、JavaScriptによるアニメーションを最小限に抑える
+- `transform` と `opacity` プロパティを使用してGPUアクセラレーションを活用
+
+```css
+.show-stimulus {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+```
+
+### 5.2 メモリ管理
+
+- 大きな配列やオブジェクトを再利用し、ガベージコレクションを最小限に抑える
+- 不要なクロージャーを避け、メモリリークを防ぐ
+
+### 5.3 イベント処理の最適化
+
+- イベントデリゲーションを使用して、多数の要素に対するイベントリスナーの数を減らす
+- `requestAnimationFrame` を使用して、視覚的な更新を最適化する
+
+```javascript
+function updateGameVisuals() {
+    // 視覚的な更新処理
+    requestAnimationFrame(updateGameVisuals);
+}
+
+requestAnimationFrame(updateGameVisuals);
+```
+
+この設計書に基づいて開発を進めることで、HTML、JavaScript、CSSのみを使用し、ローカルファイルとして動作する2バック・メモリーゲームを効率的に実装できます。スマートフォンでの動作に最適化されており、将来的な拡張性も考慮されています。

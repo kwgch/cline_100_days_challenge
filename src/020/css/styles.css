@@ -1,0 +1,90 @@
+/* 基本スタイル */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+}
+
+.screen {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.hidden {
+    display: none;
+}
+
+/* ボタンスタイル */
+button {
+    padding: 15px 30px;
+    margin: 10px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* 刺激表示エリア */
+#stimulus-container {
+    width: 200px;
+    height: 200px;
+    margin: 30px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 5rem;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+}
+
+/* 難易度選択ボタン */
+.difficulty-selection button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    background-color: #ddd;
+    color: #333;
+}
+
+.difficulty-selection button.selected {
+    background-color: #4CAF50;
+    color: white;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 600px) {
+    .screen {
+        padding: 15px;
+    }
+    
+    button {
+        padding: 12px 24px;
+        font-size: 1rem;
+    }
+    
+    #stimulus-container {
+        width: 150px;
+        height: 150px;
+        font-size: 4rem;
+    }
+}

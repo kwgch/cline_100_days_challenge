@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2バック・メモリーゲーム</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- スタート画面 -->
+    <div id="start-screen" class="screen">
+        <h1>2バック・メモリーゲーム</h1>
+        <div class="rules">
+            <!-- ゲームルールの説明 -->
+            <p>このゲームは、表示される刺激が2つ前に表示されたものと同じかどうかを判断するゲームです。</p>
+        </div>
+        <div class="difficulty-selection">
+            <!-- 難易度選択ボタン -->
+            <button data-difficulty="easy">簡単</button>
+            <button data-difficulty="medium" class="selected">普通</button>
+            <button data-difficulty="hard">難しい</button>
+        </div>
+        <button id="start-button">ゲーム開始</button>
+    </div>
+
+    <!-- ゲーム画面 -->
+    <div id="game-screen" class="screen hidden">
+        <div class="game-info">
+            <div id="score">スコア: 0</div>
+            <div id="round">ラウンド: 0/20</div>
+        </div>
+        <div id="stimulus-container">
+            <!-- 刺激が表示される領域 -->
+        </div>
+        <div class="controls">
+            <button id="same-button">同じ</button>
+            <button id="different-button">異なる</button>
+        </div>
+    </div>
+
+    <!-- 結果画面 -->
+    <div id="result-screen" class="screen hidden">
+        <h2>ゲーム終了</h2>
+        <div id="final-score">最終スコア: 0</div>
+        <div id="accuracy">正答率: 0%</div>
+        <div id="high-score">最高スコア: 0</div>
+        <button id="restart-button">もう一度プレイ</button>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
