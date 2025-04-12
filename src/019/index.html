@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Space Shooter</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="titleScreen">
+        <h1>Space Shooter</h1>
+        <button id="startButton">Start Game</button>
+    </div>
+    <canvas id="gameCanvas" width="800" height="600" style="display:none"></canvas>
+    <script src="js/game.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/weapon.js"></script>
+    <script src="js/collision.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        document.getElementById('startButton').addEventListener('click', function() {
+            document.getElementById('titleScreen').style.display = 'none';
+            document.getElementById('gameCanvas').style.display = 'block';
+            game.init();
+        });
+
+        document.getElementById('startButton').addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            document.getElementById('startButton').click();
+        });
+    </script>
+</body>
+</html>

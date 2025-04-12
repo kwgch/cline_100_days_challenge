@@ -1,0 +1,309 @@
+# Mode: PLAN
+## Core Rules
+
+You have two modes of operation:
+
+1. Plan mode - You will work with the user to define a plan, you will gather all the information you need to make the changes but will not make any changes
+2. Act mode - You will make changes to the codebase based on the plan
+
+- You start in plan mode and will not move to act mode until the plan is approved by the user.
+- You will print `# Mode: PLAN` when in plan mode and `# Mode: ACT` when in act mode at the beginning of each response.
+- Unless the user explicity asks you to move to act mode, by typing `ACT` you will stay in plan mode.
+- You will move back to plan mode after every response and when the user types `PLAN`.
+- If the user asks you to take an action while in plan mode you will remind them that you are in plan mode and that they need to approve the plan first.
+- When in plan mode always output the full updated plan in every response.
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+## 横スクロールシューティングゲーム仕様書
+
+### 概要
+HTML、JavaScript、CSSを使用したローカルファイルのみで動作する横スクロールシューティングゲームです。宇宙を背景とし、シンプルな敵と武器を備えた、スマートフォンでも動作する設計となっています。
+
+### 基本仕様
+
+#### ゲーム基本設定
+- **タイトル**: スペースシューター
+- **ジャンル**: 横スクロールシューティングゲーム
+- **プラットフォーム**: ウェブブラウザ（スマートフォン対応）
+- **開発言語**: HTML5, CSS3, JavaScript
+- **動作環境**: ローカルファイルのみ（インターネット接続不要）
+
+#### ゲームプレイ
+- プレイヤーは宇宙船を操作して敵を倒す
+- 画面は自動的に右から左へスクロール
+- タッチ操作（スマホ）とキーボード操作（PC）に対応
+- スコアシステムを実装（敵を倒すとポイント獲得）
+
+#### ゲーム要素
+- **プレイヤー**: 宇宙船（1種類）
+- **敵**: 宇宙人の乗った小型UFO（1種類）
+- **武器**: レーザービーム（1種類）
+- **背景**: 宇宙空間（星が流れるエフェクト）
+
+#### ゲームフロー
+1. タイトル画面
+2. ゲームプレイ画面
+3. ゲームオーバー画面（スコア表示、リトライボタン）
+
+### 詳細仕様
+
+#### プレイヤー仕様
+- 画面左側に固定位置で表示
+- 上下左右に移動可能（画面外には出られない）
+- タッチ操作：ドラッグで移動
+- キーボード操作：矢印キーで移動
+- 攻撃ボタン（画面右下）またはスペースキーで射撃
+- 敵や敵の攻撃に接触するとライフが減少
+- ライフは3つ（ゲーム開始時）
+
+#### 敵仕様
+- 画面右から左へ移動
+- ランダムな高さから出現
+- 一定間隔で自動生成
+- 難易度に応じて出現頻度と速度が変化
+- プレイヤーの弾に当たると消滅しスコア加算
+
+#### 武器仕様
+- レーザービーム：直線的に右方向へ発射
+- 連射可能（一定のクールダウン時間あり）
+- 敵に当たると敵を倒し、弾も消滅
+
+#### UI要素
+- 画面上部：スコア表示
+- 画面左上：残りライフ表示
+- 画面右下：攻撃ボタン（スマホ用）
+
+#### 効果音・視覚効果
+- 射撃音
+- 敵撃破時の爆発エフェクト
+- 背景の星の流れるアニメーション
+
+## アーキテクチャ設計書
+
+### ファイル構成
+```
+space-shooter/
+├── index.html        # メインHTMLファイル
+├── css/
+│   └── style.css     # スタイルシート
+├── js/
+│   ├── game.js       # ゲームのメインロジック
+├── js/
+│   ├── player.js       # プレイヤー関連の処理
+├── js/
+│   ├── enemy.js      # 敵関連の処理
+├── js/
+│   ├── weapon.js      # 武器関連の処理
+├── js/
+│   ├── collision.js  # 衝突判定処理
+│   └── ui.js         # UI関連の処理
+└── assets/
+    ├── images/       # 画像ファイル
+    └── sounds/       # 効果音ファイル
+```
+
+### クラス設計
+
+#### Game クラス
+- ゲームのメインループを管理
+- 各オブジェクトの初期化と更新
+- 画面描画の制御
+- ゲーム状態（開始、実行中、終了）の管理
+
+```javascript
+class Game {
+  constructor() {
+    // ゲーム初期化
+  }
+  
+  init() {
+    // ゲーム要素の初期化
+  }
+  
+  start() {
+    // ゲーム開始
+  }
+  
+  update() {
+    // フレーム毎の更新処理
+  }
+  
+  render() {
+    // 描画処理
+  }
+  
+  checkCollisions() {
+    // 衝突判定
+  }
+  
+  gameOver() {
+    // ゲームオーバー処理
+  }
+}
+```
+
+#### Player クラス
+- プレイヤーの宇宙船を管理
+- 移動処理
+- 攻撃処理
+- ライフ管理
+
+```javascript
+class Player {
+  constructor(x, y) {
+    // プレイヤー初期化
+  }
+  
+  move(direction) {
+    // 移動処理
+  }
+  
+  shoot() {
+    // 攻撃処理
+  }
+  
+  takeDamage() {
+    // ダメージ処理
+  }
+  
+  update() {
+    // 状態更新
+  }
+  
+  render(ctx) {
+    // 描画処理
+  }
+}
+```
+
+#### Enemy クラス
+- 敵の生成と管理
+- 移動パターン
+- 敵の状態管理
+
+```javascript
+class Enemy {
+  constructor(x, y, speed) {
+    // 敵初期化
+  }
+  
+  update() {
+    // 状態更新
+  }
+  
+  render(ctx) {
+    // 描画処理
+  }
+  
+  destroy() {
+    // 破壊処理
+  }
+}
+```
+
+#### Weapon クラス
+- 武器の生成と管理
+- 弾道計算
+- 衝突判定連携
+
+```javascript
+class Weapon {
+  constructor(x, y, speed) {
+    // 武器初期化
+  }
+  
+  update() {
+    // 状態更新
+  }
+  
+  render(ctx) {
+    // 描画処理
+  }
+  
+  isOutOfBounds() {
+    // 画面外判定
+  }
+}
+```
+
+#### CollisionManager クラス
+- 衝突判定の管理
+- ヒットボックスの計算
+
+```javascript
+class CollisionManager {
+  constructor(game) {
+    // 初期化
+  }
+  
+  checkCollisions() {
+    // 衝突判定処理
+  }
+  
+  isColliding(obj1, obj2) {
+    // 2オブジェクト間の衝突判定
+  }
+}
+```
+
+#### UIManager クラス
+- スコア表示
+- ライフ表示
+- ゲーム状態表示
+
+```javascript
+class UIManager {
+  constructor(game) {
+    // 初期化
+  }
+  
+  updateScore(score) {
+    // スコア更新
+  }
+  
+  updateLives(lives) {
+    // ライフ更新
+  }
+  
+  showGameOver() {
+    // ゲームオーバー表示
+  }
+  
+  render() {
+    // UI描画
+  }
+}
+```
+
+### レスポンシブ設計
+- ビューポート設定でスマホ対応
+- タッチイベントとキーボードイベントの両方をサポート
+- 画面サイズに応じた要素の配置調整
+- デバイスピクセル比を考慮した描画処理
+
+### パフォーマンス最適化
+- requestAnimationFrame を使用したアニメーション
+- オブジェクトプーリングによるメモリ使用量の最適化
+- 画面外オブジェクトの適切な破棄
+- 衝突判定の最適化（空間分割など）
+
+### 拡張性
+- 新しい敵タイプの追加が容易な設計
+- 武器システムの拡張が可能
+- レベルデザインの追加実装が可能
+
+この仕様書とアーキテクチャ設計書を基に、Clineに実装を指示することで、シンプルながらも楽しめる横スクロールシューティングゲームを作成できます。
+
+## Project Intelligence
+
+*   Created the memory-bank directory and core files.
+*   Populated the projectbrief.md, productContext.md, systemPatterns.md, and techContext.md files with initial information.
+*   Using a simple MVC architecture.
+*   No external libraries or frameworks will be used.
+*   Implemented touch controls for player movement and shooting.
+*   Improved the visual appearance of the player and enemy spaceships.
+*   Added a starfield background.
