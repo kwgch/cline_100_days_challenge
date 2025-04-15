@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Target Click Game</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Target Click Game</h1>
+        <div id="difficulty-selection">
+            <label for="difficulty">Difficulty:</label>
+            <select id="difficulty">
+                <option value="easy">Easy</option>
+                <option value="normal">Normal</option>
+                <option value="hard">Hard</option>
+            </select>
+        </div>
+        <button id="start-button">Start</button>
+        <div id="game-screen" style="display: none;">
+            <div id="target"></div>
+        </div>
+        <div id="end-screen" style="display: none;">
+            <h2>Game Over</h2>
+            <div id="final-score">Final Score: 0</div>
+            <button id="restart-button">Restart</button>
+            <button id="menu-button">Menu</button>
+        </div>
+    </div>
+    <script src="js/main.js" type="module"></script>
+</body>
+</html>
