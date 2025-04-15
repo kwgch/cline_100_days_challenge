@@ -1,0 +1,38 @@
+body {
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #e0f2f1;
+}
+
+.container {
+  text-align: center;
+}
+
+canvas {
+  border: 1px solid #000;
+}
+
+.controls {
+  margin-top: 20px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+input[type="range"] {
+  width: 200px;
+}
+
+.statistics {
+  margin-top: 10px;
+}
+
+.statistics p {
+  margin: 5px 0;
+}

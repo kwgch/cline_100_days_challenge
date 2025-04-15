@@ -1,0 +1,250 @@
+; Description: clineのルール
+
+- アプリはスマホで動作することを前提に、かつPCでも操作できるようにすること
+- スマホの場合にタップで画面が動かないようにすること
+- 同じファイルへの操作を2回失敗するならプランを再検討すること
+- memory-bankを適宜更新すること
+- README.mdを作成すること
+- ファイルが大きくなりそうなら分割を検討すること
+
+# ツール利用パターン
+- ファイルの作成にはwrite_to_fileを使用する
+- ファイルの変更にはreplace_in_fileを使用する
+- ファイルの内容を読むにはread_fileを使用する
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+# 拡張版Conway's Game of Life 仕様書・設計書
+
+## 仕様書
+
+### プロジェクト概要
+「拡張版Conway's Game of Life」は、伝統的なConway's Game of Lifeに様々な拡張機能を追加したインタラクティブなシミュレーションです。HTML、JavaScript、CSSのみを使用し、ローカルファイルとして動作し、スマートフォンとPC両方に対応します。
+
+### 機能要件
+
+#### 基本機能
+1. **標準的なGame of Lifeシミュレーション**
+   - 伝統的なルール（誕生：隣接セル3つ、生存：隣接セル2〜3つ）
+   - グリッドサイズは画面サイズに応じて自動調整
+   - タッチ/クリックでセルの状態を切り替え
+
+2. **シミュレーション制御**
+   - 開始/停止ボタン
+   - ステップ実行ボタン（1世代進める）
+   - スピード調整スライダー（1〜60FPS）
+   - グリッドのクリアボタン
+   - ランダム配置ボタン
+
+#### 拡張機能
+1. **ルールカスタマイズ**
+   - 誕生条件のカスタマイズ（隣接セルの数）
+   - 生存条件のカスタマイズ（隣接セルの数）
+   - 確率的ルールの追加（自然発生、ランダム死など）
+
+2. **複数のプリセットルールセット**
+   - 標準的なGame of Life
+   - HighLife（6隣接で誕生追加）
+   - Day & Night
+   - カスタムプリセット保存機能（最大5つ）
+
+3. **色彩とビジュアル効果**
+   - セルの年齢に基づく色変化
+   - 複数の色モード（単色、虹色、ヒートマップなど）
+   - グリッド表示/非表示の切り替え
+
+4. **動的ルール変更**
+   - 時間経過またはパターン形成に基づくルール自動切り替え
+   - 条件付きルール（特定のパターンが形成されたらルール変更）
+
+5. **パターンライブラリ**
+   - 有名なパターン（グライダー、銃など）の読み込み
+   - 現在のパターンの保存
+
+6. **統計情報**
+   - 生きたセルの数
+   - 世代数
+   - パターン安定性の指標
+
+### 非機能要件
+1. **パフォーマンス**
+   - 60x60グリッドで最低30FPSを維持
+   - スマートフォンでも滑らかに動作
+
+2. **レスポンシブデザイン**
+   - スマートフォン、タブレット、デスクトップに対応
+   - 縦向き/横向き両方に対応
+   - タッチ操作とマウス操作の両方をサポート
+
+3. **オフライン動作**
+   - インターネット接続なしで完全に動作
+   - ローカルストレージを使用した設定・パターン保存
+
+4. **アクセシビリティ**
+   - 高コントラストモード
+   - キーボード操作のサポート
+
+## アーキテクチャ設計書
+
+### ファイル構成
+```
+index.html           # メインHTMLファイル
+styles/
+  main.css           # メインスタイルシート
+  responsive.css     # レスポンシブデザイン用スタイル
+scripts/
+  app.js             # アプリケーションのエントリーポイント
+  grid.js            # グリッド管理とレンダリング
+  rules.js           # ルールエンジンと条件処理
+  patterns.js        # パターンライブラリ
+  ui.js              # UIコントロールとイベントハンドラ
+  storage.js         # ローカルストレージ管理
+assets/
+  icons/             # UIアイコン
+```
+
+### コアモジュール設計
+
+#### 1. グリッドモジュール (grid.js)
+```javascript
+class Grid {
+  constructor(width, height, cellSize);
+  initialize();
+  getCell(x, y);
+  setCell(x, y, state);
+  clear();
+  randomize(density);
+  nextGeneration(rules);
+  render(canvas, colorMode);
+}
+```
+
+#### 2. ルールエンジン (rules.js)
+```javascript
+class RuleEngine {
+  constructor();
+  setRules(birthConditions, survivalConditions);
+  setProbabilisticRules(spontaneousGeneration, randomDeath);
+  applyRules(grid);
+  detectPatterns(grid);
+  switchRulesConditionally(detectedPattern);
+  getPresetRules(presetName);
+  saveCustomRules(name, rules);
+}
+```
+
+#### 3. UIコントローラ (ui.js)
+```javascript
+class UIController {
+  constructor(grid, ruleEngine);
+  initializeControls();
+  bindEvents();
+  updateSpeedControl(fps);
+  updateColorMode(mode);
+  toggleGrid();
+  updateStatistics(liveCount, generation);
+  handleResize();
+  handleTouch(event);
+  handleMouse(event);
+}
+```
+
+#### 4. パターンライブラリ (patterns.js)
+```javascript
+class PatternLibrary {
+  constructor();
+  getPatternList();
+  loadPattern(name, grid);
+  saveCurrentPattern(name, grid);
+  exportPattern(grid);
+  importPattern(patternData);
+}
+```
+
+#### 5. ストレージマネージャ (storage.js)
+```javascript
+class StorageManager {
+  constructor();
+  saveSettings(settings);
+  loadSettings();
+  savePattern(name, pattern);
+  loadPattern(name);
+  listSavedPatterns();
+  clearStorage();
+}
+```
+
+#### 6. アプリケーションコントローラ (app.js)
+```javascript
+class GameOfLifeApp {
+  constructor();
+  initialize();
+  start();
+  stop();
+  step();
+  setSpeed(fps);
+  toggleRuleMode(mode);
+  loadPreset(presetName);
+  saveCurrentState();
+  handleWindowResize();
+}
+```
+
+### レスポンシブデザイン戦略
+
+1. **ビューポート設定**
+   ```html
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+   ```
+
+2. **グリッドサイズ自動調整**
+   - 画面サイズに基づいてセルサイズとグリッドサイズを動的に計算
+   - 最小セルサイズを設定し、小さすぎて見えなくなるのを防止
+
+3. **UIレイアウト**
+   - デスクトップ：サイドパネルにコントロール
+   - モバイル：下部にコントロールパネル、折りたたみ可能
+   - 向き検出による自動レイアウト調整
+
+4. **タッチ最適化**
+   - タッチターゲットサイズを最低44x44pxに設定
+   - スワイプジェスチャーでパン、ピンチジェスチャーでズーム
+   - 長押しでコンテキストメニュー表示
+
+### パフォーマンス最適化
+
+1. **レンダリング最適化**
+   - `requestAnimationFrame`を使用したアニメーション
+   - 変更があったセルのみを再描画
+   - オフスクリーンキャンバスを使用した二重バッファリング
+
+2. **計算最適化**
+   - 生きたセルとその周囲のみを計算対象とする
+   - Webワーカーを使用した並列計算（オプション）
+   - ルールチェックの効率的な実装
+
+3. **メモリ管理**
+   - 効率的なデータ構造（TypedArrayなど）の使用
+   - 不要なオブジェクト生成の最小化
+   - 定期的なガベージコレクション考慮
+
+### 実装上の注意点
+
+1. **ブラウザ互換性**
+   - ES6+機能を使用する場合はBabelなどのトランスパイラを検討
+   - タッチイベントとマウスイベントの両方をサポート
+   - ローカルストレージAPIのフォールバック
+
+2. **拡張性**
+   - 新しいルールセットやパターンを容易に追加できる設計
+   - 将来的な機能拡張（3D表示など）を考慮したモジュール分離
+
+3. **テスト戦略**
+   - 各モジュールの単体テスト
+   - パフォーマンステスト（低スペックデバイスでの動作確認）
+   - クロスブラウザテスト
+
+この設計に基づいて実装することで、拡張可能で高性能な「拡張版Conway's Game of Life」が実現できます。モジュール化された設計により、機能の追加や変更が容易になり、レスポンシブデザインによりさまざまなデバイスで最適な体験を提供できます。

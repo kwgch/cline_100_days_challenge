@@ -1,0 +1,25 @@
+@media (max-width: 768px) {
+  .container {
+    width: 100%;
+    padding: 10px;
+  }
+
+  canvas {
+    width: 100%;
+    height: auto;
+  }
+
+  .controls {
+    display: block;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  button {
+    margin: 5px;
+  }
+
+  input[type="range"] {
+    width: 100%;
+  }
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Extended Conway's Game of Life</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/responsive.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+</head>
+<body>
+  <div class="container">
+    <h1>Extended Conway's Game of Life</h1>
+    <canvas id="gameCanvas"></canvas>
+    <div class="controls">
+      <button id="startButton">Start</button>
+      <button id="stopButton">Stop</button>
+      <button id="stepButton">Step</button>
+      <button id="clearButton">Clear</button>
+      <button id="randomizeButton">Randomize</button>
+      <label for="speedSlider">Speed:</label>
+      <input type="range" id="speedSlider" min="1" max="60" value="10">
+      <div class="statistics">
+        <p>Generation: <span id="generation">0</span></p>
+        <p>Living Cells: <span id="livingCells">0</span></p>
+      </div>
+    </div>
+  </div>
+  <script src="scripts/grid.js"></script>
+  <script src="scripts/rules.js"></script>
+  <script src="scripts/ui.js"></script>
+  <script src="scripts/app.js"></script>
+  <script>
+    const grid = new Grid(60, 60, 10);
+    grid.initialize();
+    const ruleEngine = new RuleEngine();
+    const uiController = new UIController(grid, ruleEngine);
+    uiController.initializeControls();
+    grid.render(document.getElementById('gameCanvas'), 'rainbow');
+  </script>
+</body>
+</html>
