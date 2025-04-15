@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>花火ゲーム</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="score-container">
+        スコア: <span id="score">0</span>
+    </div>
+    <div id="missed-container">
+        残り: <span id="missed">3</span>
+    </div>
+    <button id="start-button" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3em; color: white; background-color: rgba(0, 0, 0, 0.5); border: 2px solid white; padding: 20px; cursor: pointer; border-radius: 10px;">Start Game</button>
+    <canvas id="game-canvas"></canvas>
+
+    <div id="game-over" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3em; color: white; text-align: center;">
+        Game Over!
+    </div>
+
+    <div id="game-clear" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3em; color: white; text-align: center;">
+        Game Clear!
+    </div>
+    
+    <script src="js/particle.js"></script>
+    <script src="js/firework.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
