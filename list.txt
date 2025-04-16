@@ -21,7 +21,7 @@
 21. Firework Game
 22. Target Click Game 
 23. Game of Life
-24. TBD
+24. Inference Data Quiz
 25. TBD
 26. TBD
 27. TBD

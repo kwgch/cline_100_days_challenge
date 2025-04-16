@@ -1,0 +1,78 @@
+/* Mobile first */
+body {
+  background-color: #f0f8ff; /* Light sky blue */
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+  background-color: #fffaf0; /* Floral white */
+}
+
+.character-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.character {
+  font-size: 2rem;
+}
+
+.hint-buttons {
+  display: block;
+  flex-direction: row;
+  gap: 1rem;
+  margin-top: 1rem;
+  align-items: center;
+}
+
+.hint-buttons .hint-container {
+  display: block;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hint-buttons .hint-buttons-inner {
+  display: block;
+  gap: 1rem;
+}
+
+.choice-buttons {
+  display: block;
+  flex-direction: row;
+  gap: 1rem;
+  margin-top: 1rem;
+  align-items: center;
+}
+
+.choice-buttons .choice-container {
+  display: block;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Touch target optimization */
+button {
+  min-width: 80px;
+  min-height: 48px;
+  touch-action: manipulation;
+  border-radius: 0.5rem;
+  margin: .5em;
+  color: white;
+  background-color: #4682b4; /* Steel blue */
+  border: none;
+}
+
+/* Media query (PC) */
+@media (hover: hover) {
+  button:hover {
+    filter: brightness(1.1);
+  }
+}
+
+#result {
+  margin-top: 1rem;
+}
