@@ -23,7 +23,7 @@
 23. Game of Life
 24. Inference Data Quiz
 25. Endless Runner
-26. TBD
+26. 3D Brick Breaker
 27. TBD
 28. TBD
 29. TBD
