@@ -1,0 +1,117 @@
+; Description: clineのルール
+
+- アプリはスマホで動作することを前提に、かつPCでも操作できるようにすること
+- スマホの場合にタップで画面が動かないようにすること
+- 同じファイルへの操作を2回失敗するならプランを再検討すること
+- memory-bankを適宜更新すること
+- README.mdを作成すること
+- ファイルが大きくなりそうなら分割を検討すること
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+# Babylon.js Endless Runner Game
+
+---
+
+# 【概要】
+- Babylon.js を使用した 3D エンドレスランナーゲームを作成する
+- HTML / JavaScript / CSS で動作する
+- Babylon.js は CDN 経由で読み込む
+- スマートフォン対応
+- デバッグを小さく、フレーム流れを減らすために、オブジェクトプーリングを実装
+
+# 【要件】
+- 地面ストリーミング
+- レーン分岐 (3レーン)
+- 障害物のプール・再利用
+- プレイヤーモデル
+  - 右左のレーン移動
+  - ジャンプ動作
+- スタート画面 / ゲーム中 / ゲームオーバー画面
+
+# 【環境設定】
+- Babylon.js CDN
+- フレーム率を保つため、最初から地面・障害物を定数配置
+- 通信やサーバー置きなし、ローカルファイルだけで動作
+
+# 【アーキテクチャ設計書】
+
+## シーン構成
+- スタート画面
+- ゲームプレイ中
+- ゲームオーバー
+
+## コンポーネント
+- Player
+- GroundManager
+- ObstacleManager
+- InputManager
+- UIManager
+
+## 物体
+- Player: 動くキャラクター
+- Ground Tile: 潰れず継続する地面
+- Obstacle: 避ける実体
+
+# 【詳細設計書】
+
+## Player
+- 3Dモデル: 簡易な精形ボックス (BoxMesh)
+- Input:
+  - 左右スワイプスクリーンでレーン移動
+  - 上方スワイプスクリーンでジャンプ
+
+## GroundManager
+- 3~5枚の地面タイルを組み合わせ、前方に移動
+- 消えたら背後に再配置
+
+## ObstacleManager
+- プールした障害物を持つ
+- 一定間隔で先の地面に配置
+- 接続してプールを再利用
+
+## InputManager
+- タッチ操作 / スワイプ操作を解析
+- プレイヤーへ通知
+
+## UIManager
+- Start / GameOver UI
+- スコア表示
+
+## フレームコントロール
+- `requestAnimationFrame`を利用
+- 動作毎に Player を前進
+- Ground / Obstacle の再配置を検知
+- 障害物との突撃判定
+
+## キーコードデザイン
+- HTML スタクチュア
+  - キャンバスとキャンバスで分ける
+- CSS
+  - スタート画面、ゲーム中 UI の表示分切
+- JavaScript
+  - Babylon.js のシーン初期化
+  - Player / Ground / Obstacle の初期化
+  - ループで動かす
+
+# 【表示サンプル】
+- Start Screen: スタートボタンを押すとゲーム開始
+- Game Over: 障害物にぶつかると移行
+- スコア表示
+
+# 【使用CDN】
+```html
+<script src="https://cdn.babylonjs.com/babylon.js"></script>
+<script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+```
+
+# 【補説】
+- もしパフォーマンスが必要なら、次のオプションで変更できる
+  - Material を簡易化
+  - Mesh を楽にする
+- 最初はボックスメッシだけで良い
+
+---
