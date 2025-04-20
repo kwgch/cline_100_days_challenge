@@ -12,7 +12,7 @@
 
 ## Technical Constraints
 - Performance limitations on mobile devices.
-- Need to optimize for touch input.
+- Need to optimize for touch and mouse input.
 - Limited to local files, no server-side components.
 
 ## Dependencies

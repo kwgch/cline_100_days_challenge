@@ -3,17 +3,23 @@
 ## What Works
 - Basic project setup and documentation.
 - Memory bank files created.
-
-## What's Left to Build
 - HTML, CSS, and JavaScript files.
 - Babylon.js scene setup.
 - Ground streaming implementation.
-- Player model and controls.
+- Player model and controls (keyboard, touch, mouse).
 - Obstacle management and pooling.
-- UI elements.
+- Collision detection and game over screen.
+- UI elements (start screen, score, game over screen).
+- Obstacles have faces.
+- Player is white.
+- Jump height is adjustable.
+- Obstacle placement is optimized for performance.
+
+## What's Left to Build
+- Finalize the game and test on different devices.
 
 ## Current Status
-- Initial project setup and documentation complete.
+- Game is playable with core features implemented.
 
 ## Known Issues
 - None at this time.
