@@ -61,16 +61,16 @@ export class Game {
                     this.sceneManager.tiltMaze(targetTilt.x, targetTilt.z);
 
                     // Update Timer
-                    //this.timer.update(deltaTime);
+                    // this.timer.update(deltaTime);
 
-                    // Update UI
-                    //this.uiManager.updateLevel(this.currentLevelIndex + 1, this.levelManager.getTotalLevels());
-                    //this.uiManager.updateTimers(this.timer.getLevelTime(), this.timer.getTotalTime());
+                    // // Update UI
+                    // this.uiManager.updateLevel(this.currentLevelIndex + 1, this.levelManager.getTotalLevels());
+                    // this.uiManager.updateTimers(this.timer.getLevelTime(), this.timer.getTotalTime());
 
                     // Check Goal
-                    //if (this.levelManager.checkGoal(this.sceneManager.ball)) {
-                    //    this.levelComplete();
-                    //}
+                    if (this.levelManager.checkGoal(this.sceneManager.ball)) {
+                       this.levelComplete();
+                    }
 
                     this.scene.render();
                 }

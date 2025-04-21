@@ -3,7 +3,8 @@ export class InputManager {
         this.canvas = canvas;
         this.scene = scene;
         this.tilt = { x: 0, z: 0 };
-        this.sensitivity = 0.01;
+        // this.sensitivity = 0.05;
+        this.sensitivity = 0.5;
         this.maxTilt = Math.PI / 6;
         // this.maxTilt = Math.PI;
 
@@ -41,6 +42,8 @@ export class InputManager {
 
             this.tilt.x = Math.max(-this.maxTilt, Math.min(this.tilt.x + deltaY));
             this.tilt.z = Math.max(-this.maxTilt, Math.min(this.tilt.z + deltaX));
+
+            //console.log("tilt.x", this.tilt.x, "tilt.z", this.tilt.z);
 
             startX = x;
             startY = y;
@@ -81,6 +84,8 @@ export class InputManager {
                 this.tilt.x = Math.max(-this.maxTilt, Math.min(this.tilt.x + deltaY));
                 this.tilt.z = Math.max(-this.maxTilt, Math.min(this.tilt.z + deltaX));
 
+                //console.log("tilt.x", this.tilt.x, "tilt.z", this.tilt.z);
+
                 startX = x;
                 startY = y;
             }
@@ -88,6 +93,8 @@ export class InputManager {
                 evt.event.preventDefault();
                 const delta = evt.event.deltaY * this.sensitivity;
                 this.tilt.x = Math.max(-this.maxTilt, Math.min(this.tilt.x + delta));
+                this.tilt.z = Math.max(-this.maxTilt, Math.min(this.tilt.z + delta));
+                //console.log("tilt.x", this.tilt.x, "tilt.z", this.tilt.z);
             }
             if (evt.type === BABYLON.PointerEventTypes.POINTERPICK) {
                 // Handle pointer pick event if needed
@@ -101,47 +108,7 @@ export class InputManager {
                 // Handle pointer double tap event if needed
                 console.log("Pointer double tap", evt.event.clientX, evt.event.clientY);
             }
-        })
-
-        // // document.getElementById("renderCanvas").addEventListener("mousedown", (e) => {
-        // this.canvas.addEventListener("mousedown", (e) => {
-        //     // e.preventDefault();
-        //     // e.stopPropagation();
-
-        //     isDragging = true;
-        //     startX = e.clientX;
-        //     startY = e.clientY;
-        //     console.log("Mouse down", e.clientX, e.clientY);
-        // }, false);
-
-        // this.canvas.addEventListener("mousemove", (e) => {
-        //     if (!isDragging) return;
-        //     e.preventDefault();
-        //     // e.stopPropagation();
-
-        //     const x = e.clientX;
-        //     const y = e.clientY;
-
-        //     let deltaX = (x - startX) * this.sensitivity;
-        //     let deltaY = (y - startY) * this.sensitivity;
-
-        //     this.tilt.x = Math.max(-this.maxTilt, Math.min(this.tilt.x + deltaY));
-        //     this.tilt.z = Math.max(-this.maxTilt, Math.min(this.tilt.z + deltaX));
-
-        //     startX = x;
-        //     startY = y;
-        //     console.log("Mouse move", e.clientX, e.clientY);
-        // }, false);
-
-        // this.canvas.addEventListener("mouseup", () => {
-        //     isDragging = false;
-        //     //this.resetTilt();
-        // }, false);
-
-        // this.canvas.addEventListener("mouseleave", () => {
-        //     isDragging = false;
-        //     //this.resetTilt();
-        // }, false);
+        });
     }
 
     getTargetTilt() {
