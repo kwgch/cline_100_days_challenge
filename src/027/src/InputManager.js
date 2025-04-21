@@ -3,8 +3,8 @@ export class InputManager {
         this.canvas = canvas;
         this.scene = scene;
         this.tilt = { x: 0, z: 0 };
-        this.sensitivity = 0.5;
-        this.maxTilt = Math.PI / 6;
+        this.sensitivity = 20;
+        this.maxTilt = Math.PI ;
         // this.maxTilt = Math.PI;
 
         this.initMouse();

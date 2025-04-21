@@ -7,6 +7,7 @@ export class SceneManager {
         this.mazeContainer = null;
         this.levelMeshes = [];
         this.floor = null;
+        this.goal = null;
     }
 
     createCamera() {
@@ -33,6 +34,14 @@ export class SceneManager {
         this.ball.diffuseColor = new BABYLON.Color3(0.4, 0.2, 0);
     }
 
+    createGoal(goalPosition) {
+        this.goal = BABYLON.MeshBuilder.CreateCylinder("goal", { height: 0.5, diameter: 1, tessellation: 24 }, this.scene);
+        this.goal.position = new BABYLON.Vector3(goalPosition.x, goalPosition.y, goalPosition.z);
+        this.goal.isPickable = false;
+        this.goal.material = new BABYLON.StandardMaterial("goalMat", this.scene);
+        this.goal.material.emissiveColor = new BABYLON.Color3(0, 1, 0);
+    }
+
     clearLevelMeshes() {
         if (this.mazeContainer) {
             this.mazeContainer.dispose(true, true);
@@ -48,6 +57,10 @@ export class SceneManager {
         this.ball = null;
         this.mazeContainer = null;
         this.floor = null;
+        if (this.goal) {
+            this.goal.dispose();
+            this.goal = null;
+        }
     }
 
     attachCameraControl(canvas) {

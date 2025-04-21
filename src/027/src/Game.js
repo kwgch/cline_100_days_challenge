@@ -97,6 +97,7 @@ export class Game {
         //this.sceneManager.createMaze(levelData.maze);
         this.sceneManager.createMazeFromData(mazeData, levelSettings.width, levelSettings.height);
         this.sceneManager.createBall(levelSettings.startPos);
+        this.sceneManager.createGoal(levelSettings.goalPos);
 
         // Reset timer
         this.timer.reset();
