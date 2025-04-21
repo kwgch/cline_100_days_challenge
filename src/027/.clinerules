@@ -1,0 +1,482 @@
+; Description: clineのルール
+
+- アプリはスマホで動作することを前提に、かつPCでも操作できるようにすること
+- スマホの場合にタップで画面が動かないようにすること
+- 同じファイルへの操作を2回失敗するならプランを再検討すること
+- memory-bankを適宜更新すること
+- README.mdを作成すること
+- ファイルが大きくなりそうなら分割を検討すること
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+---
+
+# 転がるボール迷路ゲーム 開発ドキュメント
+
+## 1. 仕様書
+
+### 1.1. ゲーム概要
+プレイヤーは画面上の操作（タッチ/マウスドラッグ、またはキーボード）で迷路盤を傾け、ボールを物理演算に従って転がし、制限時間内にゴールまで導く3Dパズルゲームです。**デバイスの物理的な傾きは使用しません。**
+
+### 1.2. ターゲットプラットフォーム
+-   **メイン**: スマートフォン（縦画面表示）
+-   **サブ**: PC（Webブラウザ）
+
+### 1.3. 技術スタック
+-   **言語**: HTML, CSS, JavaScript
+-   **3Dエンジン**: Babylon.js (CDN経由で読み込み)
+-   **物理エンジン**: Oimo.js または Cannon.js (Babylon.jsに統合)
+-   **動作環境**: 最新の主要Webブラウザ (Chrome, Firefox, Safari, Edge)、ローカルファイルシステム上での動作 (HTTPS要件は緩和されるが、推奨)
+
+### 1.4. 主要機能
+-   **3D迷路**: 立体的な迷路ステージを表示します。
+-   **ボール**: 物理演算に従って転がるボールを表示します。
+-   **操作**:
+    -   **タッチ/マウス**: ゲーム画面 (Canvas) 上でドラッグ（プレスして移動）すると、ドラッグ開始点からの相対的な移動方向と距離に応じて迷路盤全体が傾きます。
+    -   **キーボード (PC)**: 矢印キーまたはWASDキーで迷路盤全体を傾けます。
+    -   **(オプション) カメラ操作**: PCではマウスホイールでズーム、右クリック（または別のキー組み合わせ）ドラッグで視点回転などのカメラ操作を可能にすることを検討します。（ただし、傾き操作と競合しないように設計が必要）
+-   **物理演算**:
+    -   ボールと迷路（壁、床）の衝突判定と挙動をシミュレートします。
+    -   重力の影響を適用します。（傾きは迷路盤の回転で表現）
+-   **ゴール判定**: ボールがゴールエリアに到達したことを判定します。
+-   **タイム計測**:
+    -   各レベルのプレイタイムを計測・表示します。
+    -   ゲーム全体のトータルプレイタイムを計測・表示します。
+-   **レベルシステム**: 複数の迷路ステージを用意し、クリアするごとに次のレベルに進みます。
+-   **UI**: 現在のレベル、レベルタイム、トータルタイムを表示します。
+
+### 1.5. 開発方針
+-   AI コーディングエージェント (cline) を使用し、無料または安価なモデルでの実装を目指します。
+-   ローカルファイル（HTML, CSS, JS）のみで完結し、サーバーサイドの実装は行いません。
+-   Babylon.js は CDN から読み込みます。
+-   **デバイスセンサーへのアクセス（`deviceorientation`）や関連するパーミッション処理は行いません。**
+
+## 2. 基本設計書
+
+### 2.1. アーキテクチャ
+-   **フロントエンド**: 単一のHTMLファイル、CSSファイル、JavaScriptファイルで構成します。
+-   **3Dエンジン**: Babylon.js Coreライブラリを使用します。
+-   **物理エンジン**: Babylon.js に同梱されている、または推奨されている物理エンジンプラグイン（Oimo.jsまたはCannon.js）を使用します。
+
+### 2.2. 画面構成
+-   **ゲーム画面**:
+    -   3Dビュー: 迷路、ボール、ゴールを表示するメイン領域 (`renderCanvas`)。この領域がタッチ/マウスドラッグによる傾き操作の入力エリアとなります。
+    -   UIオーバーレイ: 画面上部または下部にレベル情報、レベルタイム、トータルタイムを表示する領域。
+
+### 2.3. 主要モジュール/クラス構成 (JavaScript内)
+-   **`Game`**: アプリケーション全体を管理。Babylon.jsのEngineとSceneの初期化、ゲームループの管理、各マネージャーの生成と連携を行います。
+-   **`SceneManager`**: シーンの構築（カメラ、ライト、環境設定）、メッシュ（迷路、ボール、ゴール）の生成と配置、**迷路盤の傾け処理 (`tiltMaze`)** を担当します。
+-   **`PhysicsManager`**: 物理エンジンの初期化、物理演算の有効化、物理ボディ（Impostor）の設定を行います。
+-   **`InputManager`**: **タッチ/マウスのポインターイベント (`pointerdown`, `pointermove`, `pointerup`) およびキーボードイベントを監視**します。ポインターイベントからはドラッグ量に応じた**目標傾き値**を計算し、キーボードイベントからは固定の目標傾き値を設定します。現在の目標傾き値を `getTargetTilt()` のようなメソッドで提供します。
+-   **`LevelManager`**: レベルデータの定義、現在のレベルに応じた迷路の生成・破棄、ゴール判定のロジックを持ちます。
+-   **`UIManager`**: タイムやレベルなどのUI要素の表示更新を担当します。
+-   **`Timer`**: レベルタイムとトータルタイムの計測・管理を行います。
+
+### 2.4. データ構造
+-   **レベルデータ**: 変更なし。JavaScriptの配列またはオブジェクト形式で定義します。
+-   **ゲーム状態**: 変更なし。現在のレベル、レベルタイム、トータルタイムなどを管理するオブジェクト。
+-   **入力状態 (`InputManager`内)**:
+    -   `isPointerDown`: ポインター（タッチ/マウス）が押されているかどうかのフラグ。
+    -   `pointerStartX`, `pointerStartY`: ポインターが押された開始座標。
+    *   `currentPointerX`, `currentPointerY`: 現在のポインター座標。
+    *   `targetTilt`: 計算された目標傾き値 `{ x: number, z: number }` (-1から1の範囲)。
+    *   `keys`: 押されているキーの状態 `{ left: boolean, ... }`。
+
+### 2.5. 操作方法と物理演算の連携
+-   **迷路の傾け**:
+    1.  `InputManager` がポインターイベントまたはキーボードイベントを検知します。
+    2.  **ポインターイベントの場合:** `pointerdown` でドラッグ開始位置を記録。`pointermove` で現在のポインター位置と開始位置の差分 (dx, dy) を計算。この差分を正規化し、目標傾き値 `targetTilt` ({ x: normTiltX, z: normTiltZ }) に変換します（例: dy が normTiltX に、dx が normTiltZ に対応）。`pointerup` でドラッグ終了とし、目標傾き値を 0 にリセット（または徐々に戻す）。
+    3.  **キーボードイベントの場合:** 対応するキーが押されている間、目標傾き値 `targetTilt` を固定値（例: 上キーなら `{ x: 1, z: 0 }`）に設定します。キーが離されたら 0 に戻します。
+    4.  `Game` のメインループ内で、`InputManager.getTargetTilt()` を呼び出して現在の目標傾き値を取得します。
+    5.  取得した目標傾き値を `SceneManager.tiltMaze()` に渡します。
+    6.  `SceneManager.tiltMaze()` は、受け取った目標傾き値に基づき、迷路盤の親ノード (`mazeContainer`) をX軸およびZ軸周りに**滑らかに**（`Lerp`などを使って）回転させます。回転角度は最大傾斜角 (`MAX_TILT_ANGLE`) で制限します。
+-   **物理設定**: 変更なし。ボール、床、壁に `PhysicsImpostor` を設定し、重力を有効にします。
+
+### 2.6. ゲームフロー
+1.  **初期化**: HTML読み込み後、`Game`クラスがBabylon.jsエンジン、シーン、各マネージャーを初期化します。（パーミッション要求は不要）。
+2.  **リスナー登録**: `InputManager` がキーボードリスナーと **`renderCanvas` へのポインターイベントリスナー**を登録します。
+3.  **レベル開始**: `LevelManager`が最初のレベルデータを読み込み、`SceneManager`が迷路とボールを生成・配置します。`Timer`がレベルタイム計測を開始します。
+4.  **プレイ**:
+    -   ゲームループ内で:
+        -   `InputManager` が保持する最新の目標傾き値 (`targetTilt`) を取得します。
+        -   `SceneManager.tiltMaze()` が目標傾き値に向かって迷路盤の回転を更新します。
+        -   Babylon.jsの物理エンジンがボールの動きを計算し、`SceneManager`がボールの位置を更新します。
+        -   `Timer`が時間を計測し、`UIManager`がUIを更新します。
+        -   `LevelManager`がゴール判定を行います。
+5.  **ゴール判定**: 変更なし。
+6.  **レベルクリア**: 変更なし。
+
+## 3. 詳細設計書
+
+### 3.1. HTML (index.html)
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Rolling Ball Maze (Virtual Tilt)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="ui-container">
+        <div id="level-info">Level: <span id="current-level">1</span> / <span id="total-levels">N</span></div>
+        <div id="timer-info">Time: <span id="level-timer">0</span>s</div>
+        <div id="total-timer-info">Total: <span id="total-timer">0</span>s</div>
+        <!-- Optional: Add visual feedback for tilt control area if needed -->
+        <!-- <div id="control-indicator" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 100px; height: 100px; border: 1px solid rgba(255,255,255,0.3); border-radius: 50%;"></div> -->
+    </div>
+    <canvas id="renderCanvas"></canvas>
+
+    <!-- Babylon.js CDN -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <!-- Optional: Physics Engine Plugin -->
+    <script src="https://cdn.babylonjs.com/cannon.js"></script> <!-- Or Oimo.js -->
+    <!-- <script src="https://cdn.babylonjs.com/Oimo.js"></script> -->
+
+    <!-- Your Game Logic -->
+    <script src="main.js"></script>
+</body>
+</html>
+
+```
+-   必要であれば、操作エリアを示すためのインジケーター (`control-indicator`) を追加できますが、必須ではありません（Canvas全体を操作エリアとするため）。
+
+### 3.2. CSS (style.css)
+```css
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: sans-serif;
+}
+
+#renderCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none; /* Prevent default touch actions like scrolling/zooming on the canvas */
+}
+
+#ui-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 8px;
+    border-radius: 5px;
+    z-index: 10;
+    pointer-events: none; /* Allow clicks/touches to pass through UI to the canvas */
+}
+
+#ui-container div {
+    margin-bottom: 4px;
+}
+
+/* Style for optional control indicator */
+/*
+#control-indicator {
+    pointer-events: none; // Ensure it doesn't interfere with canvas input
+}
+*/
+
+/* ... other styles ... */
+```
+-   **重要**: `#renderCanvas` に `touch-action: none;` を追加し、キャンバス上でのタッチ操作時にブラウザのデフォルト動作（スクロールなど）が発生しないようにします。
+-   **重要**: `#ui-container` に `pointer-events: none;` を追加し、UI要素がキャンバスへのポインターイベントを妨げないようにします。
+
+### 3.3. JavaScript (main.js) - 主要クラスとメソッドの変更点
+
+**`InputManager` の再設計:**
+
+```javascript
+class InputManager {
+    constructor(canvas) { // Pass canvas for attaching listeners
+        this.canvas = canvas;
+        this.keys = { left: false, right: false, up: false, down: false };
+        this.targetTilt = { x: 0, z: 0 }; // Target tilt based on input (-1 to 1)
+
+        // Pointer state for drag control
+        this.isPointerDown = false;
+        this.pointerStart = { x: 0, y: 0 };
+        this.pointerCurrent = { x: 0, y: 0 };
+        this.dragDelta = { x: 0, y: 0 }; // Difference from start position
+
+        // Sensitivity for drag control (pixels dragged for max tilt)
+        this.dragSensitivity = 100; // Adjust as needed
+
+        this._setupEventListeners();
+    }
+
+    _setupEventListeners() {
+        // Keyboard Input (PC)
+        window.addEventListener("keydown", (e) => this._handleKeyDown(e.key));
+        window.addEventListener("keyup", (e) => this._handleKeyUp(e.key));
+
+        // Pointer Events (Touch & Mouse on the canvas)
+        this.canvas.addEventListener("pointerdown", (e) => this._handlePointerDown(e));
+        // Add listeners to window to catch moves/ups even if pointer leaves canvas
+        window.addEventListener("pointermove", (e) => this._handlePointerMove(e));
+        window.addEventListener("pointerup", (e) => this._handlePointerUp(e));
+        window.addEventListener("pointercancel", (e) => this._handlePointerUp(e)); // Treat cancel as up
+
+        // Prevent context menu on right-click if needed
+        // this.canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+    }
+
+    _handleKeyDown(key) {
+        switch (key) {
+            case "ArrowUp": case "w": this.keys.up = true; break;
+            case "ArrowDown": case "s": this.keys.down = true; break;
+            case "ArrowLeft": case "a": this.keys.left = true; break;
+            case "ArrowRight": case "d": this.keys.right = true; break;
+        }
+        this._updateTargetTiltFromKeys();
+    }
+
+    _handleKeyUp(key) {
+        switch (key) {
+            case "ArrowUp": case "w": this.keys.up = false; break;
+            case "ArrowDown": case "s": this.keys.down = false; break;
+            case "ArrowLeft": case "a": this.keys.left = false; break;
+            case "ArrowRight": case "d": this.keys.right = false; break;
+        }
+        // Only update from keys if no pointer interaction is happening
+        if (!this.isPointerDown) {
+            this._updateTargetTiltFromKeys();
+        }
+    }
+
+    _updateTargetTiltFromKeys() {
+        // Key input determines target tilt directly (overwrites previous key state)
+        let newTiltX = 0;
+        let newTiltZ = 0;
+        if (this.keys.up) newTiltX = 1;
+        else if (this.keys.down) newTiltX = -1;
+
+        if (this.keys.left) newTiltZ = 1; // Tilt left = positive Z rotation
+        else if (this.keys.right) newTiltZ = -1; // Tilt right = negative Z rotation
+
+        this.targetTilt.x = newTiltX;
+        this.targetTilt.z = newTiltZ;
+    }
+
+    _handlePointerDown(event) {
+        // Ignore if not primary button (for mouse)
+        if (event.pointerType === "mouse" && event.button !== 0) return;
+
+        this.isPointerDown = true;
+        // Capture pointer to ensure move/up events are received even if outside canvas
+        this.canvas.setPointerCapture(event.pointerId);
+
+        this.pointerStart.x = event.clientX;
+        this.pointerStart.y = event.clientY;
+        this.pointerCurrent.x = event.clientX;
+        this.pointerCurrent.y = event.clientY;
+        this.dragDelta.x = 0;
+        this.dragDelta.y = 0;
+        // Reset key tilt when pointer interaction starts
+        this.targetTilt.x = 0;
+        this.targetTilt.z = 0;
+
+        // Prevent default browser actions (like text selection) during drag
+        event.preventDefault();
+    }
+
+    _handlePointerMove(event) {
+        if (!this.isPointerDown || !this.canvas.hasPointerCapture(event.pointerId)) return;
+
+        this.pointerCurrent.x = event.clientX;
+        this.pointerCurrent.y = event.clientY;
+
+        // Calculate delta from the start position
+        this.dragDelta.x = this.pointerCurrent.x - this.pointerStart.x;
+        this.dragDelta.y = this.pointerCurrent.y - this.pointerStart.y;
+
+        // Convert drag delta to target tilt (-1 to 1)
+        // Vertical drag (dy) controls front/back tilt (X-axis rotation)
+        // Horizontal drag (dx) controls left/right tilt (Z-axis rotation)
+        let tiltX = this.dragDelta.y / this.dragSensitivity;
+        let tiltZ = this.dragDelta.x / this.dragSensitivity;
+
+        // Clamp values to the range [-1, 1]
+        this.targetTilt.x = BABYLON.Scalar.Clamp(tiltX, -1, 1);
+        // Flip Z if needed (positive X drag = right = negative Z tilt)
+        this.targetTilt.z = BABYLON.Scalar.Clamp(tiltZ * -1, -1, 1);
+
+        event.preventDefault(); // Prevent default actions during move
+    }
+
+    _handlePointerUp(event) {
+        if (!this.isPointerDown || !this.canvas.hasPointerCapture(event.pointerId)) return;
+
+        this.isPointerDown = false;
+        this.canvas.releasePointerCapture(event.pointerId);
+
+        // Reset drag state
+        this.dragDelta.x = 0;
+        this.dragDelta.y = 0;
+
+        // Gradually reset tilt to 0 when pointer is released (optional, feels nicer)
+        // Or simply set targetTilt to 0 if immediate stop is desired
+        // this.targetTilt.x = 0;
+        // this.targetTilt.z = 0;
+
+        // If keys are still held, revert to key controls
+        this._updateTargetTiltFromKeys();
+
+        event.preventDefault();
+    }
+
+    // Method called by Game loop to get the current desired tilt
+    getTargetTilt() {
+        // If pointer is not down, the tilt should smoothly return to 0
+        // unless keys are overriding it. We handle the smooth return in SceneManager.tiltMaze
+        if (!this.isPointerDown && !this.keys.up && !this.keys.down && !this.keys.left && !this.keys.right) {
+            // Signal that the input wants tilt to return to zero
+            return { x: 0, z: 0 };
+        }
+        // Otherwise, return the current target (from keys or pointer drag)
+        return this.targetTilt;
+    }
+}
+```
+
+**`SceneManager.tiltMaze` の調整:**
+
+```javascript
+// In SceneManager class
+tiltMaze(targetTiltX, targetTiltZ) {
+    if (this.mazeContainer) {
+        const MAX_TILT_ANGLE = Math.PI / 12; // 15 degrees
+        const LERP_FACTOR = 0.1; // Smoothness factor
+
+        // Calculate the final desired rotation based on the target tilt and max angle
+        const finalRotationX = targetTiltX * MAX_TILT_ANGLE;
+        const finalRotationZ = targetTiltZ * MAX_TILT_ANGLE;
+
+        // Smoothly interpolate the maze container's rotation towards the final rotation
+        this.mazeContainer.rotation.x = BABYLON.Scalar.Lerp(
+            this.mazeContainer.rotation.x,
+            finalRotationX,
+            LERP_FACTOR
+        );
+        this.mazeContainer.rotation.z = BABYLON.Scalar.Lerp(
+            this.mazeContainer.rotation.z,
+            finalRotationZ,
+            LERP_FACTOR
+        );
+
+        // If targetTilt is 0, the maze will smoothly return to the flat position due to Lerp.
+    }
+}
+```
+
+**`Game` クラスの変更点:**
+
+```javascript
+class Game {
+    constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.engine = new BABYLON.Engine(this.canvas, true);
+        this.scene = null;
+        this.levelManager = new LevelManager(levels);
+        this.sceneManager = null;
+        // Pass canvas to InputManager
+        this.inputManager = new InputManager(this.canvas);
+        this.uiManager = new UIManager();
+        this.timer = new Timer();
+        this.physicsManager = new PhysicsManager();
+
+        this.isGameOver = false;
+        this.currentLevelIndex = 0;
+
+        window.addEventListener("resize", () => {
+            this.engine.resize();
+        });
+    }
+
+    async init() {
+        this.scene = new BABYLON.Scene(this.engine);
+        // Pass inputManager to SceneManager if needed (e.g., for camera control logic)
+        this.sceneManager = new SceneManager(this.scene, this.inputManager);
+        this.physicsManager.enablePhysics(this.scene, new BABYLON.Vector3(0, GRAVITY, 0));
+
+        this.sceneManager.createCamera();
+        this.sceneManager.createLights();
+        this.sceneManager.attachCameraControl(this.canvas); // Attach non-conflicting camera controls
+
+        // No permission check needed, start level directly
+        await this.startLevel(this.currentLevelIndex);
+        this.startGameLoop(); // Start loop after level is ready
+    }
+
+    startGameLoop() {
+        if (this.engine.activeRenderLoops.length === 0) {
+            this.engine.runRenderLoop(() => {
+                if (!this.isGameOver && this.scene && this.scene.isReady()) {
+                    const deltaTime = this.engine.getDeltaTime() / 1000.0;
+
+                    // Get target tilt from input manager
+                    const targetTilt = this.inputManager.getTargetTilt();
+
+                    // Apply tilt smoothly in SceneManager
+                    this.sceneManager.tiltMaze(targetTilt.x, targetTilt.z);
+
+                    // Update Timer
+                    this.timer.update(deltaTime);
+
+                    // Update UI
+                    this.uiManager.updateLevel(this.currentLevelIndex + 1, this.levelManager.getTotalLevels());
+                    this.uiManager.updateTimers(this.timer.getLevelTime(), this.timer.getTotalTime());
+
+                    // Check Goal
+                    if (this.levelManager.checkGoal(this.sceneManager.ball)) {
+                        this.levelComplete();
+                    }
+
+                    this.scene.render();
+                }
+            });
+            console.log("Render loop started.");
+        }
+    }
+
+    // startLevel, levelComplete, gameOver methods remain largely the same
+    async startLevel(levelIndex) { /* ... unchanged ... */ }
+    levelComplete() { /* ... unchanged ... */ }
+    gameOver(message) { /* ... unchanged ... */ }
+}
+
+// --- Main Execution ---
+window.addEventListener("DOMContentLoaded", () => {
+    window.game = new Game("renderCanvas");
+    window.game.init().catch(error => {
+        console.error("Game initialization failed:", error);
+        alert("Failed to initialize the game. Check console for details.");
+    });
+});
+```
+
+### 3.4. AI コーディングエージェントへの指示（例）
+
+1.  **HTML/CSS**: 上記の改訂版 `index.html` と `style.css` の内容でファイルを作成してください。特に `renderCanvas` の `touch-action: none;` と `ui-container` の `pointer-events: none;` が重要です。
+2.  **JS 初期化**: `main.js` を作成し、`Game` クラスのコンストラクタと `init` メソッドを実装してください。`init` 内でパーミッション関連処理が不要になったことを確認してください。`InputManager` に `canvas` を渡すようにしてください。
+3.  **InputManager 実装**: `InputManager` クラスを上記のように再実装してください。
+    *   `deviceorientation` 関連のコードを**完全に削除**します。
+    *   コンストラクタで `canvas` を受け取ります。
+    *   `_setupEventListeners` でキーボードと**ポインターイベント** (`pointerdown`, `pointermove`, `pointerup`, `pointercancel`) を `canvas` または `window` に登録します。
+    *   `_handlePointerDown`, `_handlePointerMove`, `_handlePointerUp` を実装し、ドラッグ量から `targetTilt` を計算するロジック（感度調整 `dragSensitivity` を含む）を実装します。`setPointerCapture` / `releasePointerCapture` を使用します。
+    *   `_handleKeyDown`, `_handleKeyUp` でキー入力による `targetTilt` 更新を実装します。
+    *   `getTargetTilt` メソッドで、現在の入力（キーまたはポインター）に基づいた目標傾き値を返すようにします。ポインターが離された場合に 0 を返すようにします。
+4.  **SceneManager 調整**: `tiltMaze` メソッドを修正し、受け取った `targetTilt` に向かって `mazeContainer` の回転を `Lerp` で滑らかに更新するようにします。
+5.  **Game ループ**: `Game.startGameLoop` 内で `InputManager.getTargetTilt()` を呼び出し、その結果を `SceneManager.tiltMaze()` に渡すようにします。
+6.  **他クラス**: `PhysicsManager`, `LevelManager`, `UIManager`, `Timer` は基本的に以前の設計のままで問題ありません。
+
+---
