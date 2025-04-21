@@ -1,35 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rolling Ball Maze</title>
+    <link rel="stylesheet" href="style.css">
     <style>
-        body {
+        body, html {
+            height: 100%;
             margin: 0;
-            overflow: hidden;
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            overflow: hidden; /* Prevent scrollbars */
         }
 
         #renderCanvas {
             width: 100%;
             height: 100%;
-            touch-action: pan-y;
+            touch-action: none; /* Disable default touch actions */
         }
     </style>
-</head>
-
-<body>
-    <canvas id="renderCanvas"></canvas>
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/cannon.js"></script>
-    <script type="module" src="main.js"></script>
+    <script src="https://cdn.babylonjs.com/oimo.js"></script>
+    <script src="https://cdn.babylonjs.com/babylon.gui.min.js"></script>
+</head>
+<body>
+    <canvas id="renderCanvas"></canvas>
 </body>
-
+    <script type="module" src="main.js"></script>
 </html>

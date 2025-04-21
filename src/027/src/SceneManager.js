@@ -75,6 +75,10 @@ export class SceneManager {
             depth: MAZE_HEIGHT_WORLD
         }, this.scene);
         this.floor.position.y = -0.05; // Slightly below walls
+        const floorMaterial = new BABYLON.StandardMaterial("floorMat", this.scene);
+        floorMaterial.alpha = 0.5;
+        floorMaterial.backFaceCulling = false;
+        this.floor.material = floorMaterial;
         this.floor.physicsImpostor = new BABYLON.PhysicsImpostor(this.floor, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.5, restitution: 0.2 }, this.scene);
         //this.floor.parent = this.mazeContainer; // Set parent to mazeContainer
         this.levelMeshes.push(this.floor);
