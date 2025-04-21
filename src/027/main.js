@@ -1,402 +1,15 @@
-class InputManager {
-    constructor(canvas) { // Pass canvas for attaching listeners
-        this.canvas = canvas;
-        this.keys = { left: false, right: false, up: false, down: false };
-        this.targetTilt = { x: 0, z: 0 }; // Target tilt based on input (-1 to 1)
-
-        // Pointer state for drag control
-        this.isPointerDown = false;
-        this.pointerStart = { x: 0, y: 0 };
-        this.pointerCurrent = { x: 0, y: 0 };
-        this.dragDelta = { x: 0, y: 0 }; // Difference from start position
-
-        // Sensitivity for drag control (pixels dragged for max tilt)
-        this.dragSensitivity = 100; // Adjust as needed
-
-        this._setupEventListeners();
-    }
-
-    _setupEventListeners() {
-        // Keyboard Input (PC)
-        window.addEventListener("keydown", (e) => this._handleKeyDown(e.key));
-        window.addEventListener("keyup", (e) => this._handleKeyUp(e.key));
-
-        // Pointer Events (Touch & Mouse on the canvas)
-        this.canvas.addEventListener("pointerdown", (e) => this._handlePointerDown(e));
-        // Add listeners to window to catch moves/ups even if pointer leaves canvas
-        window.addEventListener("pointermove", (e) => this._handlePointerMove(e));
-        window.addEventListener("pointerup", (e) => this._handlePointerUp(e));
-        window.addEventListener("pointercancel", (e) => this._handlePointerUp(e)); // Treat cancel as up
-
-        // Prevent context menu on right-click if needed
-        // this.canvas.addEventListener("contextmenu", (e) => e.preventDefault());
-    }
-
-    _handleKeyDown(key) {
-        switch (key) {
-            case "ArrowUp": case "w": this.keys.up = true; break;
-            case "ArrowDown": case "s": this.keys.down = true; break;
-            case "ArrowLeft": case "a": this.keys.left = true; break;
-            case "ArrowRight": case "d": this.keys.right = true; break;
-        }
-        this._updateTargetTiltFromKeys();
-    }
-
-    _handleKeyUp(key) {
-        switch (key) {
-            case "ArrowUp": case "w": this.keys.up = false; break;
-            case "ArrowDown": case "s": this.keys.down = false; break;
-            case "ArrowLeft": case "a": this.keys.left = false; break;
-            case "ArrowRight": case "d": this.keys.right = false; break;
-        }
-        // Only update from keys if no pointer interaction is happening
-        if (!this.isPointerDown) {
-            this._updateTargetTiltFromKeys();
-        }
-    }
-
-    _updateTargetTiltFromKeys() {
-        // Key input determines target tilt directly (overwrites previous key state)
-        let newTiltX = 0;
-        let newTiltZ = 0;
-        if (this.keys.up) newTiltX = 1;
-        else if (this.keys.down) newTiltX = -1;
-
-        if (this.keys.left) newTiltZ = 1; // Tilt left = positive Z rotation
-        else if (this.keys.right) newTiltZ = -1; // Tilt right = negative Z rotation
-
-        this.targetTilt.x = newTiltX;
-        this.targetTilt.z = newTiltZ;
-    }
-
-    _handlePointerDown(event) {
-        // Ignore if not primary button (for mouse)
-        if (event.pointerType === "mouse" && event.button !== 0) return;
-
-        this.isPointerDown = true;
-        // Capture pointer to ensure move/up events are received even if outside canvas
-        this.canvas.setPointerCapture(event.pointerId);
-
-        this.pointerStart.x = event.clientX;
-        this.pointerStart.y = event.clientY;
-        this.pointerCurrent.x = event.clientX;
-        this.pointerCurrent.y = event.clientY;
-        this.dragDelta = { x: 0, y: 0 };
-        // Reset key tilt when pointer interaction starts
-        this.targetTilt.x = 0;
-        this.targetTilt.z = 0;
-
-        // Prevent default browser actions (like text selection) during drag
-        event.preventDefault();
-    }
-
-    _handlePointerMove(event) {
-        if (!this.isPointerDown || !this.canvas.hasPointerCapture(event.pointerId)) return;
-
-        this.pointerCurrent.x = event.clientX;
-        this.pointerCurrent.y = event.clientY;
-
-        // Calculate delta from the start position
-        this.dragDelta.x = this.pointerCurrent.x - this.pointerStart.x;
-        this.dragDelta.y = this.pointerCurrent.y - this.pointerStart.y;
-
-        // Convert drag delta to target tilt (-1 to 1)
-        // Vertical drag (dy) controls front/back tilt (X-axis rotation)
-        let tiltX = this.dragDelta.y / this.dragSensitivity;
-        let tiltZ = this.dragDelta.x / this.dragSensitivity;
-
-        // Clamp values to the range [-1, 1]
-        this.targetTilt.x = BABYLON.Scalar.Clamp(tiltX, -1, 1);
-        // Flip Z if needed (positive X drag = right = negative Z tilt)
-        this.targetTilt.z = BABYLON.Scalar.Clamp(tiltZ * -1, -1, 1);
-
-        event.preventDefault(); // Prevent default actions during move
-    }
-
-    _handlePointerUp(event) {
-        if (!this.isPointerDown || !this.canvas.hasPointerCapture(event.pointerId)) return;
-
-        this.isPointerDown = false;
-        this.canvas.releasePointerCapture(event.pointerId);
-
-        // Reset drag state
-        this.dragDelta.x = 0;
-        this.dragDelta.y = 0;
-
-        // Gradually reset tilt to 0 when pointer is released (optional, feels nicer)
-        // Or simply set targetTilt to 0 if immediate stop is desired
-        // this.targetTilt.x = 0;
-        // this.targetTilt.z = 0;
-
-        // If keys are still held, revert to key controls
-        this._updateTargetTiltFromKeys();
-
-        event.preventDefault();
-    }
-
-    // Method called by Game loop to get the current desired tilt
-    getTargetTilt() {
-        // If pointer is not down, the tilt should smoothly return to zero
-        // unless keys are overriding it. We handle the smooth return in SceneManager.tiltMaze
-        if (!this.isPointerDown && !this.keys.up && !this.keys.down && !this.keys.left && !this.keys.right) {
-            // Signal that the input wants tilt to return to zero
-            return { x: 0, z: 0 };
-        }
-        // Otherwise, return the current target (from keys or pointer drag)
-        return this.targetTilt;
-    }
-}
-
-class SceneManager {
-    constructor(scene, inputManager) {
-        this.scene = scene;
-        this.inputManager = inputManager;
-        this.camera = null;
-        this.light = null;
-        this.mazeContainer = null;
-        this.ball = null;
-        // this.createScene(); // createScene is called from Game.init after physics are enabled
-    }
-
-    createScene() {
-        this.createCamera();
-        this.createLights();
-        this.createMaze();
-        this.createBall();
-    }
-
-    createCamera() {
-        this.camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 10, new BABYLON.Vector3(0, 0, 0), this.scene);
-        this.camera.attachControl(this.scene.getEngine().getRenderingCanvas(), true);
-    }
-
-    createLights() {
-        this.light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), this.scene);
-    }
-
-    createMaze() {
-        // Remove the mazeContainer and create walls instead
-        // this.mazeContainer = BABYLON.MeshBuilder.CreateBox("mazeContainer", { height: 1, width: 5, depth: 5 }, this.scene);
-        // this.mazeContainer.rotation.x = Math.PI / 4;
-        // this.mazeContainer.physicsImpostor = new BABYLON.PhysicsImpostor(this.mazeContainer, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.1 }, this.scene);
-
-        const wallHeight = 2;
-        const wallThickness = 0.2;
-        const mazeWidth = 5;
-        const mazeDepth = 5;
-
-        // Create walls for the maze
-        const wall1 = BABYLON.MeshBuilder.CreateBox("wall1", { height: wallHeight, width: wallThickness, depth: mazeDepth }, this.scene);
-        wall1.position.x = -mazeWidth / 2 + wallThickness / 2;
-        wall1.position.y = wallHeight / 2;
-        this.wall1 = wall1; // Store wall1
-        wall1.physicsImpostor = new BABYLON.PhysicsImpostor(wall1, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.1 }, this.scene);
-        const wall1Material = new BABYLON.StandardMaterial("wall1Material", this.scene);
-        wall1Material.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.9); // Light blue
-        wall1.material = wall1Material;
-
-        const wall2 = BABYLON.MeshBuilder.CreateBox("wall2", { height: wallHeight, width: wallThickness, depth: mazeDepth }, this.scene);
-        wall2.position.x = mazeWidth / 2 + wallThickness / 2;
-        wall2.position.y = wallHeight / 2;
-        this.wall2 = wall2; // Store wall2
-        wall2.physicsImpostor = new BABYLON.PhysicsImpostor(wall2, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.1 }, this.scene);
-        const wall2Material = new BABYLON.StandardMaterial("wall2Material", this.scene);
-        wall2Material.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.9); // Light blue
-        wall2.material = wall2Material;
-
-        const wall3 = BABYLON.MeshBuilder.CreateBox("wall3", { height: wallHeight, width: mazeWidth, depth: wallThickness }, this.scene);
-        wall3.position.z = -mazeDepth / 2 + wallThickness / 2;
-        wall3.position.y = wallHeight / 2;
-        this.wall3 = wall3; // Store wall3
-        wall3.physicsImpostor = new BABYLON.PhysicsImpostor(wall3, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.1 }, this.scene);
-        const wall3Material = new BABYLON.StandardMaterial("wall3Material", this.scene);
-        wall3Material.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.9); // Light blue
-        wall3.material = wall3Material;
-
-        const wall4 = BABYLON.MeshBuilder.CreateBox("wall4", { height: wallHeight, width: mazeWidth, depth: wallThickness }, this.scene);
-        wall4.position.z = mazeDepth / 2 + wallThickness / 2;
-        wall4.position.y = wallHeight / 2;
-        this.wall4 = wall4; // Store wall4
-        wall4.physicsImpostor = new BABYLON.PhysicsImpostor(wall4, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.1 }, this.scene);
-        const wall4Material = new BABYLON.StandardMaterial("wall4Material", this.scene);
-        wall4Material.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.9); // Light blue
-        wall4.material = wall4Material;
-
-        // Create a ground
-        this.ground = BABYLON.MeshBuilder.CreateGround("ground", { width: mazeWidth, height: mazeDepth }, this.scene);
-        this.ground.physicsImpostor = new BABYLON.PhysicsImpostor(this.ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.1 }, this.scene);
-        const groundMaterial = new BABYLON.StandardMaterial("groundMaterial", this.scene);
-        groundMaterial.diffuseColor = new BABYLON.Color3(0.9, 0.8, 0.8); // Light pink
-        this.ground.material = groundMaterial;
-
-        // Create a parent container for the walls and ground
-        this.mazeContainer = BABYLON.Mesh.CreateBox("mazeContainer", 1, this.scene);
-        this.mazeContainer.isVisible = false; // Make the parent container invisible
-
-        // wall1.parent = this.mazeContainer;
-        // wall2.parent = this.mazeContainer;
-        // wall3.parent = this.mazeContainer;
-        // wall4.parent = this.mazeContainer;
-        // this.ground.parent = this.mazeContainer;
-    }
-
-    createBall() {
-        this.ball = BABYLON.MeshBuilder.CreateSphere("ball", { diameter: 0.5 }, this.scene);
-        this.ball.position.y = 1;
-        this.ball.physicsImpostor = new BABYLON.PhysicsImpostor(this.ball, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 0.8 }, this.scene);
-        const ballMaterial = new BABYLON.StandardMaterial("ballMaterial", this.scene);
-        ballMaterial.diffuseColor = new BABYLON.Color3(0.5, 0.9, 0.5); // Darker green
-        this.ball.material = ballMaterial;
-    }
-
-    attachCameraControl(canvas) {
-        // this.camera.attachControl(canvas, true); // Standard camera control
-    }
-
-    tiltMaze(targetTiltX, targetTiltZ) {
-        // Apply rotation directly to the walls and ground
-        const MAX_TILT_ANGLE = Math.PI / 12; // 15 degrees
-        const LERP_FACTOR = 0.1; // Smoothness factor
-
-        const finalRotationX = targetTiltX * MAX_TILT_ANGLE;
-        const finalRotationZ = targetTiltZ * MAX_TILT_ANGLE;
-
-        console.log("finalRotationX: ", finalRotationX, "finalRotationZ: ", finalRotationZ);
-
-        // Apply impulse to the ball based on the tilt
-        const impulseDirection = new BABYLON.Vector3(targetTiltZ, 0, -targetTiltX);
-        const impulseMagnitude = 1;
-        this.ball.physicsImpostor.applyImpulse(impulseDirection.scale(impulseMagnitude), this.ball.getAbsolutePosition());
-
-        this.ground.rotation.x = BABYLON.Scalar.Lerp(
-            this.ground.rotation.x,
-            finalRotationX,
-            LERP_FACTOR
-        );
-        this.ground.rotation.z = BABYLON.Scalar.Lerp(
-            this.ground.rotation.z,
-            finalRotationZ,
-            LERP_FACTOR
-        );
-
-        this.wall1.rotation.x = BABYLON.Scalar.Lerp(
-            this.wall1.rotation.x,
-            finalRotationX,
-            LERP_FACTOR
-        );
-        this.wall1.rotation.z = BABYLON.Scalar.Lerp(
-            this.wall1.rotation.z,
-            finalRotationZ,
-            LERP_FACTOR
-        );
-
-        this.wall2.rotation.x = BABYLON.Scalar.Lerp(
-            this.wall2.rotation.x,
-            finalRotationX,
-            LERP_FACTOR
-        );
-        this.wall2.rotation.z = BABYLON.Scalar.Lerp(
-            this.wall2.rotation.z,
-            finalRotationZ,
-            LERP_FACTOR
-        );
-
-        this.wall3.rotation.x = BABYLON.Scalar.Lerp(
-            this.wall3.rotation.x,
-            finalRotationX,
-            LERP_FACTOR
-        );
-        this.wall3.rotation.z = BABYLON.Scalar.Lerp(
-            this.wall3.rotation.z,
-            finalRotationZ,
-            LERP_FACTOR
-        );
-
-        this.wall4.rotation.x = BABYLON.Scalar.Lerp(
-            this.wall4.rotation.x,
-            finalRotationX,
-            LERP_FACTOR
-        );
-        this.wall4.rotation.z = BABYLON.Scalar.Lerp(
-            this.wall4.rotation.z,
-            finalRotationZ,
-            LERP_FACTOR
-        );
-    }
-}
-
-class LevelManager {
-    constructor(levels) {
-        this.levels = levels;
-        this.currentLevelIndex = 0;
-    }
-
-    loadLevel(levelIndex) {
-        // Load level data and create maze
-    }
-
-    getTotalLevels() {
-        return this.levels.length;
-    }
-
-    checkGoal(ball) {
-        // Check if the ball has reached the goal
-        return false;
-    }
-}
-
-
-
-class UIManager {
-    updateLevel(currentLevel, totalLevels) {
-        document.getElementById("current-level").innerText = currentLevel;
-        document.getElementById("total-levels").innerText = totalLevels;
-    }
-
-    updateTimers(levelTime, totalTime) {
-        document.getElementById("level-timer").innerText = levelTime.toFixed(1);
-        document.getElementById("total-timer").innerText = totalTime.toFixed(1);
-    }
-}
-
-class Timer {
-    constructor() {
-        this.levelTime = 0;
-        this.totalTime = 0;
-    }
-
-    update(deltaTime) {
-        this.levelTime += deltaTime;
-        this.totalTime += deltaTime;
-    }
-
-    getLevelTime() {
-        return this.levelTime;
-    }
-
-    getTotalTime() {
-        return this.totalTime;
-    }
-}
-
-class PhysicsManager {
-    enablePhysics(scene, gravity) {
-        scene.enablePhysics(gravity, new BABYLON.CannonJSPlugin());
-    }
-}
-
 class Game {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         this.engine = new BABYLON.Engine(this.canvas, true);
         this.scene = null;
-        this.levelManager = new LevelManager(levels);
+        this.levelManager = new LevelManager(levelSettings);
         this.sceneManager = null;
-        // Pass inputManager to SceneManager
         this.inputManager = new InputManager(this.canvas);
-        this.uiManager = new UIManager();
+        this.uiManager = null;
         this.timer = new Timer();
-        this.physicsManager = new PhysicsManager();
+        this.physicsManager = null;
+        this.mazeGenerator = new MazeGenerator();
 
         this.isGameOver = false;
         this.currentLevelIndex = 0;
@@ -408,18 +21,16 @@ class Game {
 
     async init() {
         this.scene = new BABYLON.Scene(this.engine);
-        // Pass inputManager to SceneManager if needed (e.g., for camera control logic)
-        this.physicsManager.enablePhysics(this.scene, new BABYLON.Vector3(0, -9.81, 0));
-        this.sceneManager = new SceneManager(this.scene, this.inputManager);
-        this.sceneManager.createScene();
+        this.sceneManager = new SceneManager(this.scene);
+        this.physicsManager = new PhysicsManager();
+        this.physicsManager.enablePhysics(this.scene, new BABYLON.Vector3(0, GRAVITY, 0));
 
         this.sceneManager.createCamera();
         this.sceneManager.createLights();
-        this.sceneManager.attachCameraControl(this.canvas); // Attach non-conflicting camera controls
+        this.sceneManager.attachCameraControl(this.canvas);
 
-        // No permission check needed, start level directly
         await this.startLevel(this.currentLevelIndex);
-        this.startGameLoop(); // Start loop after level is ready
+        this.startGameLoop();
     }
 
     startGameLoop() {
@@ -435,16 +46,16 @@ class Game {
                     this.sceneManager.tiltMaze(targetTilt.x, targetTilt.z);
 
                     // Update Timer
-                    this.timer.update(deltaTime);
+                    //this.timer.update(deltaTime);
 
                     // Update UI
-                    this.uiManager.updateLevel(this.currentLevelIndex + 1, this.levelManager.getTotalLevels());
-                    this.uiManager.updateTimers(this.timer.getLevelTime(), this.timer.getTotalTime());
+                    //this.uiManager.updateLevel(this.currentLevelIndex + 1, this.levelManager.getTotalLevels());
+                    //this.uiManager.updateTimers(this.timer.getLevelTime(), this.timer.getTotalTime());
 
                     // Check Goal
-                    if (this.levelManager.checkGoal(this.sceneManager.ball)) {
-                        this.levelComplete();
-                    }
+                    //if (this.levelManager.checkGoal(this.sceneManager.ball)) {
+                    //    this.levelComplete();
+                    //}
 
                     this.scene.render();
                 }
@@ -453,21 +64,440 @@ class Game {
         }
     }
 
-    // startLevel, levelComplete, gameOver methods remain largely the same
     async startLevel(levelIndex) {
-        // Load level data and create maze
+        this.isGameOver = false;
+        this.sceneManager.clearLevelMeshes(); // Clear previous level
+
+        // Load level data (maze layout, start position, etc.)
+        const levelSettings = this.levelManager.getLevelSettings(levelIndex);
+        if (!levelSettings) {
+            this.gameOver("Congratulations! You completed all levels!");
+            return;
+        }
+
+        // Generate maze data
+        const mazeData = this.mazeGenerator.generate(levelSettings.width, levelSettings.height);
+
+        // Create maze and ball
+        //this.sceneManager.createMaze(levelData.maze);
+        this.sceneManager.createMazeFromData(mazeData, levelSettings.width, levelSettings.height);
+        this.sceneManager.createBall(levelSettings.startPos);
+
+        // Reset timer
+        this.timer.reset();
     }
+
     levelComplete() {
-        // Handle level completion
+        this.currentLevelIndex++;
+        if (this.currentLevelIndex >= this.levelManager.getTotalLevels()) {
+            this.gameOver("Congratulations! You completed all levels!");
+        } else {
+            this.startLevel(this.currentLevelIndex);
+        }
     }
+
     gameOver(message) {
-        // Handle game over
+        this.isGameOver = true;
+        alert(message);
     }
 }
 
-// --- Main Execution ---
-const levels = []; // Empty level array for now
+// Level data (example)
+const levelSettings = [
+    { width: 11, height: 11, startPos: { x: 1, y: 0.5, z: 1 }, goalPos: { x: 9, y: 0.5, z: 9 } },
+    { width: 15, height: 15, startPos: { x: 1, y: 0.5, z: 1 }, goalPos: { x: 13, y: 0.5, z: 13 } },
+];
 
+const GRAVITY = -9.81;
+
+class SceneManager {
+    constructor(scene) {
+        this.scene = scene;
+        this.camera = null;
+        this.lights = [];
+        this.ball = null;
+        this.mazeContainer = null;
+        this.levelMeshes = [];
+        this.floor = null;
+    }
+
+    createCamera() {
+        this.camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 10, new BABYLON.Vector3(0, 0, 0), this.scene);
+        this.camera.attachControl(this.scene.getEngine().getRenderingCanvas(), true);
+    }
+
+    createLights() {
+        const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), this.scene);
+        this.lights.push(light);
+    }
+
+    createBall(startPosition) {
+        this.ball = BABYLON.MeshBuilder.CreateSphere("ball", { diameter: 0.5, segments: 32 }, this.scene);
+        this.ball.position = new BABYLON.Vector3(startPosition.x, startPosition.y, startPosition.z);
+        this.ball.physicsImpostor = new BABYLON.PhysicsImpostor(this.ball, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 0.2, friction: 0.8 }, this.scene);
+        this.ball.material = new BABYLON.StandardMaterial("ballMat", this.scene);
+        this.ball.diffuseColor = new BABYLON.Color3(0.4, 0.2, 0);
+    }
+
+    clearLevelMeshes() {
+        if (this.mazeContainer) {
+            this.mazeContainer.dispose(true, true);
+        }
+        if (this.floor) {
+            this.floor.dispose();
+        }
+
+        this.levelMeshes.forEach(mesh => {
+            mesh.dispose();
+        });
+        this.levelMeshes = [];
+        this.ball = null;
+        this.mazeContainer = null;
+        this.floor = null;
+    }
+
+    attachCameraControl(canvas) {
+        // code to attach camera control
+    }
+
+    createMazeFromData(gridData, width, height) {
+        this.clearLevelMeshes();
+
+        // Calculate cell size, wall height, and wall thickness
+        const CELL_SIZE = 2;
+        const WALL_HEIGHT = 1.5;
+        const WALL_THICKNESS = 0.2;
+        const MAZE_WIDTH_WORLD = width * CELL_SIZE;
+        const MAZE_HEIGHT_WORLD = height * CELL_SIZE;
+
+        // Calculate offsets to center the maze at (0, 0, 0)
+        const offsetX = -MAZE_WIDTH_WORLD / 2 + CELL_SIZE / 2;
+        const offsetZ = -MAZE_HEIGHT_WORLD / 2 + CELL_SIZE / 2;
+
+        // Create Floor
+        this.floor = BABYLON.MeshBuilder.CreateBox("floor", {
+            width: MAZE_WIDTH_WORLD,
+            height: 0.1,
+            depth: MAZE_HEIGHT_WORLD
+        }, this.scene);
+        this.floor.position.y = -0.05; // Slightly below walls
+        this.floor.physicsImpostor = new BABYLON.PhysicsImpostor(this.floor, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.5, restitution: 0.2 }, this.scene);
+        this.levelMeshes.push(this.floor);
+
+        // Create the maze container
+        this.mazeContainer = new BABYLON.TransformNode("mazeContainer", this.scene);
+
+        // Create Walls based on gridData
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const cell = gridData[y][x];
+
+                if (cell.walls[0]) { // Top
+                    const wall = BABYLON.MeshBuilder.CreateBox("wall", { width: CELL_SIZE, height: WALL_HEIGHT, depth: WALL_THICKNESS }, this.scene);
+                    wall.position = new BABYLON.Vector3(offsetX + x * CELL_SIZE, WALL_HEIGHT / 2, offsetZ + y * CELL_SIZE - CELL_SIZE / 2);
+                    wall.physicsImpostor = new BABYLON.PhysicsImpostor(wall, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.5, restitution: 0.7 }, this.scene);
+                    wall.parent = this.mazeContainer;
+                    this.levelMeshes.push(wall);
+                }
+
+                if (cell.walls[1]) { // Right
+                    const wall = BABYLON.MeshBuilder.CreateBox("wall", { width: WALL_THICKNESS, height: WALL_HEIGHT, depth: CELL_SIZE }, this.scene);
+                    wall.position = new BABYLON.Vector3(offsetX + x * CELL_SIZE + CELL_SIZE / 2, WALL_HEIGHT / 2, offsetZ + y * CELL_SIZE);
+                    wall.physicsImpostor = new BABYLON.PhysicsImpostor(wall, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.5, restitution: 0.7 }, this.scene);
+                    wall.parent = this.mazeContainer;
+                    this.levelMeshes.push(wall);
+                }
+
+                if (cell.walls[2]) { // Bottom
+                    const wall = BABYLON.MeshBuilder.CreateBox("wall", { width: CELL_SIZE, height: WALL_HEIGHT, depth: WALL_THICKNESS }, this.scene);
+                    wall.position = new BABYLON.Vector3(offsetX + x * CELL_SIZE, WALL_HEIGHT / 2, offsetZ + y * CELL_SIZE + CELL_SIZE / 2);
+                    wall.physicsImpostor = new BABYLON.PhysicsImpostor(wall, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.5, restitution: 0.7 }, this.scene);
+                    wall.parent = this.mazeContainer;
+                    this.levelMeshes.push(wall);
+                }
+
+                if (cell.walls[3]) { // Left
+                    const wall = BABYLON.MeshBuilder.CreateBox("wall", { width: WALL_THICKNESS, height: WALL_HEIGHT, depth: CELL_SIZE }, this.scene);
+                    wall.position = new BABYLON.Vector3(offsetX + x * CELL_SIZE - CELL_SIZE / 2, WALL_HEIGHT / 2, offsetZ + y * CELL_SIZE);
+                    wall.physicsImpostor = new BABYLON.PhysicsImpostor(wall, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.5, restitution: 0.7 }, this.scene);
+                    wall.parent = this.mazeContainer;
+                    this.levelMeshes.push(wall);
+                }
+            }
+        }
+         // Set the maze container's position to be at the center of the floor
+         this.mazeContainer.position = new BABYLON.Vector3(0, 0, 0);
+    }
+
+    tiltMaze(x, z) {
+        if (this.mazeContainer) {
+            this.mazeContainer.rotationQuaternion = BABYLON.Quaternion.RotationAxis(BABYLON.Vector3.Right(), x).multiply(BABYLON.Quaternion.RotationAxis(BABYLON.Vector3.Forward(), z));
+        }
+    }
+}
+
+class PhysicsManager {
+    constructor() {
+    }
+
+    enablePhysics(scene, gravity) {
+        scene.enablePhysics(gravity, new BABYLON.CannonJSPlugin());
+    }
+}
+
+class InputManager {
+    constructor(canvas) {
+        this.canvas = canvas;
+        this.tilt = { x: 0, z: 0 };
+        this.sensitivity = 0.02;
+        this.maxTilt = Math.PI / 6;
+
+        this.initTouch();
+        this.initMouse();
+    }
+
+    initTouch() {
+        let startX, startY;
+
+        this.canvas.addEventListener("touchstart", (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        }, false);
+
+        this.canvas.addEventListener("touchmove", (e) => {
+            e.preventDefault();
+            const x = e.touches[0].clientX;
+            const y = e.touches[0].clientY;
+
+            let deltaX = (x - startX) * this.sensitivity;
+            let deltaY = (y - startY) * this.sensitivity;
+
+            this.tilt.x = Math.max(-this.maxTilt, Math.min(this.maxTilt, this.tilt.x + deltaY));
+            this.tilt.z = Math.max(-this.maxTilt, Math.min(this.maxTilt, this.tilt.z + deltaX));
+
+            startX = x;
+            startY = y;
+        }, false);
+
+        this.canvas.addEventListener("touchend", () => {
+            //this.resetTilt();
+        }, false);
+    }
+
+    initMouse() {
+        let startX, startY, isDragging = false;
+
+        this.canvas.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+        }, false);
+
+        this.canvas.addEventListener("mousemove", (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+
+            const x = e.clientX;
+            const y = e.clientY;
+
+            let deltaX = (x - startX) * this.sensitivity;
+            let deltaY = (y - startY) * this.sensitivity;
+
+            this.tilt.x = Math.max(-this.maxTilt, Math.min(this.maxTilt, this.tilt.x + deltaY));
+            this.tilt.z = Math.max(-this.maxTilt, Math.min(this.maxTilt, this.tilt.z + deltaX));
+
+            startX = x;
+            startY = y;
+        }, false);
+
+        this.canvas.addEventListener("mouseup", () => {
+            isDragging = false;
+            //this.resetTilt();
+        }, false);
+
+        this.canvas.addEventListener("mouseleave", () => {
+            isDragging = false;
+            //this.resetTilt();
+        }, false);
+    }
+
+    getTargetTilt() {
+        return this.tilt;
+    }
+
+    resetTilt() {
+        this.tilt.x = 0;
+        this.tilt.z = 0;
+    }
+}
+
+class LevelManager {
+    constructor(settings) {
+        this.settings = settings;
+    }
+
+    getLevelSettings(index) {
+        return this.settings[index];
+    }
+
+    getTotalLevels() {
+        return this.settings.length;
+    }
+
+    checkGoal(ball) {
+        // code to check goal
+    }
+}
+
+class UIManager {
+    constructor() {
+    }
+
+    updateLevel(level, totalLevels) {
+        // code to update level
+    }
+
+    updateTimers(levelTime, totalTime) {
+        // code to update timers
+    }
+}
+
+class Timer {
+    constructor() {
+    }
+
+    reset() {
+        // code to reset timer
+    }
+}
+
+class MazeGenerator {
+    constructor() {
+        this.grid = [];
+        this.cols = 0;
+        this.rows = rows;
+        this.stack = [];
+    }
+
+    // Helper to get index in 1D array representation if needed, or use 2D directly
+    index(x, y) {
+        if (x < 0 || x >= this.cols || y < 0 || y >= this.rows) {
+            return -1; // Out of bounds
+        }
+        return y * this.cols + x; // or simply access grid[y][x]
+    }
+
+    // Initialize the grid with cells, all walls intact
+    setupGrid(cols, rows) {
+        this.cols = cols;
+        this.rows = rows;
+        this.grid = [];
+        this.stack = [];
+        for (let y = 0; y < rows; y++) {
+            this.grid[y] = [];
+            for (let x = 0; x < cols; x++) {
+                this.grid[y][x] = new Cell(x, y);
+            }
+        }
+    }
+
+    // Check for valid and unvisited neighbors
+    checkNeighbors(cell) {
+        const x = cell.x;
+        const y = cell.y;
+        const neighbors = [];
+
+        const top = (y > 0) ? this.grid[y - 1][x] : undefined;
+        const right = (x < this.cols - 1) ? this.grid[y][x + 1] : undefined;
+        const bottom = (y < this.rows - 1) ? this.grid[y + 1][x] : undefined;
+        const left = (x > 0) ? this.grid[y][x - 1] : undefined;
+
+        if (top && !top.visited) neighbors.push(top);
+        if (right && !right.visited) neighbors.push(right);
+        if (bottom && !bottom.visited) neighbors.push(bottom);
+        if (left && !left.visited) neighbors.push(left);
+
+        if (neighbors.length > 0) {
+            // Choose one random neighbor
+            const r = Math.floor(Math.random() * neighbors.length);
+            return neighbors[r];
+        } else {
+            return undefined; // No unvisited neighbors
+        }
+    }
+
+    // Remove the wall between two adjacent cells
+    removeWall(current, next) {
+        const dx = current.x - next.x; // -1 (next is right), 1 (next is left), 0
+        const dy = current.y - next.y; // -1 (next is bottom), 1 (next is top), 0
+
+        if (dx === 1) { // Next is to the left of current
+            current.walls[3] = false; // Remove current's left wall
+            next.walls[1] = false;    // Remove next's right wall
+        } else if (dx === -1) { // Next is to the right of current
+            current.walls[1] = false; // Remove current's right wall
+            next.walls[3] = false;    // Remove next's left wall
+        }
+
+        if (dy === 1) { // Next is above current
+            current.walls[0] = false; // Remove current's top wall
+            next.walls[2] = false;    // Remove next's bottom wall
+        } else if (dy === -1) { // Next is below current
+            current.walls[2] = false; // Remove current's bottom wall
+            next.walls[0] = false;    // Remove next's top wall
+        }
+    }
+
+    // Main generation function using Recursive Backtracking
+    generate(cols, rows) {
+        this.setupGrid(cols, rows);
+
+        // Start at a random cell (or fixed e.g., 0,0)
+        let current = this.grid[0][0];
+        current.visited = true;
+        this.stack.push(current);
+        let visitedCount = 1;
+        const totalCells = cols * rows;
+
+        while (visitedCount < totalCells) {
+            let next = this.checkNeighbors(current);
+            if (next) {
+                next.visited = true;
+                visitedCount++;
+
+                // Remove the wall between current and next
+                this.removeWall(current, next);
+
+                // Push current to the stack
+                this.stack.push(current);
+
+                // Current becomes next
+                current = next;
+            } else if (this.stack.length > 0) {
+                // No unvisited neighbors, backtrack
+                current = this.stack.pop();
+            } else {
+                // Should not happen if algorithm is correct and starts connected
+                console.warn("Maze generation ended unexpectedly.");
+                break;
+            }
+        }
+        console.log("Maze generation complete.");
+        return this.grid; // Return the grid data with wall information
+    }
+}
+
+class Cell {
+    constructor(x, y) {
+        this.x = x; // Grid column index
+        this.y = y; // Grid row index
+        this.walls = [true, true, true, true]; // [top, right, bottom, left] - true means wall exists
+        this.visited = false; // For generation algorithm
+    }
+    // Helper methods like index, checkNeighbors can be added [3]
+}
+
+// --- Main Execution ---
 window.addEventListener("DOMContentLoaded", () => {
     window.game = new Game("renderCanvas");
     window.game.init().catch(error => {
