@@ -1,19 +1,29 @@
 # Active Context
 
 ## Current Work Focus
-Implementing the core gameplay mechanics, including the 3D maze environment, ball physics, and touch/mouse and keyboard controls for tilting the maze.
+Implement floor transparency and fine-tuning the physics and controls to make the ball roll smoothly and responsively.
 
 ## Recent Changes
--   Created `projectbrief.md` to define the project goals and requirements.
--   Created `productContext.md` to describe the product vision and user experience goals.
+-   Created the core memory bank files (`projectbrief.md`, `productContext.md`, `activeContext.md`, `systemPatterns.md`, `techContext.md`).
+-   Created the `index.html`, `style.css`, and `main.js` files.
+-   Implemented the 3D maze environment using Babylon.js.
+-   Implemented the ball physics using a physics engine.
+-   Implemented the touch/mouse and keyboard controls for tilting the maze.
+-   Added different colors to the walls, floor, and ball.
+-   Applying impulse to the ball based on the tilt of the maze.
+-   Implemented the maze generation feature using recursive backtracking algorithm.
+-   Refactored the code into separate modules.
+-   Fixed issues with floor and wall rotations.
+-   Increased input sensitivity.
+-   Implemented floor transparency.
 
 ## Next Steps
--   Create the `index.html`, `style.css`, and `main.js` files.
--   Implement the basic structure of the HTML file, including the canvas element and UI elements.
--   Implement the basic styling of the CSS file.
--   Implement the core game logic in the JavaScript file, including the Babylon.js initialization, scene setup, and input handling.
+-   Fine-tune the physics and controls to make the ball roll smoothly and responsively.
+-   Implement the level system.
+-   Implement the UI elements.
+-   Test the game on both smartphones and PCs.
 
 ## Active Decisions and Considerations
--   Choosing the appropriate physics engine (Oimo.js or Cannon.js).
--   Designing the maze structure and level system.
--   Implementing the touch/mouse and keyboard controls for tilting the maze.
+-   Determining the appropriate impulse magnitude for the ball.
+-   Designing the level system and maze layouts.
+-   Implementing the UI elements and their functionality.
