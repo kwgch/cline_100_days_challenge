@@ -15,7 +15,7 @@ export class Game {
         this.scene = null;
         this.levelManager = new LevelManager(levelSettings);
         this.sceneManager = null;
-        this.inputManager = new InputManager(this.canvas);
+        // this.inputManager = new InputManager(this.canvas, this.scene);
         this.uiManager = null;
         this.timer = new Timer();
         this.physicsManager = null;
@@ -30,6 +30,7 @@ export class Game {
     }
 
     async init() {
+        console.log("Game initialization started.");
         this.scene = new BABYLON.Scene(this.engine);
         this.sceneManager = new SceneManager(this.scene);
         this.physicsManager = new PhysicsManager();
@@ -38,6 +39,10 @@ export class Game {
         this.sceneManager.createCamera();
         this.sceneManager.createLights();
         this.sceneManager.attachCameraControl(this.canvas);
+
+        this.inputManager = new InputManager(this.canvas, this.scene);
+
+        console.log("InputManager created:", this.inputManager);
 
         await this.startLevel(this.currentLevelIndex);
         this.startGameLoop();

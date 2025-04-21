@@ -10,7 +10,13 @@ export class SceneManager {
     }
 
     createCamera() {
-        this.camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 10, new BABYLON.Vector3(0, 0, 0), this.scene);
+        this.camera = new BABYLON.ArcRotateCamera("camera", 
+            -Math.PI / 2, 
+            Math.PI / 2.5, 
+            10, 
+            new BABYLON.Vector3(0, 0, 0), 
+            this.scene);
+
         this.camera.attachControl(this.scene.getEngine().getRenderingCanvas(), true);
     }
 
@@ -119,7 +125,23 @@ export class SceneManager {
 
     tiltMaze(x, z) {
         if (this.mazeContainer) {
-            this.mazeContainer.rotationQuaternion = BABYLON.Quaternion.RotationAxis(BABYLON.Vector3.Right(), x).multiply(BABYLON.Quaternion.RotationAxis(BABYLON.Vector3.Forward(), z));
+            // this.mazeContainer.rotationQuaternion = BABYLON.Quaternion.RotationAxis(BABYLON.Vector3.Right(), x)
+            // .multiply(BABYLON.Quaternion.RotationAxis(BABYLON.Vector3.Forward(), -z));
+            const rotationQuaternion = 
+                    BABYLON.Quaternion.RotationAxis(BABYLON.Vector3.Up(), x).multiply(
+                    BABYLON.Quaternion.RotationAxis(BABYLON.Vector3.Down(), z)
+                    );
+            // const rotationQuaternion = BABYLON.Quaternion.RotationAxis(BABYLON.Vector3.Right(), x);
+            this.mazeContainer.rotationQuaternion = rotationQuaternion;
+            this.floor.rotationQuaternion = rotationQuaternion;
+
+            // Update physics impostors
+            this.levelMeshes.forEach(mesh => {
+                if (mesh !== this.floor && mesh.physicsImpostor) {
+                    mesh.physicsImpostor.dispose();
+                    mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.5, restitution: 0.7 }, this.scene);
+                }
+            });
         }
     }
 }
