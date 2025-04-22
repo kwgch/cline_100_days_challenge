@@ -57,7 +57,27 @@ export class Game {
                     // Get target tilt from input manager
                     const targetTilt = this.inputManager.getTargetTilt();
 
-                    // Apply tilt smoothly in SceneManager
+                    // ログでtilt値と重力ベクトルを確認
+                    // console.log("targetTilt:", targetTilt);
+
+                    // --- 重力ベクトルを傾きに応じて更新 ---
+                    // x: 横方向（右ドラッグで右に転がる）→ targetTilt.z
+                    // z: 奥行き方向（上ドラッグで手前に転がる）→ targetTilt.x
+                    // y: 常に下向き（負の値で固定）
+                    const g = Math.abs(GRAVITY) || 9.8;
+                    const gravityVec = new BABYLON.Vector3(
+                        targetTilt.z * g * 30.0, // x成分を3倍に増やす
+                        -g,
+                        targetTilt.x * g * 30.0  // z成分も3倍に増やす
+                    );
+                    // console.log("gravityVec:", gravityVec);
+
+                    if (this.scene.getPhysicsEngine()) {
+                        this.scene.getPhysicsEngine().setGravity(gravityVec);
+                    }
+                    // ---
+
+                    // SceneManagerのtiltMazeは空実装なので呼び出し不要だが、互換のため残す
                     this.sceneManager.tiltMaze(targetTilt.x, targetTilt.z);
 
                     // Update Timer
@@ -112,8 +132,21 @@ export class Game {
         }
     }
 
+    showMessage(message) {
+        const messageDiv = document.getElementById("message");
+        if (messageDiv) {
+            messageDiv.textContent = message;
+            messageDiv.style.display = "block";
+            // 3秒後に非表示にする
+            setTimeout(() => {
+                messageDiv.style.display = "none";
+            }, 3000);
+        }
+    }
+
     gameOver(message) {
         this.isGameOver = true;
-        alert(message);
+        // alert(message);
+        this.showMessage(message);
     }
 }

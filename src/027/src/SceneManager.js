@@ -29,7 +29,7 @@ export class SceneManager {
     createBall(startPosition) {
         this.ball = BABYLON.MeshBuilder.CreateSphere("ball", { diameter: 0.5, segments: 32 }, this.scene);
         this.ball.position = new BABYLON.Vector3(startPosition.x, startPosition.y, startPosition.z);
-        this.ball.physicsImpostor = new BABYLON.PhysicsImpostor(this.ball, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 0.2, friction: 0.8 }, this.scene);
+        this.ball.physicsImpostor = new BABYLON.PhysicsImpostor(this.ball, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 0.2, friction: 0.2 }, this.scene);
         this.ball.material = new BABYLON.StandardMaterial("ballMat", this.scene);
         this.ball.diffuseColor = new BABYLON.Color3(0.4, 0.2, 0);
     }
@@ -93,7 +93,6 @@ export class SceneManager {
         floorMaterial.backFaceCulling = false;
         this.floor.material = floorMaterial;
         this.floor.physicsImpostor = new BABYLON.PhysicsImpostor(this.floor, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.5, restitution: 0.2 }, this.scene);
-        //this.floor.parent = this.mazeContainer; // Set parent to mazeContainer
         this.levelMeshes.push(this.floor);
 
         // Create the maze container
@@ -110,7 +109,6 @@ export class SceneManager {
                     wall.position = new BABYLON.Vector3(offsetX + x * CELL_SIZE, WALL_HEIGHT / 2, offsetZ + y * CELL_SIZE - CELL_SIZE / 2);
                     physicsImpostor = new BABYLON.PhysicsImpostor(wall, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.5, restitution: 0.7 }, this.scene);
                     wall.physicsImpostor = physicsImpostor;
-                    //wall.parent = this.mazeContainer; // Set parent to mazeContainer
                     this.levelMeshes.push(wall);
                 }
 
@@ -119,7 +117,6 @@ export class SceneManager {
                     wall.position = new BABYLON.Vector3(offsetX + x * CELL_SIZE + CELL_SIZE / 2, WALL_HEIGHT / 2, offsetZ + y * CELL_SIZE);
                     physicsImpostor = new BABYLON.PhysicsImpostor(wall, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.5, restitution: 0.7 }, this.scene);
                     wall.physicsImpostor = physicsImpostor;
-                    //wall.parent = this.mazeContainer; // Set parent to mazeContainer
                     this.levelMeshes.push(wall);
                 }
 
@@ -128,7 +125,6 @@ export class SceneManager {
                     wall.position = new BABYLON.Vector3(offsetX + x * CELL_SIZE, WALL_HEIGHT / 2, offsetZ + y * CELL_SIZE + CELL_SIZE / 2);
                     physicsImpostor = new BABYLON.PhysicsImpostor(wall, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.5, restitution: 0.7 }, this.scene);
                     wall.physicsImpostor = physicsImpostor;
-                    //wall.parent = this.mazeContainer; // Set parent to mazeContainer
                     this.levelMeshes.push(wall);
                 }
 
@@ -137,32 +133,16 @@ export class SceneManager {
                     wall.position = new BABYLON.Vector3(offsetX + x * CELL_SIZE - CELL_SIZE / 2, WALL_HEIGHT / 2, offsetZ + y * CELL_SIZE);
                     physicsImpostor = new BABYLON.PhysicsImpostor(wall, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.5, restitution: 0.7 }, this.scene);
                     wall.physicsImpostor = physicsImpostor;
-                    //wall.parent = this.mazeContainer; // Set parent to mazeContainer
                     this.levelMeshes.push(wall);
                 }
             }
         }
-         // Set the maze container's position to be at the center of the floor
-         this.mazeContainer.position = new BABYLON.Vector3(0, 0, 0);
+        // Set the maze container's position to be at the center of the floor
+        this.mazeContainer.position = new BABYLON.Vector3(0, 0, 0);
     }
 
+    // tiltMazeは不要になったので空実装にする
     tiltMaze(x, z) {
-        if (this.mazeContainer) {
-            const rotationQuaternion = 
-                    BABYLON.Quaternion.RotationAxis(BABYLON.Vector3.Up(), x).multiply(
-                    BABYLON.Quaternion.RotationAxis(BABYLON.Vector3.Down(), z)
-                    );
-            this.mazeContainer.rotationQuaternion = rotationQuaternion;
-
-            // Update physics impostors
-            this.levelMeshes.forEach(mesh => {
-                if (mesh.physicsImpostor) {
-                    //console.log("rotationQuaternion", rotationQuaternion);
-                    //mesh.physicsImpostor.setOrientation(rotationQuaternion);
-                    const angularVelocity = rotationQuaternion.toEulerAngles();
-                    mesh.physicsImpostor.setAngularVelocity(angularVelocity);
-                }
-            });
-        }
+        // 何もしない
     }
 }
