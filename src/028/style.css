@@ -1,0 +1,30 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000000;
+}
+
+#ascii-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px; /* Default font size */
+}
+
+/* Media query for mobile devices */
+@media (max-width: 768px) {
+    #ascii-container {
+        font-size: 10px; /* Smaller font size for mobile */
+    }
+}
+
+/* Media query for larger screens */
+@media (min-width: 1200px) {
+    #ascii-container {
+        font-size: 14px; /* Larger font size for larger screens */
+    }
+}
