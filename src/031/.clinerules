@@ -1,0 +1,208 @@
+; Description: clineのルール
+
+- アプリはスマホで動作することを前提に、かつPCでも操作できるようにすること
+- スマホの場合にタップで画面が動かないようにすること
+- 同じファイルへの操作を2回失敗するならプランを再検討すること
+- memory-bankを適宜更新すること
+- README.mdを作成すること
+- ファイルが大きくなりそうなら分割を検討すること
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+## p5.jsインタラクティブアート改修：仕様書
+
+### 1. 概要
+既存のp5.jsコードを改修し、ユーザーが画面をタップ（またはクリック）した位置を起点として、連続的に円を描画するインタラクティブアートを作成する。スマートフォン（縦画面）およびPCでの利用を想定し、HTML, JavaScript (p5.js), CSSで実装する。
+
+### 2. 機能要件
+*   **描画トリガー:** ユーザーが画面上の任意の場所をタップ（スマートフォン）またはクリック（PC）する。
+*   **描画起点:** タップ/クリックされた座標を起点として円を描画する。
+*   **連続描画:** タップ/クリックするたびに、新しい円がその位置に追加描画される。
+*   **描画スタイル:**
+    *   円のスタイル（色相、彩度、明度、透明度、サイズ）は、既存コードの `noise` 関数や `tan` 関数を用いた計算ロジックを基に、時間経過と描画位置に応じて動的に変化させる。
+    *   円は塗りつぶしなし（`noFill()`）で、線（`stroke`）で描画する。
+    *   色の計算にはHSBカラーモードを使用する (`colorMode(HSB)`）。
+    *   描画の合成モードは `BLEND` と `ADD` を使用し、既存コードの効果を再現する (`blendMode(BLEND)`, `blendMode(ADD)`）。
+*   **アニメーション:**
+    *   時間経過 (`t`) により、全体の描画パターンが滑らかに変化し続ける。
+    *   背景は `background(0, 0.1)` によって描画され、古い描画が徐々にフェードアウトする効果を出す。
+*   **座標系:** p5.jsの標準に従い、キャンバスの左上を原点(0, 0)とする[1]。
+
+### 3. 非機能要件
+*   **プラットフォーム:** モダンブラウザが動作するスマートフォン（iOS, Android）およびPC（Windows, macOS）。
+*   **レスポンシブ対応:**
+    *   キャンバスサイズはデバイスの表示領域（ウィンドウサイズ）に合わせて動的に調整される。
+    *   スマートフォンの縦画面表示を主たる想定とするが、PCでの表示や横画面表示でも破綻しないようにする。
+*   **使用技術:** HTML5, CSS3, JavaScript (ES6+), p5.jsライブラリ。
+*   **パフォーマンス:** 多数の円を描画しても、描画がカクつかないよう、適切なパフォーマンスを維持する。古い円の削除なども検討する。
+*   **インタラクション:** タップ/クリックに対する応答が遅延なく行われること。
+
+### 4. UI/UX
+*   画面全体がインタラクション可能な描画領域（キャンバス）となる。
+*   ユーザーは直感的に、タップ/クリックした場所に円が発生することを理解できる。
+*   既存コードの持つ、有機的で美しい描画表現を維持する。
+
+## p5.jsインタラクティブアート改修：設計書
+
+### 1. 全体構成
+標準的なWebフロントエンド構成を採用する。
+*   `index.html`: アプリケーションのエントリーポイント。p5.jsライブラリとカスタムスクリプト(`sketch.js`)、スタイルシート(`style.css`)を読み込む。
+*   `sketch.js`: p5.jsを用いた描画ロジック、インタラクション処理を記述する。
+*   `style.css`: HTML要素の基本的なスタイリング（マージン除去など）を行う。
+
+### 2. HTML (`index.html`)
+```html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Circles</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script> <!-- p5.jsライブラリ読み込み -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <script src="sketch.js"></script> <!-- p5.jsコード -->
+</body>
+</html>
+```
+*   **p5.jsライブラリ:** CDN経由で読み込む（バージョンは適宜最新のものに更新）。
+*   **ビューポート設定:** スマートフォンでの表示を最適化するため `viewport` メタタグを設定。
+
+### 3. CSS (`style.css`)
+```css
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* スクロールバーを非表示にする */
+  height: 100%;
+  background-color: #000; /* 背景色を黒に */
+}
+
+canvas {
+  display: block; /* キャンバス下の余分なスペースを削除 */
+}
+```
+*   `body` の `margin`, `padding` を0にし、キャンバスが画面全体に広がるようにする。
+*   `overflow: hidden;` で意図しないスクロールを防ぐ。
+*   `canvas` に `display: block;` を適用し、インライン要素としての隙間をなくす。
+
+### 4. JavaScript (`sketch.js`)
+
+**4.1. グローバル変数**
+```javascript
+let t = 0; // 時間変数（既存コードから流用）
+let circles = []; // 描画する円の情報を格納する配列
+const MAX_CIRCLES = 200; // 描画する円の最大数（パフォーマンスのため）
+```
+*   `circles`: 各要素が `{ x: number, y: number, createdAt: number }` のようなオブジェクトを持つ配列。`x`, `y` は円の中心座標、`createdAt` は生成時の `t` の値。
+*   `MAX_CIRCLES`: パフォーマンス維持のため、同時に描画する円の数を制限する。
+
+**4.2. `setup()` 関数**
+```javascript
+function setup() {
+  createCanvas(windowWidth, windowHeight); // キャンバスをウィンドウサイズで作成
+  colorMode(HSB); // カラーモードをHSBに設定
+  // 初期化処理（必要に応じて追加）
+}
+```
+*   `createCanvas(windowWidth, windowHeight)`: 画面サイズいっぱいにキャンバスを作成。
+*   `colorMode(HSB)`: 既存コードに合わせる。
+
+**4.3. `draw()` 関数**
+```javascript
+function draw() {
+  let B = blendMode; // blendMode関数のエイリアス（既存コード踏襲）
+
+  // 背景描画（フェードアウト効果）
+  B(BLEND);
+  background(0, 0.1);
+
+  // 描画設定
+  B(ADD);
+  noFill();
+
+  t += 0.005; // 時間を進める
+
+  // 配列内の円を描画
+  for (let i = circles.length - 1; i >= 0; i--) {
+    const circleInfo = circles[i];
+    const circleX = circleInfo.x;
+    const circleY = circleInfo.y;
+    // const elapsedTime = t - circleInfo.createdAt; // 生成後の経過時間（必要なら利用）
+
+    // 既存コードの計算ロジックを適用（座標はcircleX, circleYを使用）
+    const tmp1 = noise(circleX / 200, circleY / 200, t) * 6 + t;
+    const tmp2 = pow(tan(tmp1), 8); // Math.powからp5.jsのpowに変更推奨
+    const tmp3 = min(13, width / tmp2); // Wをwidthに変更
+
+    // 色と透明度を設定
+    // noiseの第3引数を t にするか elapsedTime にするかで表現が変わる。 t を使うと全体の時間で同期した変化になる。
+    stroke(tmp1 * 360 % 360, 90, 100, tmp2); // HSBの範囲に合わせる (S=90, B=100), alpha=tmp2
+
+    // 円を描画[3]
+    circle(circleX, circleY, tmp3 * 4);
+
+    // 古い円を削除する（オプション：パフォーマンス改善）
+    // 例: 透明度が非常に低くなったら削除
+    // if (tmp2  MAX_CIRCLES) {
+    circles.shift(); // 配列の先頭（最も古い要素）を削除
+  }
+}
+```
+*   既存の二重ループを削除し、`circles` 配列を逆順にループ（削除処理を行う場合に安全なため）。
+*   円の計算と描画ロジック:
+    *   `noise`, `tan`, `min` 等の計算には、`circles` 配列内の座標 (`circleX`, `circleY`) とグローバルな時間 `t` を使用する。
+    *   `stroke()` の引数はHSBモード (0-360, 0-100, 0-100, 0-1) に合わせて調整する。`tmp1 * W % 360` を `tmp1 * 360 % 360` に変更。`W` (720) は `width` (キャンバス幅) に変更。
+    *   `circle()` 関数で、配列内の座標を中心 (`circleX`, `circleY`) として円を描画する[2][3]。
+*   **パフォーマンス考慮:**
+    *   `circles` 配列が `MAX_CIRCLES` を超えた場合、最も古い円のデータ（配列の先頭）を `shift()` で削除する。
+    *   （オプション）透明度が閾値以下になった円を削除するロジックも追加可能。
+
+**4.4. イベントハンドラ関数**
+```javascript
+function mousePressed() {
+  // 新しい円の情報を生成し、配列に追加
+  const newCircle = {
+    x: mouseX,
+    y: mouseY,
+    createdAt: t
+  };
+  circles.push(newCircle);
+
+  // デフォルトのタッチイベント（画面スクロールなど）を抑制する場合
+  return false;
+}
+
+// スマホのタッチ操作により確実に対応したい場合、touchStartedも定義する
+// function touchStarted() {
+//   // mousePressedと同様の処理
+//   if (touches.length > 0) { // touches配列はタッチ情報を持つ
+//     const touch = touches[0]; // 最初のタッチポイントを使用
+//     const newCircle = {
+//       x: touch.x,
+//       y: touch.y,
+//       createdAt: t
+//     };
+//     circles.push(newCircle);
+//   }
+//   return false; // デフォルトイベント抑制
+// }
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight); // ウィンドウサイズ変更時にキャンバスをリサイズ
+}
+```
+*   `mousePressed()`: マウスクリックまたはタップ時に呼び出されるp5.jsの組み込み関数[9][11][16][18]。
+    *   現在のマウス座標 (`mouseX`, `mouseY`) と時間 `t` を持つオブジェクトを作成し、`circles` 配列の末尾に追加 (`push`) する[2][6]。
+    *   `return false;` は、一部のブラウザでのデフォルトのタッチイベント（ダブルタップズームなど）を抑制するために役立つ場合がある。
+*   `touchStarted()`: タッチデバイスでの動作をより確実にするために追加することも検討[2]。`mousePressed`だけで多くの場合は動作する。
+*   `windowResized()`: ウィンドウサイズが変更されたときに `resizeCanvas` を呼び出し、キャンバスサイズを追従させる。
+
+### 5. 実装上の注意点
+*   **p5.jsの関数:** `pow`, `min`, `max` など、JavaScript標準の `Math` オブジェクトの関数よりもp5.jsが提供する同名の関数を使用した方が、p5.jsの環境内では一貫性があり、場合によっては最適化されている可能性がある。
+*   **パフォーマンス:** 円の数が増えるとパフォーマンスが低下する可能性があるため、`MAX_CIRCLES` の値は実際の動作を確認しながら調整する。描画ロジックの複雑さも影響する。
+*   **タッチイベント:** `mousePressed` は多くのタッチデバイスで動作するが、マルチタッチなどを考慮する場合は `touches` 配列や `touchStarted`, `touchMoved`, `touchEnded` イベント[2]を詳細に扱う必要がある。今回はシングルタップ/クリックを想定するため `mousePressed` で十分と考えられる。
