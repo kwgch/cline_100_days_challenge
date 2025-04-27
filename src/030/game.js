@@ -32,6 +32,14 @@ function createBoardDOM() {
       cell.classList.add('cell');
       cell.dataset.row = r;
       cell.dataset.col = c;
+      cell.addEventListener('touchstart', e => {
+        if (gameState === 'playing' && currentPair && currentPair.blocks.some(b => b.row === r && b.col === c)) {
+          rotatePair();
+          render();
+        }
+      });
+      cell.dataset.row = r;
+      cell.dataset.col = c;
       board.appendChild(cell);
     }
   }

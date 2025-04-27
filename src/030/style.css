@@ -13,11 +13,13 @@ body {
   min-height: 100vh; /* Use min-height to ensure content isn't cut off */
   background: #f0f0f0;
   font-family: sans-serif;
+  overflow: hidden; /* Prevent body scrolling */
+  touch-action: manipulation; /* Prevent double-tap zoom on iOS */
 }
 
 #game-container {
   width: 100vw;
-  height: 100vh;
+  height: 100%; /* Changed from 100vh */
   max-width: 480px; /* Limit width on larger screens */
   background: #fff;
   border: 2px solid #333;
@@ -26,14 +28,6 @@ body {
   position: relative;
   display: flex; /* Use flexbox for the container */
   flex-direction: column; /* Stack header and main area vertically */
-}
-
-header {
-  background: #333;
-  color: #fff;
-  padding: 8px;
-  text-align: center;
-  height: auto; /* Allow header height to adjust to content */
 }
 
 #main-area {
@@ -49,7 +43,7 @@ header {
   background: #222;
   padding: 2px;
   width: 75vw;
-  height: 100%;
+  height: 100%; /* Added height: 100% */
 }
 
 .cell {
@@ -64,6 +58,12 @@ header {
 #side-panel {
   padding: 8px;
   width: 25vw;
+}
+
+#score-area {
+  margin-bottom: 16px;
+  font-size: 1.2rem;
+  text-align: center;
 }
 
 #next-emoji-area {
