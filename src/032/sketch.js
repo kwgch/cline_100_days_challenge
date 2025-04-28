@@ -9,6 +9,12 @@ let prevMouseX, prevMouseY;
 let isDragging = false;
 let pressStartX, pressStartY;
 
+// ズーム用
+let scaleFactor;
+let minScale = 50;
+let maxScale = 2000;
+let prevPinchDist = null;
+
 // 4次元座標点
 let points4D = [
   [-1, -1, -1, -1], [1, -1, -1, -1], [1, 1, -1, -1], [-1, 1, -1, -1],
@@ -16,7 +22,6 @@ let points4D = [
   [-1, -1, -1, 1], [1, -1, -1, 1], [1, 1, -1, 1], [-1, 1, -1, 1],
   [-1, -1, 1, 1], [1, -1, 1, 1], [1, 1, 1, 1], [-1, 1, 1, 1]
 ];
-let scaleFactor;
 
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
@@ -40,7 +45,6 @@ function draw() {
     projected3D.push(projected);
   }
 
-//   strokeWeight(4);
   strokeWeight(3);
 
   // 辺の接続
@@ -56,20 +60,12 @@ function draw() {
     }
   }
 
-// for (let i = 0; i < 4; i++) {
-//     connectPoints(projected3D, i, (i + 1) % 4);
-//     connectPoints(projected3D, i + 4, (i + 1) % 4 + 4);
-//     connectPoints(projected3D, i + 8, (i + 1) % 4 + 8);
-//     connectPoints(projected3D, i + 12, (i + 1) % 4 + 12);
-//     connectPoints(projected3D, i, i + 4);
-//     connectPoints(projected3D, i + 8, i + 12);
-//   }
-
   // 色タイマー更新
   colorTimer += 0.02;
 }
 
 // --- イベントハンドラ ---
+// タッチ・マウスプレス
 function touchStarted() { handlePress(); }
 function mousePressed() { handlePress(); }
 function handlePress() {
@@ -82,7 +78,23 @@ function handlePress() {
   }
 }
 
-function touchMoved() { handleDrag(); }
+// タッチ・マウスムーブ
+function touchMoved() {
+  // ピンチズーム（2本指）
+  if (touches.length === 2) {
+    let d = dist(touches[0].x, touches[0].y, touches[1].x, touches[1].y);
+    if (prevPinchDist !== null) {
+      let diff = d - prevPinchDist;
+      scaleFactor = constrain(scaleFactor + diff, minScale, maxScale);
+    }
+    prevPinchDist = d;
+    // ドラッグ操作は無効化
+    return false;
+  } else {
+    prevPinchDist = null;
+    handleDrag();
+  }
+}
 function mouseDragged() { handleDrag(); }
 function handleDrag() {
   if (isDragging) {
@@ -95,7 +107,8 @@ function handleDrag() {
   }
 }
 
-function touchEnded() { handleRelease(); }
+// タッチ・マウスリリース
+function touchEnded() { handleRelease(); prevPinchDist = null; }
 function mouseReleased() { handleRelease(); }
 function handleRelease() {
   if (isDragging) {
@@ -107,9 +120,17 @@ function handleRelease() {
   }
 }
 
+// PC: マウスホイールでズーム
+function mouseWheel(event) {
+  let factor = event.delta > 0 ? 0.95 : 1.05;
+  scaleFactor = constrain(scaleFactor * factor, minScale, maxScale);
+  return false; // ページスクロール抑制
+}
+
+// ウィンドウリサイズ
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  scaleFactor = min(width, height) * 0.3;
+  // ズーム倍率は維持
 }
 
 // --- 4次元→3次元投影 ---
