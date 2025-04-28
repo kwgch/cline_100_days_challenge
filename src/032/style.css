@@ -1,0 +1,12 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* スクロールバーを非表示にする */
+  height: 100%;
+  background-color: #000; /* 背景色を黒に */
+}
+
+canvas {
+  display: block; /* キャンバス下の余白を削除 */
+  touch-action: none; /* タッチ操作によるデフォルト動作（スクロールなど）を抑制 */
+}

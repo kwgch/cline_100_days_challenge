@@ -1,0 +1,355 @@
+; Description: clineのルール
+
+- アプリはスマホで動作することを前提に、かつPCでも操作できるようにすること
+- スマホの場合にタップで画面が動かないようにすること
+- 同じファイルへの操作を2回失敗するならプランを再検討すること
+- memory-bankを適宜更新すること
+- README.mdを作成すること
+- ファイルが大きくなりそうなら分割を検討すること
+- ピンチ操作で拡大縮小できるようにすること
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+## p5.js インタラクティブ化 仕様書
+
+### 1. 概要
+
+本仕様書は、提供されたp5.jsコード（4次元超立方体のアニメーション）を、ユーザーがスマートフォンやPCでインタラクティブに操作できるように改修するための仕様を定義します。主な目的は、追加のUI要素なしに、タップやスワイプ（ドラッグ）といった直感的な操作でアニメーションを制御できるようにすることです。
+
+### 2. 機能要件
+
+1.  **描画:**
+    *   既存のp5.jsコードに基づき、4次元超立方体（テッセラクト）をWEBGLモードで描画し続けること。
+    *   既存の色が時間経過で変化する機能は維持すること。
+2.  **回転操作:**
+    *   ユーザーが画面をスワイプ（PCの場合はドラッグ）することで、描画されている3D空間内の視点を回転できること。
+        *   水平方向のスワイプ/ドラッグでY軸周りの回転を行う。
+        *   垂直方向のスワイプ/ドラッグでX軸周りの回転を行う。
+    *   既存の`frameCount`に基づく自動回転（`rotateX`, `rotateY`, `rotateZ`）は削除し、ユーザー操作による回転に置き換えること。
+    *   4次元的な回転（`project4DTo3D`内の`angle`変数による回転）は既存の自動変化を維持すること。
+3.  **タップ操作:**
+    *   ユーザーが画面をタップ（PCの場合はクリック）した際に、色の変化タイマー（`colorTimer`）を初期値（0）にリセットすること。
+4.  **レスポンシブ対応:**
+    *   スマートフォン（特に縦画面）での表示と操作に最適化されていること。
+    *   PCのブラウザでもマウス操作で同様に動作すること。
+    *   ウィンドウサイズが変更された場合、描画キャンバスのサイズも追従すること[5]。
+
+### 3. 非機能要件
+
+1.  **操作性:**
+    *   追加のボタンやスライダーなどのUI要素は使用しないこと。
+    *   タップとスワイプ（ドラッグ）のみで直感的に操作できること。
+2.  **パフォーマンス:**
+    *   アニメーションが滑らかに描画されること（目安として30fps程度を維持）。
+3.  **互換性:**
+    *   主要なモダンブラウザ（Chrome, Firefox, Safari, Edgeの最新版）で動作すること。
+4.  **実装:**
+    *   HTML, CSS, JavaScript (p5.jsライブラリを含む) のみで構成されること[3][4][17]。
+
+### 4. ターゲット環境
+
+*   **デバイス:** スマートフォン（iOS, Android）、PC（Windows, macOS）
+*   **ブラウザ:** 最新版のChrome, Firefox, Safari, Edge
+
+---
+
+## p5.js インタラクティブ化 設計書
+
+### 1. システム構成
+
+*   **`index.html`**: アプリケーションの基本構造を定義し、CSSファイルとJavaScriptファイルを読み込む。p5.jsのキャンバスを表示するコンテナ要素を配置する[11][13]。
+*   **`style.css`**: HTML要素のスタイルを定義する。特に、キャンバスのサイズ調整やタッチ操作に関するスタイルを指定する[1]。
+*   **`sketch.js`**: p5.jsコード。描画ロジックとインタラクション処理を実装する[9]。
+
+### 2. HTML構造 (`index.html`)
+
+```html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Interactive Tesseract</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- p5.jsライブラリを読み込む (CDNまたはローカルファイル) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
+  <!-- (オプション) p5.domライブラリが必要な場合 -->
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.dom.min.js"></script> -->
+  <script src="sketch.js"></script>
+</head>
+<body>
+  <!-- p5.jsキャンバスはこのbody要素内に自動的に生成される -->
+</body>
+</html>
+```
+
+*   `viewport`メタタグで、モバイルデバイスでの表示スケールとユーザーによるズーム操作禁止を設定。
+*   p5.jsライブラリ本体を読み込む[11]。
+
+### 3. CSS設計 (`style.css`)
+
+```css
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* スクロールバーを非表示にする */
+  height: 100%;
+  background-color: #000; /* 背景色を黒に */
+}
+
+canvas {
+  display: block; /* キャンバス下の余白を削除 */
+  touch-action: none; /* 一部のブラウザでのタッチ操作によるデフォルト動作（スクロールなど）を抑制 */
+}
+```
+
+*   `html`, `body` の `margin`, `padding` を0にし、`overflow: hidden` でスクロールバーが表示されるのを防ぐ。
+*   `canvas` 要素に `display: block` を指定し、意図しない余白を防ぐ。
+*   `touch-action: none` で、キャンバス上でのタッチ操作（特にスワイプ）がページのスクロールなどを引き起こさないようにする。
+
+### 4. JavaScript設計 (`sketch.js`)
+
+**グローバル変数:**
+
+```javascript
+let colorTimer = 0;
+let angle = 0; // 4次元回転用 (既存)
+
+// --- インタラクション用に追加 ---
+let rotationX = 0; // X軸周りの回転角度 (ユーザー操作用)
+let rotationY = 0; // Y軸周りの回転角度 (ユーザー操作用)
+let prevMouseX, prevMouseY; // 前回のマウス/タッチ座標
+let isDragging = false; // ドラッグ中かどうかのフラグ
+// --- 追加ここまで ---
+
+// 4次元座標点 (既存)
+let points4D = [
+  [-1, -1, -1, -1], [1, -1, -1, -1], [1, 1, -1, -1], [-1, 1, -1, -1],
+  [-1, -1, 1, -1], [1, -1, 1, -1], [1, 1, 1, -1], [-1, 1, 1, -1],
+  [-1, -1, -1, 1], [1, -1, -1, 1], [1, 1, -1, 1], [-1, 1, -1, 1],
+  [-1, -1, 1, 1], [1, -1, 1, 1], [1, 1, 1, 1], [-1, 1, 1, 1]
+];
+let scaleFactor;
+```
+
+**`setup()`関数:**
+
+```javascript
+function setup() {
+  // ウィンドウサイズいっぱいのキャンバスを作成 (WEBGLモード)
+  createCanvas(windowWidth, windowHeight, WEBGL);
+  scaleFactor = min(width, height) * 0.3; // 画面サイズに応じてスケール調整
+  frameRate(30);
+  // WEBGLモードでのマウス座標の原点を中央にする
+  imageMode(CENTER);
+  // 回転の中心を原点にするため、デフォルトのカメラ位置などを調整する場合がある
+  // camera(0, 0, (height/2) / tan(PI/6), 0, 0, 0, 0, 1, 0); // 必要に応じて調整
+}
+```
+
+*   `createCanvas`でウィンドウサイズいっぱいのキャンバスを作成[5]。
+*   `scaleFactor`を画面サイズに応じて調整するように変更。
+
+**`draw()`関数:**
+
+```javascript
+function draw() {
+  background(0);
+
+  // --- ユーザー操作による回転を適用 ---
+  rotateX(rotationX);
+  rotateY(rotationY);
+  // --- 既存のframeCountによる回転は削除 ---
+  // rotateX(frameCount * 0.01);
+  // rotateY(frameCount * 0.01);
+  // rotateZ(frameCount * 0.01); // Z軸回転が必要ならユーザー操作に含めるか検討
+
+  // --- 4次元投影と描画 (既存ロジックを流用) ---
+  let projected3D = [];
+  for (let i = 0; i  既存の2を使用
+    let projected = project4DTo3D(points4D[i], 2);
+    projected3D.push(projected);
+  }
+
+  strokeWeight(4); // 線を少し太くする (見やすさのため)
+
+  // 点と線の描画 (connectPoints内で色が決まる)
+  // 辺の接続 (既存ロジック)
+  for (let i = 0; i  0 && mouseX  0 && mouseY < height) { // キャンバス内かチェック
+    isDragging = true;
+    prevMouseX = mouseX;
+    prevMouseY = mouseY;
+  }
+}
+
+// --- タッチ/マウス操作中 (ドラッグ) ---
+function touchMoved() {
+  handleDrag();
+  // デフォルトのタッチイベント（スクロールなど）をキャンセルする場合
+  // return false; // CSSのtouch-action:noneと併用
+}
+function mouseDragged() {
+  handleDrag();
+}
+function handleDrag() {
+  if (isDragging) {
+    let dx = mouseX - prevMouseX;
+    let dy = mouseY - prevMouseY;
+
+    // 回転量を計算 (感度調整が必要な場合がある)
+    // WEBGLモードではY軸が上向きなので注意
+    rotationY += dx * 0.005; // X方向の移動でY軸回転
+    rotationX -= dy * 0.005; // Y方向の移動でX軸回転 (マイナスで直感的な操作に)
+
+    prevMouseX = mouseX;
+    prevMouseY = mouseY;
+  }
+}
+
+// --- タッチ/マウス操作終了 ---
+function touchEnded() {
+  handleRelease();
+}
+function mouseReleased() {
+  handleRelease();
+}
+function handleRelease() {
+  if (isDragging) {
+     // タップ判定: ドラッグ開始時からの移動量が非常に小さい場合
+     // (厳密なタップ判定が必要なら、開始座標も記録しておく)
+    let distMoved = dist(mouseX, mouseY, prevMouseX, prevMouseY); // mousePressed時の座標と比較するのがより正確
+    if (abs(mouseX - prevMouseX) < 5 && abs(mouseY - prevMouseY) < 5) { // 移動量が小さい場合タップとみなす (閾値は調整)
+       // --- タップ時のアクション ---
+       colorTimer = 0; // 色タイマーをリセット
+       console.log("Tapped!");
+    }
+    isDragging = false;
+  }
+}
+
+// --- ウィンドウリサイズ対応 ---
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  scaleFactor = min(width, height) * 0.3; // スケールも再計算
+}
+```
+
+*   `touchStarted`/`mousePressed`: ドラッグ開始フラグ`isDragging`を`true`にし、現在のマウス/タッチ座標を`prevMouseX`, `prevMouseY`に保存。
+*   `touchMoved`/`mouseDragged`: `isDragging`が`true`の場合、前回の座標からの移動量(`dx`, `dy`)を計算し、`rotationX`, `rotationY`を更新。更新後、`prevMouseX`, `prevMouseY`を現在の座標で更新。回転感度（`0.005`の部分）は要調整。
+*   `touchEnded`/`mouseReleased`: `isDragging`を`false`にする。タップ判定ロジックを追加し、条件を満たせば`colorTimer`を0にリセット。
+*   `windowResized`: キャンバスサイズをウィンドウサイズに合わせてリサイズし、`scaleFactor`も再計算する[5]。
+*   タッチイベントでは `touches` 配列を参照することも可能だが、ここではシングルタッチを前提とし `mouseX`, `mouseY` を共通で使用する。
+*   `return false;`によるイベントキャンセルは、環境によって挙動が異なる場合があるため、CSSの`touch-action: none;`を主に使用する。
+
+**既存関数の修正:**
+
+*   **`connectPoints`**: 描画方法を`box`から`line`に変更するか検討。現状維持でも可。色の計算式は既存のまま。
+
+```javascript
+function connectPoints(points, i, j) {
+  // boxの代わりに線を描画する例 (パフォーマンス改善の可能性)
+  stroke(
+    color(max((255 * sin(i + colorTimer)), 100), // colorTimerを反映
+          max((255 * sin(j + colorTimer)), 100),
+          max((255 * sin(1 + i + j + colorTimer)), 100), // 複雑な色の変化
+          200) // Alpha
+  );
+  line(points[i].x, points[i].y, points[i].z, points[j].x, points[j].y, points[j].z);
+
+  // --- 既存のboxを使う場合 (コメントアウト) ---
+  /*
+  noFill();
+  stroke(
+    color(max((255 * sin(i + colorTimer)), 100), // colorTimerを反映
+          max((255 * sin(j + colorTimer)), 100),
+          max((255 * sin(1 + j + colorTimer)), 100), // 既存の色計算
+          200)
+  );
+  // boxを描画すると重くなる可能性があるため注意
+  // 点を描画するなら sphere() や point() の方が適切かもしれない
+  push(); // 各boxに異なる位置を適用するため push/pop を使う
+  translate(points[i].x, points[i].y, points[i].z);
+  box(5); // 小さなboxで点を表現
+  pop();
+  push();
+  translate(points[j].x, points[j].y, points[j].z);
+  box(5);
+  pop();
+  */
+}
+```
+
+*   `connectPoints`関数内の色計算に`colorTimer`を反映させるように修正（元のコードでは`i`, `j`のみに依存していたが、時間変化させるため）。線を引く`line`関数を使う形に変更し、`noFill()`は不要なので削除。
+*   **`project4DTo3D`**: 既存のまま使用。
+*   **`matMul`**: 既存のまま使用。
+
+### 5. 開発ツールとテスト
+
+*   **開発**: p5.js Web Editor[12]やローカル環境（VS Code + Live Serverなど）を使用。
+*   **テスト**:
+    *   PCブラウザ（Chrome, Firefox, Safari, Edge）でマウス操作（ドラッグ、クリック）を確認。
+    *   ブラウザの開発者ツールでモバイルデバイスをエミュレートし、タッチ操作（スワイプ、タップ）を確認。
+    *   可能であれば、実機のスマートフォン（iOS, Android）で動作確認。
+    *   ウィンドウリサイズ時の挙動を確認。
+
+### 6. 実装上の注意点とTips
+
+1.  **回転感度の調整:**
+    *   `handleDrag`関数内の回転量計算における係数 (`0.005`) は、実際に操作しながら最適な値に調整する必要があります。値が小さいと鈍く、大きいと敏感になります。`map()`関数などを使って、移動量に対する回転量を非線形にすることも検討できます。
+    *   `rotationX -= dy * 0.005;` のように `dy` にマイナスを付けているのは、画面上方向へのドラッグでオブジェクトが上を向く（X軸正方向へ回転する）ような、より直感的な操作感にするためです。これも好みに応じて調整可能です。
+2.  **パフォーマンス:**
+    *   `connectPoints`関数内で`box()`を多数描画すると、特にモバイルデバイスではパフォーマンスが低下する可能性があります。仕様書通り`line()`で辺を描画する方が一般的に軽量です。頂点を`point()`や小さな`sphere()`で描画することもできます。
+    *   `beginShape(LINES)`と`vertex()`を使ってまとめて線を描画すると、`line()`を多数呼び出すよりも効率が良い場合があります。
+    *   `frameRate()`で指定したフレームレートが維持できているか、ブラウザの開発者ツールなどで確認し、必要に応じて描画処理を最適化します。
+3.  **WEBGL座標系:**
+    *   p5.jsのWEBGLモードでは、デフォルトでY軸が上向き、Z軸が手前向きになります。2Dモード（Y軸が下向き）とは異なるため、回転方向の計算などで混乱しないように注意が必要です。
+4.  **イベント処理の統合:**
+    *   `touchStarted`/`mousePressed`、`touchMoved`/`mouseDragged`、`touchEnded`/`mouseReleased`の処理は、それぞれ共通のハンドラ関数 (`handlePress`, `handleDrag`, `handleRelease`) を呼び出す形にすることで、コードの重複を減らし、メンテナンス性を向上させています。
+5.  **タップ判定の精度:**
+    *   現在のタップ判定は、`mouseReleased` / `touchEnded` 時の座標と、`mouseDragged` / `touchMoved` で最後に更新された `prevMouseX/Y` を比較しています。より正確なタップ判定を行うには、`mousePressed` / `touchStarted` 時の座標を別の変数に保持しておき、`mouseReleased` / `touchEnded` 時の座標との距離で判定します。
+    ```javascript
+    // グローバル変数に追加
+    let pressStartX, pressStartY;
+
+    // handlePress 内で記録
+    function handlePress() {
+        if (mouseX > 0 && mouseX  0 && mouseY < height) {
+            isDragging = true;
+            prevMouseX = mouseX;
+            prevMouseY = mouseY;
+            pressStartX = mouseX; // 開始点を記録
+            pressStartY = mouseY; // 開始点を記録
+        }
+    }
+
+    // handleRelease 内で判定
+    function handleRelease() {
+        if (isDragging) {
+            let distMoved = dist(mouseX, mouseY, pressStartX, pressStartY); // 開始点からの移動距離
+            if (distMoved < 10) { // 閾値 (例: 10ピクセル) より小さければタップ
+                colorTimer = 0;
+                console.log("Tapped!");
+            }
+            isDragging = false;
+        }
+    }
+    ```
+6.  **モバイルでのダブルタップズーム防止:**
+    *   `style.css`の`touch-action: none;` は、タッチ操作によるブラウザのデフォルト動作（スクロール、ズームなど）を抑制するのに役立ちます。意図しないズームを防ぐために重要です。
+
+### 7. 今後の拡張可能性
+
+1.  **ズーム機能:**
+    *   スマートフォンのピンチ操作（2本指での拡大・縮小）や、PCでのマウスホイール操作で、`scaleFactor`やカメラのZ位置を変更し、ズームイン・ズームアウト機能を追加できます。これには `p5.dom.js` ライブラリや追加のタッチイベント処理が必要になる場合があります。
+2.  **平行移動（パン）:**
+    *   2本指でのスワイプ操作や、特定のキー（例: Shiftキー）を押しながらのドラッグで、オブジェクト全体を画面上で平行移動させる機能を追加できます。`translate()`関数を使用します。
+3.  **図形の変更:**
+    *   `points4D`配列や`connectPoints`の接続ロジックを変更することで、他の4次元図形（例: 5胞体、16胞体など）や、異なる3次元図形のアニメーションを表示するように拡張できます。
+4.  **UI要素の追加:**
+    *   仕様ではUI要素を追加しないことになっていますが、もし将来的に設定項目（回転速度、色のパターン、図形の種類など）を追加する場合は、p5.domライブラリを使ってスライダーやボタンをHTML上に追加し、p5.jsスケッチと連携させることができます。
+5.  **回転軸の追加:**
+    *   現在はX軸とY軸周りの回転のみですが、Z軸周りの回転や、4次元空間内での他の回転（XY平面、XZ平面、YZ平面、XW平面、YW平面、ZW平面の6種類の回転が存在）を操作可能にする拡張も考えられます。ただし、操作方法が複雑になる可能性があります。
+
