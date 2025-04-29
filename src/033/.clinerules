@@ -1,0 +1,322 @@
+; Description: clineのルール
+
+- 指示に対して、無理な時はその旨を伝えて、無茶な変更を行わないこと
+- アプリはスマホで動作することを前提に、かつPCでも操作できるようにすること
+- スマホの場合にタップで画面が動かないようにすること
+- 同じファイルへの操作を2回失敗するならプランを再検討すること
+- memory-bankを適宜更新すること
+- README.mdを作成すること
+- ファイルが大きくなりそうなら分割を検討すること
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+## ライフゲーム仕様書
+
+### 基本要件
+1. **生物属性**
+   - エネルギー値（0-100）
+   - 遺伝子コード（行動パターンを定義するJavaScript文字列）
+   - 群れ識別ID（UUIDv4）
+   - 捕食対象判定用の血縁係数（0.0-1.0）
+
+2. **エネルギー管理**
+   - 移動時に1フレームあたり0.5消費
+   - 捕食成功で+10（上限100）
+   - エネルギー0で死亡（赤色表示→グレーに変化）
+
+3. **生殖システム**
+   - エネルギー80以上で分裂可能
+   - 遺伝子コードを引き継ぎ（30%確率で突然変異）
+   - 子生物は親の群れIDを継承
+
+### 遺伝子コード仕様
+```javascript
+// サンプルコード（事前定義関数を使用）
+function behavior() {
+  if (energy  90) reproduce();
+}
+```
+
+### UI要件
+- Canvasサイズ: 縦長画面（360x640）
+- 操作機能:
+  - タップで新生物追加
+  - ピンチズーム
+  - 個体タップで遺伝子表示
+- カラーテーマ:
+  - 生存生物: 群れIDに基づくHSLAカラー
+  - 捕食可能生物: 金色
+  - 死亡生物: グレー
+
+## 設計書
+
+### システム構成
+```mermaid
+graph TD
+  A[Main Loop] --> B[World Controller]
+  B --> C[Gene Processor]
+  B --> D[Energy Manager]
+  B --> E[Collision Detector]
+  C --> F[Sandboxed VM]
+```
+
+### 主要クラス設計
+```javascript
+class Organism {
+  constructor(parentDNA) {
+    this.id = crypto.randomUUID();
+    this.energy = parentDNA?.energy || 100;
+    this.dna = this.mutateDNA(parentDNA?.code || DEFAULT_CODE);
+    this.herdId = parentDNA?.herdId || this.id;
+  }
+
+  update() {
+    try {
+      const behaviorFn = new Function(this.dna);
+      behaviorFn.call(this);
+    } catch (e) {
+      console.error('Invalid DNA:', e);
+    }
+  }
+}
+```
+
+### 遺伝子処理フロー
+1. コードサニタイズ（危険なキーワード削除）
+2. ホワイトリスト関数のみ許可（moveToward, hunt等）
+3. Web Workerで隔離実行
+4. 実行結果のバリデーション
+
+### パフォーマンス最適化
+- 空間分割最適化（Spatial Hash Grid実装）
+- レンダリング間引き（60fps→30fpsで描画）
+- WebGLによるインスタンシング描画
+
+## 実装ガイドライン
+
+1. **遺伝子コード実行**
+```javascript
+const SAFE_FUNCTIONS = {
+  move: (dx, dy) => {/* 移動処理 */},
+  hunt: () => {/* 捕食処理 */},
+  reproduce: () => {/* 生殖処理 */}
+};
+
+function executeDNA(code) {
+  const wrappedCode = `with(safeFunctions) { ${code} }`;
+  return new Function('safeFunctions', wrappedCode)
+    .bind(this)(Object.create(SAFE_FUNCTIONS));
+}
+```
+
+2. **群れ行動アルゴリズム**
+```javascript
+function flockingBehavior() {
+  const separation = calculateSeparationForce();
+  const alignment = calculateAlignmentForce();
+  const cohesion = calculateCohesionForce();
+  
+  this.velocity.add(separation.mult(1.5))
+    .add(alignment)
+    .add(cohesion.mult(0.8));
+}
+```
+
+3. **突然変異処理**
+```javascript
+mutateDNA(code) {
+  return code.split('').map(c => {
+    if (Math.random() < 0.3) {
+      return String.fromCharCode(c.charCodeAt(0) + 
+        Math.floor(Math.random() * 3 - 1));
+    }
+    return c;
+  }).join('');
+}
+```
+
+この設計により、生物の自己組織化や動的な行動変化を実現できます。
+遺伝子コードの安全な実行環境と、群れ行動の物理演算が実装の鍵となります。
+パフォーマンスチューニングとしてWeb Workerと空間分割最適化を優先的に実装してください。
+
+## 詳細技術設計書
+
+### 1. コアシステム構造
+```mermaid
+%% システム全体図
+flowchart TD
+    Main[メインループ] -->|フレーム更新| World[ワールドコントローラ]
+    World --> Organism[生物管理]
+    World --> Food[餌生成]
+    Organism -->|行動制御| Gene[遺伝子プロセッサ]
+    Organism -->|エネルギー| Metabolism[代謝システム]
+    Organism -->|衝突判定| QuadTree[空間分割ツリー]
+    User[ユーザー入力] -->|タップ/ドラッグ| Input[入力ハンドラ]
+```
+
+### 2. 生物クラス詳細実装
+```javascript
+class Organism {
+  static NEXT_ID = 1;
+  
+  constructor(x, y, config = {}) {
+    this.id = Organism.NEXT_ID++;
+    this.position = new Vector(x, y);
+    this.velocity = Vector.random();
+    this.energy = config.energy || 100;
+    this.dna = this.sanitizeDNA(config.dna || DEFAULT_DNA);
+    this.herdId = config.herdId || this.id;
+    this.lineage = config.lineage ? [...config.lineage, this.id] : [this.id];
+    this.age = 0;
+    this.state = 'alive'; // alive, dying, dead
+  }
+
+  sanitizeDNA(code) {
+    return code.replace(/[^a-zA-Z0-9_{}();<>!=&| ]/g, '')
+               .replace(/(eval|Function|import|while|for\s*\(|XMLHttpRequest)/g, '');
+  }
+
+  update(world) {
+    if (this.state !== 'alive') return;
+    
+    try {
+      const context = {
+        energy: this.energy,
+        neighbors: world.getNeighbors(this.position, 100),
+        hunt: () => this.hunt(world),
+        move: (dx, dy) => this.move(dx, dy),
+        reproduce: () => this.reproduce(world)
+      };
+      
+      const code = `(() => { ${this.dna} })`;
+      new Function('context', code).call(this, context);
+    } catch (e) {
+      console.warn(`Invalid DNA in organism ${this.id}`);
+    }
+    
+    this.energy = Math.max(0, this.energy - 0.5);
+    this.age++;
+    
+    if (this.energy  organism.move(dx, dy),
+      hunt: () => organism.hunt(),
+      reproduce: () => organism.reproduce(),
+      energy: organism.energy,
+      Math: Object.freeze({
+        random: Math.random,
+        abs: Math.abs,
+        max: Math.max,
+        min: Math.min
+      })
+    }, handler);
+  }
+}
+```
+
+### 4. 群れ行動アルゴリズム実装
+```javascript
+class FlockingBehavior {
+  static calculate(organism, neighbors) {
+    const alignment = new Vector(0, 0);
+    const cohesion = new Vector(0, 0);
+    const separation = new Vector(0, 0);
+    let count = 0;
+
+    neighbors.forEach(other => {
+      if (other.herdId === organism.herdId) {
+        alignment.add(other.velocity);
+        cohesion.add(other.position);
+        const diff = organism.position.clone().subtract(other.position);
+        separation.add(diff.divide(diff.length() || 1));
+        count++;
+      }
+    });
+
+    if (count > 0) {
+      alignment.divide(count).normalize();
+      cohesion.divide(count).subtract(organism.position).normalize();
+      separation.divide(count).normalize();
+    }
+
+    return {
+      alignment: alignment.multiply(0.5),
+      cohesion: cohesion.multiply(0.3),
+      separation: separation.multiply(1.2)
+    };
+  }
+}
+```
+
+### 5. パフォーマンス最適化戦略
+
+#### 空間分割インデクシング
+```javascript
+class SpatialGrid {
+  constructor(cellSize = 50) {
+    this.cellSize = cellSize;
+    this.grid = new Map();
+  }
+
+  key(pos) {
+    return `${Math.floor(pos.x/this.cellSize)},${Math.floor(pos.y/this.cellSize)}`;
+  }
+
+  insert(organism) {
+    const k = this.key(organism.position);
+    if (!this.grid.has(k)) this.grid.set(k, new Set());
+    this.grid.get(k).add(organism);
+  }
+
+  query(range) {
+    const results = new Set();
+    const startX = Math.floor((range.x - range.radius)/this.cellSize);
+    const startY = Math.floor((range.y - range.radius)/this.cellSize);
+    const endX = Math.floor((range.x + range.radius)/this.cellSize);
+    const endY = Math.floor((range.y + range.radius)/this.cellSize);
+
+    for (let x = startX; x  {
+      positions[i*2] = org.position.x;
+      positions[i*2+1] = org.position.y;
+      
+      const color = this.calculateColor(org);
+      colors[i*3] = color[0];
+      colors[i*3+1] = color[1];
+      colors[i*3+2] = color[2];
+    });
+    
+    // バッファ更新処理...
+  }
+}
+```
+
+### 7. 実装ロードマップ
+
+| フェーズ | タスク | 期間 | 優先度 |
+|---------|-------|-----|-------|
+| 1       | コアエンジン実装（移動/エネルギー） | 3日 | 高 |
+| 2       | 遺伝子実行システムのセキュア実装 | 2日 | 高 |
+| 3       | WebGLレンダリング最適化 | 1.5日 | 中 |
+| 4       | 群れ行動アルゴリズム統合 | 2日 | 高 |
+| 5       | ユーザーインターフェース実装 | 1.5日 | 中 |
+| 6       | パフォーマンスチューニング | 1日 | 低 |
+
+### 8. リスク管理表
+
+| リスク要因 | 影響度 | 対応策 |
+|-----------|--------|--------|
+| 遺伝子コードのサニタイズ失敗 | 高 | VMサンドボックス化・WebWorker隔離 |
+| 大量生物処理時のパフォーマンス低下 | 中 | 空間分割＋WebGLインスタンシング |
+| モバイル端末でのタッチ遅延 | 低 | 入力予測アルゴリズム導入 |
+| 遺伝子コードの進化が早すぎる | 中 | 突然変異率調整メカニズム |
+
+この設計に基づき、以下の順序で実装を進めることを推奨します：
+
+1. **コアエンジンの実装**：生物の基本動作とエネルギー管理
+2. **セキュアな遺伝子実行環境**：サンドボックスとプロキシによる隔離
+3. **群れ行動アルゴリズム**：分離/整列/結合の力計算
+4. **レンダリング最適化**：WebGLインスタンシングの導入
+5. **UIポリッシュ**：タッチ操作と情報表示パネル
+
+パフォーマンスクリティカルな部分（空間分割と遺伝子実行）から実装を開始し、徐々に機能を追加していくアプローチが効果的です。特に遺伝子コードの動的変更機能は、セキュリティ対策を徹底的に行ってください。
