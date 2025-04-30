@@ -1,0 +1,178 @@
+; Description: clineのルール
+
+- 指示に対して、無理な時はその旨を伝えて、無茶な変更を行わないこと
+- アプリはスマホで動作することを前提に、かつPCでも操作できるようにすること
+- スマホの場合にタップで画面が動かないようにすること
+- 同じファイルへの操作を2回失敗するならプランを再検討すること
+- memory-bankを適宜更新すること
+- README.mdを作成すること
+- ファイルが大きくなりそうなら分割を検討すること
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+既存のコードを拡張するインタラクティブ流体シミュレーションの設計仕様書と実装方針を示します。
+
+## 機能設計仕様書
+```markdown
+### 基本要件
+- **プラットフォーム**: HTML/CSS/JavaScript (p5.js使用)
+- **対象デバイス**: スマホ縦画面(優先) + PC対応
+- **操作方式**:
+  - タップ: タップ位置に流体の力場を生成
+  - スワイプ: 方向に応じた流体力を追加
+  - ピンチ: 表示領域の拡大縮小
+  - PC対応: マウスドラッグ⇄スワイプ、ホイール⇄ピンチ
+
+### 技術要件
+| 項目 | 実装方式 |
+|------|----------|
+| タッチ処理 | Hammer.js + ネイティブイベント併用 |
+| ズーム制御 | CSS transform + p5.js scale() |
+| 物理演算 | ベクトル場に外力を加算する方式 |
+| マルチデバイス | イベントハンドラの振り分け |
+| パフォーマンス | WebGLレンダリングモード |
+```
+
+## 実装設計書
+```markdown
+### 1. イベントハンドラ設定
+```
+let zoom = 1;
+let lastDist = 0;
+
+function touchStarted() {
+  // タップ検出（Hammer.js使用）
+  hammer.on('tap', (e) => {
+    addForce(e.center.x, e.center.y, 50);
+  });
+}
+
+function touchMoved() {
+  // スワイプ速度検出
+  let force = createVector(movedX, movedY).mult(0.1);
+  addForce(touchX, touchY, force.mag(), force);
+}
+
+function mouseWheel(e) {
+  // PC用ズーム（ピンチ代替）
+  zoom += e.deltaY * -0.01;
+  zoom = constrain(zoom, 0.5, 3);
+}
+```
+
+### 2. 物理演算拡張
+```
+class Particle {
+    applyExternalForce(force, position, radius) {
+        let d = p5.Vector.dist(this.pos, position);
+        if (d < radius) {
+            let intensity = map(d, 0, radius, 1, 0);
+            this.acc.add(force.copy().mult(intensity));
+        }
+    }
+}
+
+function addForce(x, y, radius, force) {
+    particles.forEach(p => {
+        p.applyExternalForce(force, createVector(x,y), radius);
+    });
+}
+```
+
+### 3. 表示制御最適化
+```
+/* スマホ表示用設定 */
+@media (orientation: portrait) {
+  canvas {
+    touch-action: none;
+    max-height: 100vh;
+  }
+}
+```
+
+### 4. ズーム制御実装
+```
+function draw() {
+  translate(width/2, height/2);
+  scale(zoom);
+  translate(-width/2, -height/2);
+  
+  // 既存の描画処理
+}
+```
+
+## 実装手順
+1. Hammer.jsの導入（タッチジェスチャ検出）
+2. 粒子クラスに外力適用メソッド追加
+3. ズーム制御用変数と変換行列の管理
+4. クロスデバイスイベントハンドラの統合
+5. CSSタッチアクションの最適化
+6. WebGLレンダラへの切替（createCanvas(WEBGL)）
+
+## 参考：旧実装
+
+```
+let particles = [];
+let nParticles = 300;
+let angle = 0;
+let t = 0;
+
+const fr = 15
+
+function setup() {
+  frameRate(15)
+  createCanvas(600, 600);
+  colorMode(HSB, 360, 100, 100, 100);
+  background(0);
+  for (let i = 0; i < nParticles; i++) {
+    particles[i] = new Particle(random(width), random(height));
+  }
+}
+
+function draw() {
+  background(0);
+  
+  for (let i = 0; i < nParticles; i++) {
+    let px = map(sin(t), -1, 1, -1, 1);
+    let py = map(cos(t), -1, 1, -1, 1);
+    particles[i].update(px, py);
+    particles[i].display();
+  }
+  t += 0.01;
+}
+
+class Particle {
+  constructor(x, y) {
+    this.pos = createVector(x, y);
+    this.vel = createVector(0, 0);
+    this.acc = createVector(0, 0);
+    this.size = random(3, 10);
+    this.hue = random(0,360);
+  }
+
+  update(px, py) {
+    let angle = noise(this.pos.x * px * 0.01, 
+                      this.pos.y * py * 0.01) * TWO_PI * 4;
+    this.acc.set(cos(angle), sin(angle));
+    this.vel.add(this.acc);
+    this.vel.limit(2);
+    this.pos.add(this.vel);
+
+    if (this.pos.x < 0) this.pos.x = width;
+    if (this.pos.x > width) this.pos.x = 0;
+    if (this.pos.y < 0) this.pos.y = height;
+    if (this.pos.y > height) this.pos.y = 0;
+  }
+
+  display() {
+    stroke(this.hue % 360, 100, 100, 50);
+    noFill()
+    strokeWeight(3)
+    ellipse(this.pos.x, this.pos.y, this.size);
+    this.hue += 0.1;
+  }
+}
+```
