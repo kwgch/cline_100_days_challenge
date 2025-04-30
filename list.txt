@@ -32,7 +32,7 @@
 32. Interactive Tesseract
 33. Genetic Life Game
 34. Fluid Simulation
-35. TBD
+35. 3D Interactive Art
 36. TBD
 37. TBD
 38. TBD
