@@ -1,40 +1,43 @@
 let particles = [];
-// let nParticles = 300;
-let nParticles = 128;
+let nParticles = 256;
 let angle = 0;
 let t = 0;
-let hammer;
 let zoom = 1;
+let canvas;
+
+let initialTouchDistance = null;
+let initialZoom = 1;
+let initialTouchX = 0;
+let initialTouchY = 0;
+
+let mouseIsPressed = false;
+let previousMouseX = 0;
+let previousMouseY = 0;
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  canvas = createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100, 100);
   background(0);
   for (let i = 0; i < nParticles; i++) {
     particles[i] = new Particle(random(0, width), random(0, height));
   }
 
-  hammer = new Hammer(document.body);
-  hammer.get('pinch').set({ enable: true });
+  canvas.elt.addEventListener('touchstart', touchStartHandler);
+  canvas.elt.addEventListener('touchmove', touchMoveHandler);
+  canvas.elt.addEventListener('touchend', touchEndHandler);
+  canvas.elt.addEventListener('touchcancel', touchEndHandler);
 
-  hammer.on('tap', (e) => {
-    addForce(e.center.x - width/2, e.center.y - height/2, 500);
-  });
-
-  hammer.on('pan', (e) => {
-    let force = createVector(e.deltaX, e.deltaY).mult(0.1);
-    addForce(e.center.x - width/2, e.center.y - height/2, force.mag(), force);
-  });
-
-  hammer.on('pinch', (e) => {
-    zoom += e.scale * -0.01;
-    zoom = constrain(zoom, 0.5, 3);
-  });
+  canvas.elt.addEventListener('mousedown', mouseDownHandler);
+  canvas.elt.addEventListener('mousemove', mouseMoveHandler);
+  canvas.elt.addEventListener('mouseup', mouseUpHandler);
+  canvas.elt.addEventListener('mousewheel', mouseWheelHandler);
 }
 
 function draw() {
   background(0);
+  translate(width / 2, height / 2);
   scale(zoom);
+  translate(-width / 2, -height / 2);
 
   for (let i = 0; i < nParticles; i++) {
     let px = map(sin(t), -1, 1, -1, 1);
@@ -49,20 +52,63 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
 
-function mouseWheel(e) {
-  zoom += e.deltaY * -0.01;
-  zoom = constrain(zoom, 0.5, 3);
-}
-
-function mouseDragged() {
-  let force = createVector(mouseX - pmouseX, mouseY - pmouseY).mult(0.1);
-  addForce(mouseX - width/2, mouseY - height/2, force.mag(), force);
-}
-
 function addForce(x, y, radius, force) {
     particles.forEach(p => {
         p.applyExternalForce(force, createVector(x,y), radius);
     });
+}
+
+function touchStartHandler(e) {
+  e.preventDefault();
+  if (e.touches.length === 2) {
+    initialTouchDistance = dist(e.touches[0].clientX, e.touches[0].clientY, e.touches[1].clientX, e.touches[1].clientY);
+    initialZoom = zoom;
+  } else if (e.touches.length === 1) {
+    initialTouchX = e.touches[0].clientX;
+    initialTouchY = e.touches[0].clientY;
+    addForce(e.touches[0].clientX, e.touches[0].clientY, 50);
+  }
+}
+
+function touchMoveHandler(e) {
+  e.preventDefault();
+  if (e.touches.length === 2) {
+    const currentTouchDistance = dist(e.touches[0].clientX, e.touches[0].clientY, e.touches[1].clientX, e.touches[1].clientY);
+    zoom = initialZoom + (currentTouchDistance - initialTouchDistance) * 0.01;
+    zoom = constrain(zoom, 0.5, 3);
+  } else if (e.touches.length === 1) {
+    let force = createVector(e.touches[0].clientX - initialTouchX, e.touches[0].clientY - initialTouchY).mult(0.1);
+    addForce(e.touches[0].clientX, e.touches[0].clientY, force.mag(), force);
+  }
+}
+
+function touchEndHandler(e) {
+  e.preventDefault();
+  initialTouchDistance = null;
+}
+
+function mouseDownHandler(e) {
+  mouseIsPressed = true;
+  previousMouseX = e.clientX;
+  previousMouseY = e.clientY;
+}
+
+function mouseMoveHandler(e) {
+  if (mouseIsPressed) {
+    let force = createVector(e.clientX - previousMouseX, e.clientY - previousMouseY).mult(0.1);
+    addForce(e.clientX, e.clientY, force.mag(), force);
+    previousMouseX = e.clientX;
+    previousMouseY = e.clientY;
+  }
+}
+
+function mouseUpHandler(e) {
+  mouseIsPressed = false;
+}
+
+function mouseWheelHandler(e) {
+  zoom += e.deltaY * -0.01;
+  zoom = constrain(zoom, 0.5, 3);
 }
 
 class Particle {
