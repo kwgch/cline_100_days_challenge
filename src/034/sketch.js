@@ -1,5 +1,6 @@
 let particles = [];
-let nParticles = 256;
+// let nParticles = 256;
+let nParticles = 128;
 let angle = 0;
 let t = 0;
 let zoom = 1;
@@ -79,6 +80,7 @@ function touchMoveHandler(e) {
   } else if (e.touches.length === 1) {
     let force = createVector(e.touches[0].clientX - initialTouchX, e.touches[0].clientY - initialTouchY).mult(0.1);
     addForce(e.touches[0].clientX, e.touches[0].clientY, force.mag(), force);
+    particles.forEach(p => p.swipeVelLimit = 10);
   }
 }
 
@@ -99,6 +101,7 @@ function mouseMoveHandler(e) {
     addForce(e.clientX, e.clientY, force.mag(), force);
     previousMouseX = e.clientX;
     previousMouseY = e.clientY;
+    particles.forEach(p => p.swipeVelLimit = 10);
   }
 }
 
@@ -116,8 +119,10 @@ class Particle {
     this.pos = createVector(x, y);
     this.vel = createVector(0, 0);
     this.acc = createVector(0, 0);
-    this.size = random(3, 10) * min(width, height) / 600;
+    // this.size = random(3, 10) * min(width, height) / 600;
+    this.size = random(8, 32) * min(width, height) / 600;
     this.hue = random(0,360);
+    this.swipeVelLimit = 2;
   }
 
   applyExternalForce(force, position, radius) {
@@ -137,7 +142,8 @@ class Particle {
                       this.pos.y * py * 0.01) * TWO_PI * 4;
     this.acc.set(cos(angle), sin(angle));
     this.vel.add(this.acc);
-    this.vel.limit(2);
+    this.vel.limit(this.swipeVelLimit);
+    this.swipeVelLimit = lerp(this.swipeVelLimit, 2, 0.05);
     this.pos.add(this.vel);
 
     if (this.pos.x < 0) this.pos.x = width;
@@ -149,7 +155,8 @@ class Particle {
   display() {
     stroke(this.hue % 360, 100, 100, 50);
     noFill()
-    strokeWeight(3)
+    // strokeWeight(3)
+    strokeWeight(6)
     ellipse(this.pos.x, this.pos.y, this.size);
     this.hue += 0.1;
   }

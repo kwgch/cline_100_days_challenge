@@ -8,6 +8,7 @@
 -   Replaced Hammer.js with standard event listeners for touch and mouse interactions.
 -   Implemented touch and mouse interactions for controlling the simulation.
 -   Implemented zoom control using touch events and mouse wheel.
+-   Implemented increased velocity limit on swipe, with gradual return to normal limit.
 
 ## What's Left to Build
 
@@ -25,6 +26,7 @@
 -   The drawing is now displayed correctly.
 -   Touch and mouse interactions are working correctly.
 -   Zoom is working correctly.
+-   Swipe velocity is working correctly.
 
 ## Known Issues
 
