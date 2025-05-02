@@ -192,15 +192,17 @@ function updateAttentionVisualization() {
         .join(
             enter => enter.append("text")
                 .attr("class", "token-text")
+                .attr("data-index", (d, i) => i) // ★ data-index 属性を追加 ★
                 .attr("x", 0) // ★ 修正: テキスト右端を x=0 に ★
                 .attr("y", (d, i) => yScale(i))
                 .attr("dy", "0.32em")
                 .attr("text-anchor", "end") // 右揃え
                 .text(d => d)
-                .on("mouseover", (event, i) => handleTokenMouseOver(event, i)) // イベントハンドラにインデックスを渡す
-                .on("mouseout", handleMouseOut),
+                .on("mouseover", (event) => handleTokenMouseOver(event, +d3.select(event.currentTarget).attr('data-index'))) // ★ インデックス取得修正 ★
+                .on("mouseout", handleMouseOut)
+                .on("click", handleTokenClickProxy), // ★ 新しいプロキシハンドラに変更 ★
             update => update
-                .attr("y", (d, i) => yScale(i)) // Y座標は更新される可能性あり
+                .attr("data-index", (d, i) => i) // ★ update 時も data-index を更新 ★
                 .text(d => d),
             exit => exit.remove()
         );
@@ -210,13 +212,15 @@ function updateAttentionVisualization() {
         .join(
             enter => enter.append("text")
                 .attr("class", "token-text")
+                .attr("data-index", (d, i) => i) // ★ data-index 属性を追加 ★
                 .attr("x", 0) // ★ 修正: テキスト左端を x=0 (gTokensRight内で) に ★
                 .attr("y", (d, i) => yScale(i))
                 .attr("dy", "0.32em")
                 .attr("text-anchor", "start") // 左揃え
                 .text(d => d)
-                .on("mouseover", (event, i) => handleTokenMouseOver(event, i))
-                .on("mouseout", handleMouseOut),
+                .on("mouseover", (event) => handleTokenMouseOver(event, +d3.select(event.currentTarget).attr('data-index'))) // ★ インデックス取得修正 ★
+                .on("mouseout", handleMouseOut)
+                .on("click", handleTokenClickProxy), // ★ 新しいプロキシハンドラに変更 ★
             update => update
                 .attr("y", (d, i) => yScale(i))
                 .text(d => d),
@@ -314,14 +318,17 @@ function updateVisualizationData(tokens, attentionMatrices) {
     updateAttentionVisualization();
 }
 
+// ★ マウスオーバーハンドラのインデックス取得も修正 ★
 function handleTokenMouseOver(event, tokenIndex) {
+    // tokenIndex は数値として渡されるはず
+    if (typeof tokenIndex !== 'number') return;
     gLines.selectAll(".attention-line")
-        .classed("dimmed", true); // 一旦すべて暗く
+        .classed("dimmed", true);
     gLines.selectAll(".attention-line")
-        .filter(lineData => lineData.from === tokenIndex || lineData.to === tokenIndex) // 該当する線を選択
-        .classed("dimmed", false) // 暗くするのを解除
-        .attr("stroke-opacity", 0.9) // 強調
-        .raise(); // 最前面へ
+        .filter(lineData => lineData.from === tokenIndex || lineData.to === tokenIndex)
+        .classed("dimmed", false)
+        .attr("stroke-opacity", 0.9)
+        .raise();
 }
 
 function handleLineMouseOver(event, d) {
@@ -344,8 +351,8 @@ function handleMouseOut(event, d) {
     gTokensRight.selectAll(".token-text").style("font-weight", null);
 }
 
-// ★ 新しい関数: 線がクリックされたときの処理 ★
-function handleLineClick(event, d) {
+// 線がクリックされたときの処理 ★
+function handleLineClick(d) { // event 引数を削除
     // d オブジェクトから情報を取得
     const fromToken = visData.tokens[d.from];
     const toToken = visData.tokens[d.to];
@@ -358,12 +365,114 @@ function handleLineClick(event, d) {
         statusDiv.innerText = `Attention Score: "${fromToken}" (L) --> "${toToken}" (R) = ${score.toFixed(4)}`;
     }
 
-    // (オプション) クリックされた線を一時的に強調表示
+    // (オプション) クリック/選択された線をデータに基づいて強調表示
     gLines.selectAll(".attention-line").attr("stroke", "steelblue").attr("stroke-width", 1.5); // 他の線をリセット
-    d3.select(event.target) // クリックされた要素を選択
-        .attr("stroke", "red") // 色を変更
-        .attr("stroke-width", 2.5) // 太くする
-        .raise(); // 最前面へ
+
+    // ★ データ (d.from, d.to) を使って対応する線要素を再選択する ★
+    const targetLine = gLines.select(`.attention-line[data-from="${d.from}"][data-to="${d.to}"]`);
+    if (!targetLine.empty()) {
+        targetLine // 見つけた線要素を選択
+            .attr("stroke", "red") // 色を変更
+            .attr("stroke-width", 2.5) // 太くする
+            .raise(); // 最前面へ
+    } else {
+        console.warn("Target line for highlighting not found in handleLineClick.");
+    }
+}
+
+// ★ 新しいプロキシハンドラ関数 ★
+function handleTokenClickProxy(event) {
+    const clickedElement = event.currentTarget; // クリックされた <text> 要素
+    const indexStr = d3.select(clickedElement).attr('data-index');
+    const tokenIndex = parseInt(indexStr, 10);
+
+    if (isNaN(tokenIndex)) {
+        console.error("Could not parse token index from data-index attribute.");
+        return;
+    }
+
+    // 要素が左右どちらにあるか判定 (親グループのクラス名で判断)
+    const side = d3.select(clickedElement.parentNode).classed('tokens-left') ? 'left' : 'right';
+
+    // 元の handleTokenClick を正しい数値インデックスで呼び出す
+    handleTokenClick(event, tokenIndex, side);
+}
+
+// ★ 新しい関数: トークンがクリックされたときの処理 ★
+function handleTokenClick(event, tokenIndex, side) {
+    console.log(`Token clicked: Index=${tokenIndex}, Side=${side}, Token="${visData.tokens[tokenIndex]}"`);
+
+    // 現在選択されているレイヤー/ヘッドのアテンションスコアを取得
+    if (!visData.attentionMatrices || visData.numLayers === 0 || visData.numHeads === 0) return;
+    const layerData = visData.attentionMatrices[selectedLayer];
+    if (!layerData) return;
+    const attentionScores = layerData[selectedHead]; // [seqLen, seqLen]
+
+    // クリックされたトークンがパディングなら何もしない
+    if (visData.tokens[tokenIndex] === '[PAD]') {
+        statusDiv.innerText = `Clicked on [PAD] token. No attention displayed.`;
+        return;
+    }
+
+    let maxScore = -1;
+    let targetIndex = -1;
+    let targetFromIndex = -1;
+    let targetToIndex = -1;
+
+    // 最も強いアテンションの相手を探す
+    if (side === 'left') {
+        // 左側トークン(from)がクリックされた -> 最も注目している右側トークン(to)を探す
+        targetFromIndex = tokenIndex;
+        for (let j = 0; j < visData.seqLen; j++) {
+            // 自分自身とPADトークンへの接続は無視 (オプション)
+            // if (j === tokenIndex || visData.tokens[j] === '[PAD]') continue;
+            if (visData.tokens[j] === '[PAD]') continue; // PADのみ無視
+
+            const score = attentionScores[targetFromIndex][j];
+            if (score > maxScore) {
+                maxScore = score;
+                targetIndex = j; // 最も強い接続先のインデックス
+            }
+        }
+        targetToIndex = targetIndex;
+    } else { // side === 'right'
+        // 右側トークン(to)がクリックされた -> 最も注目している左側トークン(from)を探す
+        targetToIndex = tokenIndex;
+        for (let i = 0; i < visData.seqLen; i++) {
+            // 自分自身とPADトークンからの接続は無視 (オプション)
+            // if (i === tokenIndex || visData.tokens[i] === '[PAD]') continue;
+             if (visData.tokens[i] === '[PAD]') continue; // PADのみ無視
+
+            const score = attentionScores[i][targetToIndex];
+            if (score > maxScore) {
+                maxScore = score;
+                targetIndex = i; // 最も強い接続元のインデックス
+            }
+        }
+        targetFromIndex = targetIndex;
+    }
+
+    console.log(`Strongest connection found: From=${targetFromIndex}, To=${targetToIndex}, Score=${maxScore}`);
+
+    // 最大スコアを持つ線を見つけてクリックイベントを発火させる
+    if (targetFromIndex !== -1 && targetToIndex !== -1 && maxScore > 0.01) { // スコア閾値も考慮
+        // 対応する線要素を探す
+        const targetLine = gLines.select(`.attention-line[data-from="${targetFromIndex}"][data-to="${targetToIndex}"]`);
+
+        if (!targetLine.empty()) {
+            // 線要素が見つかったら、その線のデータ(d)を取得
+            const lineData = targetLine.datum();
+            // handleLineClick を呼び出してクリックをシミュレート
+            // handleLineClick(null, lineData); // event は null でも可
+              // ★ handleLineClick の呼び出しを修正: event を渡さない ★
+              handleLineClick(lineData);
+        } else {
+             console.warn(`Line element not found for connection: From=${targetFromIndex}, To=${targetToIndex}`);
+             statusDiv.innerText = `Strongest connection (Score: ${maxScore.toFixed(4)}) found, but line not drawn (score below threshold?).`;
+        }
+    } else {
+         statusDiv.innerText = `No significant attention connection found for token "${visData.tokens[tokenIndex]}".`;
+    }
 }
 
 // --- DOMContentLoaded イベントリスナー ---
