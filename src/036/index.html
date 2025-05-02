@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TensorFlow.js DistilBERT Attention Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 15px; /* 少しパディングを調整 */
+            /* スマートフォンの自動文字サイズ調整を抑制 */
+            text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%;
+            /* 基本的な文字サイズを少し大きめに設定 */
+            font-size: 16px; /* または 1rem */
+        }
+        /* テキストエリアやボタンなどの入力要素にも適用 */
+        textarea, button, select {
+            font-size: inherit; /* body のフォントサイズを継承 */
+            padding: 8px 12px; /* パディングも少し調整 */
+            margin-bottom: 10px; /* 要素間のマージン */
+        }
+        textarea {
+            width: calc(100% - 24px); /* 左右のパディング分を引く */
+            box-sizing: border-box; /* パディングを幅に含める */
+        }
+        pre {
+            white-space: pre-wrap;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            /* モノスペースフォントも少し大きく */
+            font-size: 0.9em; /* body の 90% 程度 */
+            overflow-x: auto; /* 横にはみ出す場合はスクロール */
+        }
+        select {
+            margin-right: 10px;
+        }
+        #visualization {
+            margin-top: 20px;
+            width: 100%; /* コンテナ幅を100%に */
+            overflow-x: hidden; /* 横スクロールは不要にする */
+            overflow-y: auto;   /* ★ 縦スクロールを有効にする */
+            max-height: 70vh;   /* ★ 可視化エリアの最大高さを画面の70%程度に制限 */
+        }
+        svg#attentionSvg { /* ID指定でより具体的に */
+            border: 1px solid #ccc;
+            display: block;
+            /* SVG自体の幅はJavaScriptで設定するため、ここでは指定しないか、初期値として設定 */
+            /* width: 100%; */ /* ← JavaScriptで設定するので削除またはコメントアウト */
+            max-width: none;
+            /* ★ 高さはJavaScriptで動的に設定される */
+        }
+
+        /* D3用スタイル */
+        .attention-line { stroke-width: 1.5; transition: stroke-opacity 0.2s ease-in-out; }
+        .attention-line.dimmed { stroke-opacity: 0.05 !important; }
+        .token-text {
+            font-size: 14px; /* スマホで見やすいサイズ */
+            cursor: default;
+            /* ★ white-space: nowrap; を追加してトークンが改行しないようにする */
+            white-space: nowrap;
+        }
+        .token-text:hover { font-weight: bold; }
+    
+        /* ローディング表示用のスタイル (変更なし) */
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(255, 255, 255, 0.8); display: flex;
+            justify-content: center; align-items: center; flex-direction: column;
+            z-index: 1000; transition: opacity 0.3s ease-out;
+        }
+        .loading-indicator {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(255, 255, 255, 0.7); display: none;
+            justify-content: center; align-items: center;
+            border-radius: 4px; z-index: 10;
+        }
+        .spinner, .spinner-small {
+            border: 4px solid rgba(0, 0, 0, 0.1); border-left-color: #09f;
+            border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        .spinner { width: 40px; height: 40px; }
+        .spinner-small { width: 20px; height: 20px; border-width: 2px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    
+        /* D3用スタイル */
+        .attention-line { stroke-width: 1.5; transition: stroke-opacity 0.2s ease-in-out; }
+        .attention-line.dimmed { stroke-opacity: 0.05 !important; }
+        .token-text {
+            /* SVG内のトークン文字サイズを調整 */
+            font-size: 14px; /* スマホでも見やすいサイズに */
+            cursor: default;
+        }
+        .token-text:hover { font-weight: bold; }
+    </style>    
+</head>
+<body>
+    <!-- 初期ロード用オーバーレイ -->
+    <div id="initial-loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading Model and Tokenizer...</p>
+    </div>
+
+    <h1>TensorFlow.js DistilBERT Attention Visualization</h1>
+    <textarea id="textInput" rows="3" cols="50">Google is debuting three new AI experiments that are intended to help users learn foreign languages on the go. The tools use Google's Gemini large language model to identify objects and situations in a user's immediate environment and provide translations that could help users ask for help or spark a conversation.If you want to give the new experiments a try, you can find them on the Google Labs webpage. Google experiments aren't applications, which means you don't have to download anything to get started. You can just click into the experiment you want to try and begin typing in your prompts.</textarea><br>
+
+    <!-- ボタンと推論中ローディングをまとめるコンテナ -->
+    <div style="position: relative; display: inline-block; margin-bottom: 10px;">
+        <button id="runButton">Run Inference & Visualize</button>
+        <!-- 推論中ローディングインジケーター -->
+        <div id="inference-loading" class="loading-indicator">
+            <div class="spinner-small"></div>
+        </div>
+    </div>
+
+    <div id="status">Ready.</div>
+    <pre id="resultDisplayArea"></pre>
+
+    <div>
+        Layer: <select id="layerSelector"></select>
+        Head: <select id="headSelector"></select>
+    </div>
+
+    <div id="visualization">
+         <svg id="attentionSvg" width="800" height="600"></svg>
+    </div>
+
+    <!-- スクリプト -->
+    <!-- transformers.js と自分の script.js (type="module" を忘れずに) -->
+    <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.9.0" type="module"></script>
+    <script src="script.js" type="module"></script>
+</body>
+</html>
