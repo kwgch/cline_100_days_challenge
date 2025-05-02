@@ -106,7 +106,8 @@ const svg = d3.select("#attentionSvg");
 const svgHeight = +svg.attr("height");
 // ★ margin をスマホ用に調整 ★
 // const margin = { top: 20, right: 150, bottom: 20, left: 150 };
-const margin = { top: 20, right: 50, bottom: 20, left: 50 }; // 左右マージンを減らす
+const margin = { top: 20, right: 100, bottom: 20, left: 100 };
+// const margin = { top: 20, right: 50, bottom: 20, left: 50 }; // 左右マージンを減らす
 // const innerWidth = svgWidth - margin.left - margin.right;
 // const innerHeight = svgHeight - margin.top - margin.bottom;
 
@@ -251,6 +252,7 @@ function updateAttentionVisualization() {
                 .attr("data-to", d => d.to)
                 .on("mouseover", handleLineMouseOver)
                 .on("mouseout", handleMouseOut)
+                .on("click", handleLineClick) // ★ クリックリスナーを追加 ★
                 .attr("stroke-opacity", d => opacityScale(d.score)),
             update => update
                 .attr("x1", lineMargin) // ★ 修正 ★
@@ -340,6 +342,28 @@ function handleMouseOut(event, d) {
     // トークンの強調表示を解除
     gTokensLeft.selectAll(".token-text").style("font-weight", null);
     gTokensRight.selectAll(".token-text").style("font-weight", null);
+}
+
+// ★ 新しい関数: 線がクリックされたときの処理 ★
+function handleLineClick(event, d) {
+    // d オブジェクトから情報を取得
+    const fromToken = visData.tokens[d.from];
+    const toToken = visData.tokens[d.to];
+    const score = d.score;
+
+    // ステータス表示エリアを取得して更新
+    const statusDiv = document.getElementById('status');
+    if (statusDiv) {
+        // スコアを小数点以下4桁で表示
+        statusDiv.innerText = `Attention Score: "${fromToken}" (L) --> "${toToken}" (R) = ${score.toFixed(4)}`;
+    }
+
+    // (オプション) クリックされた線を一時的に強調表示
+    gLines.selectAll(".attention-line").attr("stroke", "steelblue").attr("stroke-width", 1.5); // 他の線をリセット
+    d3.select(event.target) // クリックされた要素を選択
+        .attr("stroke", "red") // 色を変更
+        .attr("stroke-width", 2.5) // 太くする
+        .raise(); // 最前面へ
 }
 
 // --- DOMContentLoaded イベントリスナー ---
