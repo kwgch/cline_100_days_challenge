@@ -8,7 +8,8 @@ const loadingIndicator = document.getElementById('loadingIndicator');
 const probabilitiesElement = document.getElementById('probabilities'); // 確率表示用
 
 // --- 設定 ---
-const MODEL_PATH = './onnx_model_quantized/'; // 量子化モデルのパス (変更なし)
+const MODEL_PATH = 'onnx_model_quantized'; // 量子化モデルのパス (変更なし)
+
 const TOP_K_PROBS = 5; // 表示する上位確率の数
 
 // --- グローバル変数 ---
