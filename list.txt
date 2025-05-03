@@ -34,7 +34,7 @@
 34. Fluid Simulation
 35. 3D Interactive Art
 36. Transformer Attention Visualization
-37. TBD
+37. Japanese GPT-2 Visualization
 38. TBD
 39. TBD
 40. TBD

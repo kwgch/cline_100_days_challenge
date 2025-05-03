@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantized ONNX GPT2 JP (Transformers.js) - Logits Viz</title>
+    <style>
+        /* スタイルは変更なし */
+        body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
+        textarea { width: 95%; height: 80px; margin-bottom: 10px; padding: 10px; }
+        button { padding: 10px 15px; cursor: pointer; }
+        #status { margin-bottom: 15px; font-weight: bold; color: #555; }
+        #output { margin-top: 15px; border: 1px solid #ccc; padding: 15px; min-height: 100px; background-color: #f9f9f9; white-space: pre-wrap; word-wrap: break-word; }
+        .loading-indicator { display: inline-block; margin-left: 10px; font-style: italic; }
+        label { display: block; margin-bottom: 5px; }
+        /* 確率表示用のスタイルを追加 */
+        #probabilities { margin-top: 15px; border: 1px dashed #aaa; padding: 10px; background-color: #eee; font-size: 0.9em; }
+        #probabilities ul { margin: 0; padding-left: 20px; }
+    </style>
+    <!-- Transformers.js (AutoModelForCausalLM と AutoTokenizer をインポート) -->
+    <script type="module">
+        // pipeline の代わりに必要なクラスをインポート
+        import { AutoTokenizer, AutoModelForCausalLM } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@latest";
+        // グローバルスコープに登録
+        window.AutoTokenizer = AutoTokenizer;
+        window.AutoModelForCausalLM = AutoModelForCausalLM;
+        // pipeline, env は不要
+    </script>
+</head>
+<body>
+    <h1>日本語GPT-2 (量子化ONNX + Transformers.js) - 次トークン確率可視化</h1>
+
+    <div id="status">ライブラリとモデルを読み込み中...</div>
+
+    <label for="prompt">文章の始まりを入力:</label><br>
+    <textarea id="prompt" placeholder="例: 今日は良い天気なので、">今日は良い天気なので、</textarea><br>
+
+    <label for="maxLength">最大生成トークン数:</label>
+    <input type="number" id="maxLength" value="10" min="1" max="50" style="width: 60px;"> <!-- デフォルトと上限を小さめに変更 -->
+
+    <button id="generateButton" disabled>準備中...</button>
+    <span id="loadingIndicator" class="loading-indicator" style="display: none;">生成中...</span>
+
+    <h2>生成結果:</h2>
+    <div id="output"></div>
+
+    <!-- 確率表示エリアを追加 -->
+    <h2>次のトークン予測確率 (Top 5):</h2>
+    <div id="probabilities">ここに確率が表示されます</div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
