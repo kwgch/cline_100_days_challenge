@@ -1,4 +1,0 @@
-[[redirects]]
-  from = "/models/onnx_model_quantized/*"
-  to = "/src/037/onnx_model_quantized/:splat"
-  status = 200
