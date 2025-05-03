@@ -9,7 +9,14 @@ const probabilitiesElement = document.getElementById('probabilities'); // 確率
 
 // --- 設定 ---
 // const MODEL_PATH = 'onnx_model_quantized'; // 量子化モデルのパス (変更なし)
-const MODEL_PATH = '/src/037/onnx_model_quantized/'; // 絶対パスで指定
+// const MODEL_PATH = '/src/037/onnx_model_quantized/'; // 絶対パスで指定
+// script.js の MODEL_PATH の定義を変更
+const relativeModelPath = 'onnx_model_quantized/';
+const currentPath = window.location.pathname;
+// 最後の '/' までのパスを取得 (例: /src/037/)
+const basePath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+const MODEL_PATH = window.location.origin + basePath + relativeModelPath;
+console.log("Using absolute model path:", MODEL_PATH); // パスが正しいかコンソールで確認
 
 const TOP_K_PROBS = 5; // 表示する上位確率の数
 
