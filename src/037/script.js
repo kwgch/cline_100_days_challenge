@@ -1,5 +1,6 @@
 // HTML要素の取得 (probabilities を追加)
 const statusElement = document.getElementById('status');
+const loadingSpinnerElement = document.getElementById('loadingSpinner'); // スピナー要素
 const promptElement = document.getElementById('prompt');
 const generateButton = document.getElementById('generateButton');
 const outputElement = document.getElementById('output');
@@ -49,11 +50,14 @@ async function initialize() {
         statusElement.innerText = '準備完了！文章を入力して生成ボタンを押してください。';
         generateButton.disabled = false;
         generateButton.innerText = '文章を生成';
-
+        // ★★ 読み込み完了 → スピナーを非表示 ★★
+        loadingSpinnerElement.classList.add('hidden'); // display:none スタイルを適用
     } catch (error) {
         console.error('初期化中にエラーが発生しました:', error);
         statusElement.innerText = `エラー: 初期化に失敗しました。(${error.message})`;
         alert(`初期化エラー:\n${error.message}\n\nモデルパス(${MODEL_PATH})やファイル構成を確認してください。`);
+        // ★★ エラー発生時もスピナーを非表示 ★★
+        loadingSpinnerElement.classList.add('hidden'); // エラーメッセージが見えるように
     }
 }
 

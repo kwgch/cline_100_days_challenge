@@ -16,6 +16,40 @@
         /* 確率表示用のスタイルを追加 */
         #probabilities { margin-top: 15px; border: 1px dashed #aaa; padding: 10px; background-color: #eee; font-size: 0.9em; }
         #probabilities ul { margin: 0; padding-left: 20px; }
+        /* ローディングステータスとスピナーのコンテナ */
+        #loadingStatusContainer {
+            display: flex; /* 横並びにする */
+            align-items: center; /* 垂直方向中央揃え */
+            margin-bottom: 15px;
+        }
+
+        #status {
+            /* margin-bottom: 15px; */ /* コンテナでマージンを管理するので削除 */
+            font-weight: bold;
+            color: #555;
+            margin-right: 10px; /* スピナーとの間隔 */
+        }
+
+        /* スピナーのスタイル */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1); /* 薄いグレーの円 */
+            border-left-color: #555; /* 一部だけ濃い色 */
+            border-radius: 50%;
+            width: 20px; /* スピナーのサイズ */
+            height: 20px;
+            animation: spin 1s linear infinite; /* アニメーション */
+        }
+
+        /* 非表示用クラス (JavaScriptから付け外しする) */
+        .hidden {
+            display: none;
+        }
+
+        /* 回転アニメーションの定義 */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
     <!-- Transformers.js (AutoModelForCausalLM と AutoTokenizer をインポート) -->
     <script type="module">
@@ -30,7 +64,11 @@
 <body>
     <h1>日本語GPT-2 (量子化ONNX + Transformers.js) - 次トークン確率可視化</h1>
 
-    <div id="status">ライブラリとモデルを読み込み中...</div>
+    <!-- ステータス表示とスピナー -->
+    <div id="loadingStatusContainer">
+        <div id="status">ライブラリとモデルを読み込み中...</div>
+        <div id="loadingSpinner" class="spinner"></div> <!-- スピナー要素を追加 -->
+    </div>
 
     <label for="prompt">文章の始まりを入力:</label><br>
     <textarea id="prompt" placeholder="例: 今日は良い天気なので、">今日は良い天気なので、</textarea><br>
