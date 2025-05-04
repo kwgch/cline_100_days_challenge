@@ -1,0 +1,165 @@
+; Description: clineのルール
+
+- 指示に対して、無理な時はその旨を伝えて、無茶な変更を行わないこと
+- アプリはスマホで動作することを前提に、かつPCでも操作できるようにすること
+- スマホの場合にタップで画面が動かないようにすること
+- 同じファイルへの操作を2回失敗するならプランを再検討すること
+- memory-bankを適宜更新すること
+- README.mdを作成すること
+- ファイルが大きくなりそうなら分割を検討すること
+
+# ロール定義
+あなたの名前はclineです。
+
+下記仕様に従って、アプリの開発を行います。
+
+はい、承知いたしました。
+ご要望のp5.js 3Dジェネラティブアートにインタラクティブな操作（スワイプでの回転、ピンチでの拡大縮小）を追加するための仕様書と設計書をMarkdown形式で作成します。UI要素を追加せず、スマホとPCの両方で動作することを想定しています。
+
+---
+
+## p5.js 3Dジェネラティブアート インタラクティブ化 仕様書
+
+### 1. 概要
+既存のp5.jsで作成された3Dジェネラティブアート作品に、ユーザーによるインタラクティブな操作機能を追加する。具体的には、画面のスワイプ（ドラッグ）による視点回転と、ピンチ操作（マウスホイール）によるズーム（拡大縮小）を可能にする。追加のUI要素は設けない。
+
+### 2. 機能要件
+*   **視点回転:**
+    *   スマートフォン: 画面を1本指でスワイプすると、スワイプ方向に合わせて3D空間の視点が回転する。
+    *   PC: マウスをドラッグすると、ドラッグ方向に合わせて3D空間の視点が回転する。
+*   **ズーム (拡大縮小):**
+    *   スマートフォン: 画面を2本指でピンチイン・ピンチアウトすると、視点がズームイン・ズームアウトする。
+    *   PC: マウスホイールをスクロールすると、視点がズームイン・ズームアウトする。
+*   **既存アニメーションの維持:** `frameCount` に基づくオブジェクトの自動回転アニメーションは維持する。
+*   **レスポンシブ対応:** スマートフォン（縦画面メイン）およびPCブラウザで動作する。ウィンドウサイズ変更に対応する。
+
+### 3. 操作方法
+*   **回転:**
+    *   スマホ: 画面上を1本指でタッチし、上下左右にスライド（スワイプ）する。
+    *   PC: 画面上でマウスボタンを押しながら、上下左右にマウスを移動（ドラッグ）する。
+*   **ズーム:**
+    *   スマホ: 画面上に2本指でタッチし、指の間隔を広げる（ピンチアウト）または狭める（ピンチイン）する。
+    *   PC: マウスホイールを前後に回転させる。
+
+### 4. 動作環境
+*   HTML5、CSS3、JavaScript (p5.jsライブラリを含む) が動作するモダンブラウザ。
+*   タッチ操作が可能なデバイス（スマートフォン、タブレット）およびマウス操作が可能なデバイス（PC）。
+
+---
+
+## p5.js 3Dジェネラティブアート インタラクティブ化 設計書
+
+### 1. 全体構成
+*   HTMLファイル (`index.html`): p5.jsライブラリを読み込み、Canvas要素を配置する。
+*   JavaScriptファイル (`sketch.js`): p5.jsのコード。`setup`関数、`draw`関数、およびインタラクションのためのイベントハンドラ関数を記述する。
+*   CSSファイル (`style.css`): Canvas要素のスタイリング（画面全体に表示するなど）。
+
+### 2. 主要な変数
+*   `camAngleX`: カメラのX軸回転角度（ユーザー操作で変化）。
+*   `camAngleY`: カメラのY軸回転角度（ユーザー操作で変化）。
+*   `camZoom`: カメラのズームレベル（距離、ユーザー操作で変化）。初期値を設定する (例: `1.0`)。
+*   `prevMouseX`, `prevMouseY`: 前フレームのマウス/タッチ座標 (ドラッグ/スワイプ量計算用)。
+*   `prevPinchDist`: 前フレームのピンチ距離 (ピンチ量計算用)。
+*   `isDragging`: ドラッグ/スワイプ中かどうかのフラグ。
+
+### 3. イベントハンドリング
+*   既存の `orbitControl()` 関数は削除する。
+*   **タッチ操作 (スマホ):**
+    *   `touchStarted()`[1]:
+        *   タッチ開始座標を記録 (`prevMouseX`, `prevMouseY`)。
+        *   `touches` 配列[3]の長さを確認。
+        *   長さが1なら `isDragging = true` とする。
+        *   長さが2なら、2点間の初期距離を計算し `prevPinchDist` に記録する。`isDragging = false` とする（回転操作と区別するため）。
+    *   `touchMoved()`:
+        *   `event.preventDefault()` を呼び出し、ページのスクロールを抑制する[7][9]。
+        *   `touches` 配列の長さを確認。
+        *   長さが1で `isDragging` が true の場合（1本指スワイプ）:
+            *   現在のタッチ座標と `prevMouseX`, `prevMouseY` との差分を計算。
+            *   差分に応じて `camAngleX`, `camAngleY` を更新する。
+            *   現在のタッチ座標を `prevMouseX`, `prevMouseY` に更新する。
+        *   長さが2の場合（ピンチ操作）:
+            *   現在の2点間の距離を計算する。
+            *   `prevPinchDist` との比率を計算し、`camZoom` を更新する（距離が広がればズームアウト、狭まればズームインするように調整。例: `camZoom *= currentDist / prevPinchDist`）。
+            *   現在の距離を `prevPinchDist` に更新する。
+    *   `touchEnded()`[4]:
+        *   `isDragging = false` とする。
+        *   ピンチ操作関連の変数をリセットする (`prevPinchDist = 0` など)。
+*   **マウス操作 (PC):**
+    *   `mousePressed()`:
+        *   クリック座標を `prevMouseX`, `prevMouseY` に記録。
+        *   `isDragging = true` とする。
+    *   `mouseDragged()`:
+        *   `isDragging` が true の場合:
+            *   現在のマウス座標と `prevMouseX`, `prevMouseY` との差分を計算。
+            *   差分に応じて `camAngleX`, `camAngleY` を更新する。
+            *   現在のマウス座標を `prevMouseX`, `prevMouseY` に更新する。
+    *   `mouseReleased()`:
+        *   `isDragging = false` とする。
+    *   `mouseWheel(event)`:
+        *   `event.delta` の値（スクロール量）に応じて `camZoom` を更新する（例: `camZoom *= (1 - event.delta * 0.001)` のように、微調整可能な係数をかける）。
+        *   `camZoom` が極端な値にならないように、最小値・最大値を設けることが望ましい。
+
+### 4. カメラ制御ロジック
+*   `draw()` 関数の冒頭で、`translate(0, 0, -initialDistance * camZoom)` のようにしてズームを適用する (z方向への移動でズームを表現、`initialDistance` は適切な初期距離)。
+*   次に、ユーザー操作による回転 `rotateX(camAngleX)` と `rotateY(camAngleY)` を適用する。
+*   既存の `rotateX(PI/8)` や `rotateY(-PI/8)` は、初期視点の調整として `camAngleX`, `camAngleY` の初期値に加えるか、ユーザー操作回転の前に適用する。
+
+### 5. 描画処理 (`draw` 関数)
+*   `background(0)` で背景をクリア。
+*   上記のカメラ制御ロジックを適用。
+*   既存の `frameCount` に基づくオブジェクトの回転 (`rotateX(frameCount * 0.01)` など) を適用。
+*   既存の図形描画ロジック (`push`, `noFill`, `stroke`, `beginShape`, `vertex`, `endShape`, `pop`) を実行。
+
+### 6. 初期化処理 (`setup` 関数)
+*   `createCanvas(windowWidth, windowHeight, WEBGL)` でCanvasを作成。
+*   `frameRate(fr)` を設定。
+*   カメラ変数 (`camAngleX`, `camAngleY`, `camZoom`) を初期化する。
+*   `windowResized()` 関数を定義し、ウィンドウサイズ変更時に `resizeCanvas(windowWidth, windowHeight)` を呼び出すようにする[8]。
+
+## 既存のp5.js
+
+```
+const fr = 30
+function setup() {
+  frameRate(fr)
+  createCanvas(windowWidth, windowHeight, WEBGL);
+}
+
+function draw() {
+  background(0)
+  orbitControl();
+  
+  rotateX(PI/8)
+  rotateY(-PI/8)
+  rotateX(frameCount * 0.01)
+  rotateY(frameCount * 0.01)
+  rotateZ(frameCount * 0.01)
+
+  let numPoints = 100;
+  let radius = 200;
+  let angleStep = TWO_PI / numPoints;
+
+  push();
+  noFill();
+  stroke(random(0,50), 
+         random(100,150), 
+         random(200,255)
+        );
+  strokeWeight(2);
+  beginShape();
+
+  w = 50
+  for (let i = 0; i <= numPoints; i++) {
+    let angle = i * angleStep;
+    let x = radius * cos(angle);
+    let y = radius * sin(angle);
+    let z = 30 * tan(i * 0.1 + frameCount * 0.05);
+
+    vertex(x+w, y,   z);
+    vertex(x,   y+w, z);
+    vertex(x+w, y+w, z);
+  }
+  endShape(CLOSE);
+  pop();
+}
+```
