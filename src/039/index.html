@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mobile Image Gallery</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #222;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        .gallery {
+            width: 100%;
+            max-width: 600px; /* Adjust for larger screens */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .image-item {
+            width: 90%;
+            margin: 10px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .image-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mobile Image Gallery</h1>
+    <div class="gallery" id="gallery">
+        </div>
+
+    <script>
+        const gallery = document.getElementById('gallery');
+        const imageURLs = [
+            "https://picsum.photos/600/400?random=1",
+            "https://picsum.photos/600/400?random=2",
+            "https://picsum.photos/600/400?random=3",
+            "https://picsum.photos/600/400?random=4",
+            "https://picsum.photos/600/400?random=5",
+            "https://picsum.photos/600/400?random=6",
+            "https://picsum.photos/600/400?random=7",
+            "https://picsum.photos/600/400?random=8",
+            "https://picsum.photos/600/400?random=9",
+            "https://picsum.photos/600/400?random=10"
+        ];
+
+        function addImage() {
+            const imageURL = imageURLs[Math.floor(Math.random() * imageURLs.length)];
+            const imageItem = document.createElement('div');
+            imageItem.classList.add('image-item');
+            imageItem.innerHTML = `<img src="${imageURL}" alt="Random Image">`;
+            gallery.appendChild(imageItem);
+        }
+
+        // Initial load
+        for (let i = 0; i < 5; i++) {
+            addImage();
+        }
+
+        // Infinite scroll
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+                for (let i = 0; i < 2; i++) {
+                    addImage();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
