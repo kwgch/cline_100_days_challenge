@@ -36,18 +36,18 @@
 36. Transformer Attention Visualization
 37. Japanese GPT-2 Visualization
 38. 3D Generative Art
-39. TBD
-40. TBD
-41. TBD
-42. TBD
-43. TBD
-44. TBD
-45. TBD
-46. TBD
-47. TBD
-48. TBD
-49. TBD
-50. TBD
+39. Image Gallery
+40. Cho-Han
+41. Flappy Bird
+42. Endless Runner
+43. Rhythm Game
+44. Drawing App
+45. Music Visualizer
+46. Bomb Drop
+47. Memory Game
+48. Chat Joke
+49. Maze Game
+50. Color Palette Generator
 51. TBD
 52. TBD
 53. TBD
