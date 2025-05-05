@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rhythm Game (Mobile)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #222;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #gameArea {
+            width: 320px;
+            height: 480px;
+            border: 2px solid white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .note {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            font-size: 30px;
+            top: -40px; /* Start off-screen */
+            animation: fall 3s linear forwards; /* Consistent speed */
+        }
+
+        @keyframes fall {
+            0% {
+                top: -40px;
+            }
+            100% {
+                top: 440px; /* Stop at hit zone */
+            }
+        }
+
+        #tapArea {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 80px; /* Reduced height */
+            background-color: rgba(0, 200, 0, 0.5);
+            text-align: center;
+            line-height: 80px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.1s ease;
+        }
+
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+        }
+
+        #misses {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+        }
+
+        .tapped {
+            background-color: rgba(0, 255, 0, 0.8);
+        }
+
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        #restartButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Rhythm Game</h1>
+    <div id="gameArea">
+        <div id="score">Score: 0</div>
+        <div id="misses">Misses Left: 5</div>
+        <div id="tapArea">Tap Here!</div>
+    </div>
+
+    <div id="gameOver">
+        <h2>Game Over!</h2>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <button id="restartButton">Restart</button>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        const tapArea = document.getElementById('tapArea');
+        const scoreDisplay = document.getElementById('score');
+        const missesDisplay = document.getElementById('misses');
+        const gameOverDiv = document.getElementById('gameOver');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const restartButton = document.getElementById('restartButton');
+        const emojis = ["🎸", "🥁", "🎹", "🎤", "🎺"]; // Musical instrument emojis
+        const numColumns = 3; // Three columns
+        let score = 0;
+        let misses = 0;
+        const maxMisses = 5;
+        let gameRunning = true;
+
+        function createNote(column) {
+            const note = document.createElement('div');
+            note.classList.add('note');
+            note.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            note.style.left = `${(column / numColumns) * 100 + (100 / (2 * numColumns))}%`; // Evenly spaced columns
+            note.style.transform = 'translateX(-50%)';
+            note.style.animationName = "fall";
+            note.style.animationDuration = `3s`; // Consistent speed
+            gameArea.appendChild(note);
+
+            note.addEventListener('animationend', () => {
+                note.remove();
+                if (gameRunning) {
+                    misses++;
+                    missesDisplay.textContent = `Misses Left: ${maxMisses - misses}`;
+                    if (misses >= maxMisses) {
+                        gameOver();
+                    }
+                }
+            });
+        }
+
+        function startGame() {
+            score = 0;
+            misses = 0;
+            gameRunning = true;
+            scoreDisplay.textContent = `Score: ${score}`;
+            missesDisplay.textContent = `Misses Left: ${maxMisses}`;
+            gameOverDiv.style.display = 'none';
+
+            // Create a breakbeat rhythm
+            const breakbeat = [0, 1, null, 2, 0, null, 1, null]; // Example breakbeat pattern
+            let beatIndex = 0;
+            const baseInterval = 500; // Base interval in milliseconds
+
+            const gameInterval = setInterval(() => {
+                if (breakbeat[beatIndex] !== null && gameRunning) {
+                    createNote(breakbeat[beatIndex]);
+                }
+                beatIndex = (beatIndex + 1) % breakbeat.length;
+                if (!gameRunning) {
+                    clearInterval(gameInterval);
+                }
+            }, baseInterval);
+        }
+
+        function tap(event) {
+            const tapY = tapArea.offsetTop;
+            const notes = document.querySelectorAll('.note');
+
+            let hit = false;
+            notes.forEach(note => {
+                const noteBottom = note.offsetTop + note.offsetHeight;
+                if (noteBottom > tapY && noteBottom < tapY + tapArea.offsetHeight) {
+                    score++;
+                    scoreDisplay.textContent = `Score: ${score}`;
+                    note.remove(); // Remove the note on successful tap
+                    hit = true;
+                }
+            });
+
+            // Visual feedback - only if a note was hit
+            if (hit) {
+                tapArea.classList.add('tapped');
+                setTimeout(() => {
+                    tapArea.classList.remove('tapped');
+                }, 100);
+            } else {
+                misses++;
+                missesDisplay.textContent = `Misses Left: ${maxMisses - misses}`;
+                if (misses >= maxMisses) {
+                    gameOver();
+                }
+            }
+
+            console.log("Tap!");
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            finalScoreDisplay.textContent = score;
+            gameOverDiv.style.display = 'block';
+        }
+
+        tapArea.addEventListener('touchstart', tap);
+        tapArea.addEventListener('mousedown', tap);
+        restartButton.addEventListener('click', startGame);
+
+        startGame();
+    </script>
+</body>
+</html>
