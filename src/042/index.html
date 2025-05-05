@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Endless Runner (Mobile)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #333;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        canvas {
+            border: 2px solid white;
+            background-color: #444;
+        }
+
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        #restartButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .character {
+            display: inline-block;
+            transform: scaleX(-1); /* Flip horizontally */
+        }
+    </style>
+</head>
+<body>
+    <h1>Endless Runner</h1>
+    <canvas id="gameCanvas" width="320" height="480"></canvas>
+    <div id="gameOver">
+        <h2>Game Over!</h2>
+        <p>Score: <span id="finalScore">0</span></p>
+        <button id="restartButton">Restart</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const gameOverDiv = document.getElementById('gameOver');
+        const finalScoreSpan = document.getElementById('finalScore');
+        const restartButton = document.getElementById('restartButton');
+
+        // Character properties
+        let characterX = 50;
+        let characterY = 400;
+        let characterHeight = 30;
+        let characterWidth = 20;
+        let characterVelocity = 0;
+        const gravity = 0.8;
+        const jumpStrength = -15;
+        const animalEmoji = "🦖"; // Tyrannosaurus Rex emoji
+
+        // Ground properties
+        let groundHeight = 50;
+
+        // Obstacle properties
+        let obstacleWidth = 30;
+        let obstacleHeight = 40;
+        let obstacleX = 400;
+        let obstacleY = 480 - groundHeight - obstacleHeight;
+        let obstacleSpeed = -4;
+
+        let score = 0;
+        let gameRunning = true;
+
+        function resetObstacle() {
+            obstacleX = canvas.width;
+            obstacleHeight = Math.floor(Math.random() * 50) + 30;
+            obstacleY = 480 - groundHeight - obstacleHeight;
+        }
+
+        function jump() {
+            if (characterY >= 480 - groundHeight - characterHeight) {
+                characterVelocity = jumpStrength;
+            }
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            finalScoreSpan.textContent = score;
+            gameOverDiv.style.display = "block";
+        }
+
+        function restartGame() {
+            gameRunning = true;
+            gameOverDiv.style.display = "none";
+            characterY = 400;
+            characterVelocity = 0;
+            score = 0;
+            resetObstacle();
+            update();
+        }
+
+        function update() {
+            if (!gameRunning) return;
+
+            // Character physics
+            characterVelocity += gravity;
+            characterY += characterVelocity;
+
+            // Ground collision
+            if (characterY > 480 - groundHeight - characterHeight) {
+                characterY = 480 - groundHeight - characterHeight;
+                characterVelocity = 0;
+            }
+
+            // Obstacle movement
+            obstacleX += obstacleSpeed;
+
+            if (obstacleX < -obstacleWidth) {
+                resetObstacle();
+                score++;
+            }
+
+            // Collision detection
+            if (
+                characterX + characterWidth > obstacleX &&
+                characterX < obstacleX + obstacleWidth &&
+                characterY + characterHeight > obstacleY
+            ) {
+                gameOver();
+            }
+
+            draw();
+            requestAnimationFrame(update);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw character (emoji)
+            ctx.font = "30px Arial";
+            ctx.save(); // Save the current transformation matrix
+            ctx.translate(characterX, characterY); // Move the origin to the character's position
+            ctx.scale(-1, 1); // Flip horizontally
+            ctx.fillText(animalEmoji, -15, 25); // Draw the emoji at the new origin
+            ctx.restore(); // Restore the original transformation matrix
+
+            // Draw ground
+            ctx.fillStyle = 'green';
+            ctx.fillRect(0, 480 - groundHeight, canvas.width, groundHeight);
+
+            // Draw obstacle
+            ctx.fillStyle = 'red';
+            ctx.fillRect(obstacleX, obstacleY, obstacleWidth, obstacleHeight);
+
+            // Draw score
+            ctx.fillStyle = 'white';
+            ctx.font = '20px Arial';
+            ctx.fillText(`Score: ${score}`, 10, 30);
+        }
+
+        // Event listener for jump
+        document.addEventListener('touchstart', jump);
+        document.addEventListener('mousedown', jump);
+        restartButton.addEventListener('click', restartGame);
+
+        // Start the game
+        resetObstacle();
+        update();
+    </script>
+</body>
+</html>
