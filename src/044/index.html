@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mobile Drawing App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #222;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        canvas {
+            border: 2px solid white;
+            touch-action: none; /* Disable default touch actions */
+        }
+    </style>
+</head>
+<body>
+    <h1>Mobile Drawing App</h1>
+    <canvas id="drawingCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size to fill the screen
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let drawing = false;
+        let lines = []; // Store all lines as separate arrays of points
+        let currentLine = [];
+        let time = 0;
+
+        function startDrawing(e) {
+            drawing = true;
+            currentLine = [];
+            lines.push(currentLine);
+            draw(e);
+        }
+
+        function stopDrawing() {
+            drawing = false;
+            ctx.beginPath();
+        }
+
+        function draw(e) {
+            if (!drawing) return;
+
+            let x = e.clientX || e.touches[0].clientX;
+            let y = e.clientY || e.touches[0].clientY;
+
+            currentLine.push({ x: x - canvas.offsetLeft, y: y - canvas.offsetTop });
+
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = 'white';
+
+            ctx.beginPath();
+            ctx.moveTo(currentLine[currentLine.length - 2]?.x || currentLine[0].x, currentLine[currentLine.length - 2]?.y || currentLine[0].y);
+            ctx.lineTo(x - canvas.offsetLeft, y - canvas.offsetTop);
+            ctx.stroke();
+        }
+
+        // Touch events
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchend', stopDrawing);
+        canvas.addEventListener('touchcancel', stopDrawing);
+        canvas.addEventListener('touchmove', draw);
+
+        // Mouse events (for testing on desktop)
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        canvas.addEventListener('mousemove', draw);
+
+        // Animation loop
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = 'white';
+
+            for (const line of lines) {
+                ctx.beginPath();
+                for (let i = 0; i < line.length - 1; i++) {
+                    const p1 = line[i];
+                    const p2 = line[i + 1];
+
+                    // Simple wiggle effect (replace with Perlin noise for smoother results)
+                    const offset = Math.sin(time + i * 0.1) * 5;
+                    const x1 = p1.x + offset;
+                    const y1 = p1.y + offset;
+                    const x2 = p2.x + offset;
+                    const y2 = p2.y + offset;
+
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                }
+                ctx.stroke();
+            }
+
+            time += 0.02;
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
