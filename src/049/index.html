@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Maze Game</h1>
+        <canvas id="mazeCanvas"></canvas>
+        <div class="controls">
+            <div class="dpad">
+                <button onclick="move(0, -1)" class="up">Up</button>
+                <button onclick="move(0, 1)" class="down">Down</button>
+                <button onclick="move(-1, 0)" class="left">Left</button>
+                <button onclick="move(1, 0)" class="right">Right</button>
+            </div>
+            <div class="ab-buttons">
+                <button onclick="placeBomb()" class="a-button">A</button>
+                <button onclick="placeBomb()" class="b-button">B</button>
+            </div>
+        </div>
+        <div id="gameOver" style="display: none;">
+            <h2>Game Over!</h2>
+            <button onclick="resetGame()">Restart</button>
+        </div>
+        <div id="youWin" style="display: none;">
+            <h2>You Win!</h2>
+            <button onclick="resetGame()">Restart</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
