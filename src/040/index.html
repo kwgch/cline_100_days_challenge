@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cho-Han (Mobile)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #222;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            height: 100vh;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .dice {
+            font-size: 100px;
+            margin: 10px;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .dice.rolling {
+            animation: rotate 0.5s linear infinite;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 20px;
+            margin: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cho-Han</h1>
+    <div id="score">Score: 0</div>
+    <div style="display: flex;">
+        <div id="dice1" class="dice">🎲</div>
+        <div id="dice2" class="dice">🎲</div>
+    </div>
+    <div>
+        <button id="evenBtn">Even</button>
+        <button id="oddBtn">Odd</button>
+    </div>
+
+    <script>
+        const dice1 = document.getElementById('dice1');
+        const dice2 = document.getElementById('dice2');
+        const evenBtn = document.getElementById('evenBtn');
+        const oddBtn = document.getElementById('oddBtn');
+        const scoreDisplay = document.getElementById('score');
+
+        let score = 0;
+
+        function rollDice(guess) {
+            dice1.classList.add('rolling');
+            dice2.classList.add('rolling');
+
+            const randomNumber1 = Math.floor(Math.random() * 6) + 1;
+            const randomNumber2 = Math.floor(Math.random() * 6) + 1;
+            let diceEmoji1 = "";
+            let diceEmoji2 = "";
+
+            switch (randomNumber1) {
+                case 1: diceEmoji1 = "⚀"; break;
+                case 2: diceEmoji1 = "⚁"; break;
+                case 3: diceEmoji1 = "⚂"; break;
+                case 4: diceEmoji1 = "⚃"; break;
+                case 5: diceEmoji1 = "⚄"; break;
+                case 6: diceEmoji1 = "⚅"; break;
+            }
+            switch (randomNumber2) {
+                case 1: diceEmoji2 = "⚀"; break;
+                case 2: diceEmoji2 = "⚁"; break;
+                case 3: diceEmoji2 = "⚂"; break;
+                case 4: diceEmoji2 = "⚃"; break;
+                case 5: diceEmoji2 = "⚄"; break;
+                case 6: diceEmoji2 = "⚅"; break;
+            }
+
+            setTimeout(() => {
+                dice1.classList.remove('rolling');
+                dice1.textContent = diceEmoji1;
+                dice2.classList.remove('rolling');
+                dice2.textContent = diceEmoji2;
+
+                const sum = randomNumber1 + randomNumber2;
+                const isEven = sum % 2 === 0;
+
+                let resultMessage = isEven ? "Even" : "Odd";
+                let winLoseMessage = "";
+                if ((guess === "even" && isEven) || (guess === "odd" && !isEven)) {
+                    score++;
+                    winLoseMessage = "You win!";
+                } else {
+                    score--;
+                    winLoseMessage = "You lose!";
+                }
+
+                scoreDisplay.textContent = `Score: ${score} - ${resultMessage} - ${winLoseMessage}`;
+
+            }, 500);
+        }
+
+        evenBtn.addEventListener('click', () => rollDice("even"));
+        oddBtn.addEventListener('click', () => rollDice("odd"));
+    </script>
+</body>
+</html>
