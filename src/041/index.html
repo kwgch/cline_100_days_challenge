@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flappy Bird (Mobile)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #4ec0ca;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        canvas {
+            border: 2px solid white;
+            background-color: #555;
+        }
+
+        .bird {
+            display: inline-block;
+            transform: scaleX(-1); /* Flip horizontally */
+        }
+
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        #restartButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Flappy Bird</h1>
+    <canvas id="gameCanvas" width="320" height="480"></canvas>
+    <div id="gameOver">
+        <h2>Game Over!</h2>
+        <p>Score: <span id="finalScore">0</span></p>
+        <button id="restartButton">Restart</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const gameOverDiv = document.getElementById('gameOver');
+        const finalScoreSpan = document.getElementById('finalScore');
+        const restartButton = document.getElementById('restartButton');
+
+        // Bird properties
+        let birdX = 50;
+        let birdY = 200;
+        let birdVelocity = 0;
+        const gravity = 0.6;
+        const jumpStrength = -10;
+        const birdEmoji = "🐦"; // Bird emoji
+
+        // Obstacle properties
+        let obstacleWidth = 50;
+        let obstacleHeight = 200;
+        let obstacleX = 400;
+        let obstacleY = 0;
+        let obstacleSpeed = -2;
+
+        let score = 0;
+        let gameRunning = true;
+
+        function resetObstacle() {
+            obstacleHeight = Math.floor(Math.random() * 200) + 100;
+            obstacleX = canvas.width;
+        }
+
+        function jump() {
+            birdVelocity = jumpStrength;
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            finalScoreSpan.textContent = score;
+            gameOverDiv.style.display = "block";
+        }
+
+        function restartGame() {
+            gameRunning = true;
+            gameOverDiv.style.display = "none";
+            birdY = 200;
+            birdVelocity = 0;
+            score = 0;
+            resetObstacle();
+            update();
+        }
+
+        function update() {
+            if (!gameRunning) return;
+
+            // Bird physics
+            birdVelocity += gravity;
+            birdY += birdVelocity;
+
+            // Obstacle movement
+            obstacleX += obstacleSpeed;
+
+            if (obstacleX < -obstacleWidth) {
+                resetObstacle();
+                score++;
+            }
+
+            // Collision detection
+            if (
+                birdX + 20 > obstacleX &&
+                birdX - 20 < obstacleX + obstacleWidth &&
+                (birdY - 20 < obstacleHeight || birdY + 20 > canvas.height)
+            ) {
+                gameOver();
+            }
+
+            if (birdY < 0 || birdY > canvas.height) {
+                gameOver();
+            }
+
+            draw();
+            requestAnimationFrame(update);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw bird (emoji)
+            ctx.font = "30px Arial";
+            ctx.save(); // Save the current transformation matrix
+            ctx.translate(birdX, birdY); // Move the origin to the bird's position
+            ctx.scale(-1, 1); // Flip horizontally
+            ctx.fillText(birdEmoji, -15, 10); // Draw the emoji at the new origin
+            ctx.restore(); // Restore the original transformation matrix
+
+            // Draw obstacle
+            ctx.fillStyle = 'green';
+            ctx.fillRect(obstacleX, 0, obstacleWidth, obstacleHeight);
+            ctx.fillRect(obstacleX, obstacleHeight + 150, obstacleWidth, canvas.height);
+
+            // Draw score
+            ctx.fillStyle = 'white';
+            ctx.font = '20px Arial';
+            ctx.fillText(`Score: ${score}`, 10, 30);
+        }
+
+        // Event listener for jump
+        document.addEventListener('touchstart', jump);
+        document.addEventListener('mousedown', jump);
+        restartButton.addEventListener('click', restartGame);
+
+        // Start the game
+        resetObstacle();
+        update();
+    </script>
+</body>
+</html>
