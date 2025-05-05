@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Music Visualizer (Mobile)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #222;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        canvas {
+            border: 2px solid white;
+            touch-action: none; /* Disable default touch actions */
+        }
+    </style>
+</head>
+<body>
+    <h1>Music Visualizer</h1>
+    <canvas id="visualizerCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('visualizerCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size to fill the screen
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let audioContext;
+        let analyser;
+        let audioData;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const maxRadius = Math.min(centerX, centerY) * 0.8; // Limit radius to fit canvas
+        let time = 0;
+
+        async function getAudio() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioContext = new AudioContext();
+                const source = audioContext.createMediaStreamSource(stream);
+                analyser = audioContext.createAnalyser();
+                source.connect(analyser);
+                analyser.fftSize = 256;
+                const bufferLength = analyser.frequencyBinCount;
+                audioData = new Uint8Array(bufferLength);
+            } catch (err) {
+                console.error("Error accessing microphone:", err);
+            }
+        }
+
+        function drawWave(radiusScale, color, rotation) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            const numSegments = 512; // Increase segments for smoother curves
+            for (let i = 0; i < numSegments; i++) {
+                const angle = (i / numSegments) * Math.PI * 4 + rotation; // Multiple rotations
+                const frequencyData = audioData[i % 256]; // Loop through audio data
+                const displacement = frequencyData / 255 * 20; // Scale frequency data for displacement
+                const radius = radiusScale * maxRadius + displacement;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        function animate() {
+            if (analyser) {
+                analyser.getByteFrequencyData(audioData);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                let sum = 0;
+                for (let i = 0; i < audioData.length; i++) {
+                    sum += audioData[i];
+                }
+                const average = sum / audioData.length;
+                let volumeScale = average / 255; // Scale volume based on average audio data
+                volumeScale = volumeScale * 1.5 + 0.5; // Adjust scaling factor and add a minimum scale
+                if (volumeScale < 0.5) volumeScale = 0.5; // Ensure a minimum scale
+
+                // Draw multiple waveforms
+                // const numWaves = 75; // Increase the number of waveforms
+                const numWaves = 24; // Increase the number of waveforms
+                for (let i = 0; i < numWaves; i++) {
+                    const radiusOffset = (i / numWaves) * 0.8; // Vary the radius
+                    const colorOffset = (i / numWaves) * 120; // Vary the color
+                    drawWave(volumeScale * (0.2 + radiusOffset), `hsl(${average + colorOffset}, 100%, 50%)`, time * (0.1 + radiusOffset));
+                }
+            }
+
+            time += 0.01;
+            requestAnimationFrame(animate);
+        }
+
+        getAudio().then(() => {
+            animate();
+        });
+    </script>
+</body>
+</html>
