@@ -42,12 +42,12 @@
 42. Endless Runner
 43. Rhythm Game
 44. Drawing App
-45. Music Visualizer
+45. Color Palette Generator
 46. Bomb Drop
 47. Memory Game
 48. Chat Joke
 49. Maze Game
-50. Color Palette Generator
+50. TBD
 51. TBD
 52. TBD
 53. TBD

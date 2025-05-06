@@ -1,115 +1,251 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Music Visualizer (Mobile)</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Palette Generator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            background-color: #222;
-            color: white;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            overflow: hidden;
-            height: 100vh;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+            touch-action: manipulation;
         }
 
-        canvas {
-            border: 2px solid white;
-            touch-action: none; /* Disable default touch actions */
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .palette {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .color {
+            width: 100px;
+            height: 100px;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 600px) {
+            .container {
+                width: 95%;
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            button {
+                font-size: 14px;
+            }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+            animation-iteration-count: infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .fall {
+            animation: fall 2s forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+        }
+
+        .fall-1 {
+            animation-delay: 0.2s;
+        }
+
+        .fall-2 {
+            animation-delay: 0.4s;
+        }
+
+        .fall-3 {
+            animation-delay: 0.6s;
+        }
+
+        .fall-4 {
+            animation-delay: 0.8s;
+        }
+
+        .fall-5 {
+            animation-delay: 1.0s;
         }
     </style>
 </head>
 <body>
-    <h1>Music Visualizer</h1>
-    <canvas id="visualizerCanvas"></canvas>
-
+    <div class="container">
+        <h1 id="title">Color Palette Generator</h1>
+        <div class="palette">
+            <div class="color" id="color1"></div>
+            <div class="color" id="color2"></div>
+            <div class="color" id="color3"></div>
+            <div class="color" id="color4"></div>
+            <div class="color" id="color5"></div>
+        </div>
+        <button id="generateBtn">Generate New Palette</button>
+    </div>
     <script>
-        const canvas = document.getElementById('visualizerCanvas');
-        const ctx = canvas.getContext('2d');
+        const generateBtn = document.getElementById('generateBtn');
+        const title = document.getElementById('title');
+        const color1 = document.getElementById('color1');
+        const color2 = document.getElementById('color2');
+        const color3 = document.getElementById('color3');
+        const color4 = document.getElementById('color4');
+        const color5 = document.getElementById('color5');
+        const container = document.querySelector('.container');
 
-        // Set canvas size to fill the screen
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        generateBtn.addEventListener('click', generatePalette);
 
-        let audioContext;
-        let analyser;
-        let audioData;
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        const maxRadius = Math.min(centerX, centerY) * 0.8; // Limit radius to fit canvas
-        let time = 0;
+        function generatePalette() {
+            color1.style.backgroundColor = getRandomColor();
+            color2.style.backgroundColor = getRandomColor();
+            color3.style.backgroundColor = getRandomColor();
+            color4.style.backgroundColor = getRandomColor();
+            color5.style.backgroundColor = getRandomColor();
 
-        async function getAudio() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                audioContext = new AudioContext();
-                const source = audioContext.createMediaStreamSource(stream);
-                analyser = audioContext.createAnalyser();
-                source.connect(analyser);
-                analyser.fftSize = 256;
-                const bufferLength = analyser.frequencyBinCount;
-                audioData = new Uint8Array(bufferLength);
-            } catch (err) {
-                console.error("Error accessing microphone:", err);
+            const elements = [
+                { el: title, delay: 0 },
+                { el: color1, delay: 0.2 },
+                { el: color2, delay: 0.4 },
+                { el: color3, delay: 0.6 },
+                { el: color4, delay: 0.8 },
+                { el: color5, delay: 1.0 },
+                { el: generateBtn, delay: 0 }
+            ];
+
+            // Shuffle the elements array
+            shuffleArray(elements);
+
+            setTimeout(() => {
+                elements.forEach((element, index) => {
+                    setTimeout(() => {
+                        element.el.classList.add('shake');
+                        setTimeout(() => {
+                            element.el.classList.remove('shake');
+                            element.el.classList.add('fall');
+                        }, 500);
+                    }, index * 200); // Stagger the animation
+                });
+            }, 3000);
+        }
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        // Function to shuffle an array (Fisher-Yates shuffle)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
             }
         }
 
-        function drawWave(radiusScale, color, rotation) {
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            const numSegments = 512; // Increase segments for smoother curves
-            for (let i = 0; i < numSegments; i++) {
-                const angle = (i / numSegments) * Math.PI * 4 + rotation; // Multiple rotations
-                const frequencyData = audioData[i % 256]; // Loop through audio data
-                const displacement = frequencyData / 255 * 20; // Scale frequency data for displacement
-                const radius = radiusScale * maxRadius + displacement;
-                const x = centerX + radius * Math.cos(angle);
-                const y = centerY + radius * Math.sin(angle);
-                if (i === 0) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
-                }
-            }
-            ctx.closePath();
-            ctx.stroke();
+        const constructionMessage = document.createElement('p');
+        constructionMessage.textContent = "Sorry, under construction 😜";
+        constructionMessage.style.fontSize = '24px';
+        constructionMessage.style.textAlign = 'center';
+        constructionMessage.style.marginTop = '20px';
+        constructionMessage.style.display = 'none'; // Initially hidden
+        container.appendChild(constructionMessage);
+
+        function showConstructionMessage() {
+            constructionMessage.style.display = 'block';
         }
 
-        function animate() {
-            if (analyser) {
-                analyser.getByteFrequencyData(audioData);
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+        function generatePalette() {
+            color1.style.backgroundColor = getRandomColor();
+            color2.style.backgroundColor = getRandomColor();
+            color3.style.backgroundColor = getRandomColor();
+            color4.style.backgroundColor = getRandomColor();
+            color5.style.backgroundColor = getRandomColor();
 
-                let sum = 0;
-                for (let i = 0; i < audioData.length; i++) {
-                    sum += audioData[i];
-                }
-                const average = sum / audioData.length;
-                let volumeScale = average / 255; // Scale volume based on average audio data
-                volumeScale = volumeScale * 1.5 + 0.5; // Adjust scaling factor and add a minimum scale
-                if (volumeScale < 0.5) volumeScale = 0.5; // Ensure a minimum scale
+            const elements = [
+                { el: title, delay: 0 },
+                { el: color1, delay: 0.2 },
+                { el: color2, delay: 0.4 },
+                { el: color3, delay: 0.6 },
+                { el: color4, delay: 0.8 },
+                { el: color5, delay: 1.0 },
+                { el: generateBtn, delay: 0 }
+            ];
 
-                // Draw multiple waveforms
-                // const numWaves = 75; // Increase the number of waveforms
-                const numWaves = 24; // Increase the number of waveforms
-                for (let i = 0; i < numWaves; i++) {
-                    const radiusOffset = (i / numWaves) * 0.8; // Vary the radius
-                    const colorOffset = (i / numWaves) * 120; // Vary the color
-                    drawWave(volumeScale * (0.2 + radiusOffset), `hsl(${average + colorOffset}, 100%, 50%)`, time * (0.1 + radiusOffset));
-                }
-            }
+            // Shuffle the elements array
+            shuffleArray(elements);
 
-            time += 0.01;
-            requestAnimationFrame(animate);
+            setTimeout(() => {
+                elements.forEach((element, index) => {
+                    setTimeout(() => {
+                        element.el.classList.add('shake');
+                        setTimeout(() => {
+                            element.el.classList.remove('shake');
+                            element.el.classList.add('fall');
+                        }, 500);
+                    }, index * 200); // Stagger the animation
+                });
+
+                setTimeout(() => {
+                    showConstructionMessage();
+                }, 4000); // Show message after all elements have fallen
+            }, 3000);
         }
-
-        getAudio().then(() => {
-            animate();
-        });
     </script>
 </body>
 </html>
