@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>インタラクティブ解説：べき乗則の背後に同期現象の存在</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Plotly.js の読み込み -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <header>
+        <h1>インタラクティブ解説：べき乗則の背後に同期現象の存在</h1>
+    </header>
+
+    <main>
+        <section id="research-overview">
+            <h2>研究の概要</h2>
+            <article>
+                <h3>研究のポイント</h3>
+                <p>自然界や社会に広く見られる「テイラーの法則（TL）」と呼ばれるべき乗則の背後に、「同期現象」が存在することを理論的に解明しました。特に、強い同期（波形比例性）が指数2のTLを誘発することを示しました。</p>
+            </article>
+            <article>
+                <h3>研究の背景</h3>
+                <p>自然界や社会には様々な「べき乗則」が存在します。その中でも「テイラーの法則（TL）」は、多くの生物個体群で観測される平均と分散の間のべき乗則です。TLの指数は通常1から2の間の値をとりますが、なぜ指数が2に近づくのかは長年の謎でした。</p>
+                <p>一方、「同期現象」は複数の振動子が相互作用によって同じリズムで振動する現象です。本研究では、これら二つの普遍的現象の関係性を理論的に解明しました。</p>
+            </article>
+            <article>
+                <h3>研究の成果</h3>
+                <p>本研究では、複数の振動子が結合して同期する際、その同期の強さに応じてTLが現れることを理論的に示しました。特に、「波形比例性」と呼ばれる強い同期状態では、必然的に指数2のTLが現れることを証明しました。</p>
+                <p>これにより、自然界で広く観測される指数2のTLの背後に同期現象が存在する可能性が示唆されました。</p>
+            </article>
+            <article>
+                <h3>研究の意義・今後の展望</h3>
+                <p>本研究は、自然界に広く見られる二つの普遍的現象（TLと同期現象）の間に深い関係があることを示した点で重要です。今後は、実際の生態系や社会システムにおいて、TLと同期現象の関係を実証的に検証することが期待されます。</p>
+            </article>
+            <div class="glossary">
+                <h3>用語解説</h3>
+                <dl>
+                    <dt data-term-key="power-law">べき乗則</dt>
+                    <dd>二つの量の間に「y = ax^b」という関係が成り立つ法則。bは指数と呼ばれる。</dd>
+                    
+                    <dt data-term-key="taylors-law">テイラーの法則（TL）</dt>
+                    <dd>平均(M)と分散(V)の間に「V = aM^b」という関係が成り立つべき乗則。多くの生物個体群で観測される。</dd>
+                    
+                    <dt data-term-key="synchronization">同期現象</dt>
+                    <dd>複数の振動子が相互作用によって同じリズムで振動する現象。</dd>
+                    
+                    <dt data-term-key="exponent">指数</dt>
+                    <dd>べき乗則「y = ax^b」におけるb。TLでは通常1から2の間の値をとる。</dd>
+                    
+                    <dt data-term-key="waveform-proportionality">波形比例性</dt>
+                    <dd>複数の時系列の波形が互いに定数倍の関係になる強い同期状態。</dd>
+                </dl>
+            </div>
+            <div id="tooltip-container" class="tooltip-hidden"></div>
+        </section>
+
+        <section id="taylors-law-section">
+            <h2>テイラーの法則（TL）の解説と視覚化</h2>
+            <div class="content-wrapper">
+                <div class="explanation-area">
+                    <p>テイラーの法則（TL）は、平均(M)と分散(V)の間に成り立つべき乗則で、数式では以下のように表されます：</p>
+                    <p class="formula">V = aM<sup>b</sup></p>
+                    <p>ここで、aは定数、bは指数です。両対数プロットでは、この関係は直線として表示されます：</p>
+                    <p class="formula">log(V) = log(a) + b・log(M)</p>
+                    <p>この直線の傾きが指数bに相当します。特に重要な値は：</p>
+                    <ul>
+                        <li><strong>b = 1</strong>: ポアソン分布（完全にランダムな事象）に対応</li>
+                        <li><strong>b = 2</strong>: 強い同期状態（波形比例性）に対応</li>
+                    </ul>
+                    <p>下のグラフでは、異なる同期状態におけるTLを確認できます。</p>
+                </div>
+                <div class="visualization-area">
+                    <div id="tl-plot-taylor" class="plot-container"></div>
+                    <div class="controls">
+                        <button id="btn-async-data" class="control-button">非同期状態のデータ</button>
+                        <button id="btn-sync-data" class="control-button">同期状態のデータ</button>
+                        <button id="btn-strong-sync-data" class="control-button">強い同期状態のデータ</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="synchronization-section">
+            <h2>同期現象の解説と視覚化</h2>
+            <div class="content-wrapper">
+                <div class="explanation-area">
+                    <p>同期現象とは、複数の振動子（時系列データ）が相互作用によって同じリズムで振動する現象です。</p>
+                    <p>特に「波形比例性」(waveform proportionality)は、複数の時系列の波形が互いに定数倍の関係になる強い同期状態を指します。数式では：</p>
+                    <p class="formula">y<sub>i</sub>(t) = c<sub>i</sub> · y<sub>j</sub>(t)</p>
+                    <p>ここで、y<sub>i</sub>(t)とy<sub>j</sub>(t)は異なる時系列、c<sub>i</sub>は定数です。</p>
+                    <p>下のスライダーを操作すると、結合の強さに応じて時系列の同期状態が変化します：</p>
+                    <ul>
+                        <li><strong>弱い結合</strong>: 各時系列が独立に変動（非同期）</li>
+                        <li><strong>中程度の結合</strong>: 時系列の位相が揃い始める（同期）</li>
+                        <li><strong>強い結合</strong>: 時系列の波形が相似形になる（波形比例性）</li>
+                    </ul>
+                    <p>同時に、同期状態の変化に伴うTLの変化も観察できます。特に、波形比例性が達成されると、TLの指数が2に近づくことが確認できます。</p>
+                </div>
+                <div class="visualization-area">
+                    <div id="timeseries-plot" class="plot-container"></div>
+                    <div id="tl-plot-sync" class="plot-container"></div>
+                    <div class="controls">
+                        <label for="coupling-strength-slider">結合の強さ:</label>
+                        <input type="range" id="coupling-strength-slider" min="0" max="100" value="0">
+                        <span id="coupling-strength-value">0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="paper-info">
+                <h3>論文情報</h3>
+                <p>雑誌名: Physical Review Letters</p>
+                <p>題名: Waveform proportionality and Taylor's law induced by synchronization of periodic and chaotic oscillators</p>
+                <p>著者名: Yuzuru Mitsui and Hiroshi Kori</p>
+                <p>DOI: <a href="https://doi.org/10.1103/PhysRevLett.134.167202" target="_blank" rel="noopener noreferrer">10.1103/PhysRevLett.134.167202</a></p>
+            </div>
+            <div class="contact-info">
+                <h3>問合せ先情報</h3>
+                <p>研究内容について: 三井譲（九州大学 助教）</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

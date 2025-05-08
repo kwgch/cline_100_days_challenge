@@ -1,0 +1,297 @@
+/* Base styles */
+:root {
+    --primary-color: #3a6ea5;
+    --secondary-color: #004e98;
+    --accent-color: #ff6b6b;
+    --background-color: #f8f9fa;
+    --text-color: #333;
+    --light-gray: #e9ecef;
+    --medium-gray: #ced4da;
+    --dark-gray: #6c757d;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    padding: 0;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+/* Typography */
+h1, h2, h3 {
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+}
+
+h2 {
+    font-size: 1.5rem;
+    color: var(--secondary-color);
+    border-bottom: 2px solid var(--light-gray);
+    padding-bottom: 0.5rem;
+    margin-top: 2rem;
+}
+
+h3 {
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+    margin-top: 1.5rem;
+}
+
+p {
+    margin-bottom: 1rem;
+}
+
+ul, ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Layout */
+header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+section {
+    margin-bottom: 2rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+}
+
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.explanation-area, .visualization-area {
+    width: 100%;
+}
+
+.plot-container {
+    width: 100%;
+    height: 300px;
+    margin-bottom: 1rem;
+    border: 1px solid var(--light-gray);
+    border-radius: 4px;
+}
+
+/* Controls */
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    align-items: center;
+}
+
+.control-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.control-button:hover {
+    background-color: var(--secondary-color);
+}
+
+#coupling-strength-slider {
+    flex-grow: 1;
+    max-width: 300px;
+    margin: 0 0.5rem;
+    -webkit-appearance: none;
+    height: 8px;
+    background: var(--light-gray);
+    border-radius: 4px;
+    outline: none;
+}
+
+#coupling-strength-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+}
+
+#coupling-strength-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    border: none;
+}
+
+#coupling-strength-value {
+    min-width: 30px;
+    text-align: center;
+}
+
+/* Glossary and Tooltip */
+.glossary {
+    background-color: var(--light-gray);
+    padding: 1rem;
+    border-radius: 4px;
+    margin-top: 1.5rem;
+}
+
+.glossary dt {
+    font-weight: bold;
+    color: var(--secondary-color);
+    cursor: pointer;
+    margin-top: 0.5rem;
+}
+
+.glossary dt:hover {
+    text-decoration: underline;
+}
+
+.glossary dd {
+    margin-left: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+#tooltip-container {
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    max-width: 300px;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.tooltip-hidden {
+    display: none;
+}
+
+/* Formula styling */
+.formula {
+    font-style: italic;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+/* Footer */
+footer {
+    background-color: var(--light-gray);
+    padding: 1.5rem;
+    margin-top: 2rem;
+    border-top: 1px solid var(--medium-gray);
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.paper-info, .contact-info {
+    flex: 1;
+}
+
+/* Responsive design */
+@media (min-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+    
+    .content-wrapper {
+        flex-direction: row;
+    }
+    
+    .explanation-area, .visualization-area {
+        width: 50%;
+    }
+    
+    .footer-content {
+        flex-direction: row;
+    }
+}
+
+/* Mobile touch optimization */
+@media (max-width: 767px) {
+    .control-button, 
+    #coupling-strength-slider::-webkit-slider-thumb,
+    #coupling-strength-slider::-moz-range-thumb {
+        min-height: 44px; /* Minimum touch target size */
+    }
+    
+    .control-button {
+        flex: 1 0 auto;
+        text-align: center;
+        padding: 0.75rem;
+    }
+    
+    #coupling-strength-slider {
+        height: 20px; /* Larger slider for mobile */
+    }
+    
+    #coupling-strength-slider::-webkit-slider-thumb,
+    #coupling-strength-slider::-moz-range-thumb {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+/* Prevent unwanted scrolling on touch */
+.plot-container {
+    touch-action: none;
+}
