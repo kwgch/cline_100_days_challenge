@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>お絵かきアプリ</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            touch-action: none;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+            background-color: white;
+            touch-action: none;
+        }
+        .controls {
+            padding: 10px;
+            background-color: #333;
+            color: white;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="color"] {
+            width: 40px;
+            height: 40px;
+            border: none;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <input type="color" id="colorPicker" value="#000000">
+        <input type="range" id="brushSize" min="1" max="50" value="5">
+        <button id="clearBtn">消す</button>
+        <button id="saveBtn">保存</button>
+    </div>
+    <canvas id="drawingCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        const colorPicker = document.getElementById('colorPicker');
+        const brushSize = document.getElementById('brushSize');
+        const clearBtn = document.getElementById('clearBtn');
+        const saveBtn = document.getElementById('saveBtn');
+
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight - 60; // Account for controls height
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Drawing state
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        // Handle both mouse and touch events
+        function startDrawing(e) {
+            isDrawing = true;
+            [lastX, lastY] = getPosition(e);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            let [x, y] = getPosition(e);
+            
+            // Reverse vertical/horizontal movement randomly
+            if (Math.random() > 0.7) {
+                x = lastX + (lastX - x) * (0.5 + Math.random());
+                y = lastY + (lastY - y) * (0.5 + Math.random());
+            }
+            
+            // Add sudden jumps occasionally
+            if (Math.random() > 0.9) {
+                x += (Math.random() - 0.5) * 200;
+                y += (Math.random() - 0.5) * 200;
+            }
+            
+            const dx = x - lastX;
+            const dy = y - lastY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Draw unexpected patterns
+            ctx.beginPath();
+            ctx.arc(
+                x + Math.random() * 20 - 10, 
+                y + Math.random() * 20 - 10,
+                distance * 0.2 + 2,
+                0, 
+                Math.PI * 2
+            );
+            ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            ctx.fill();
+            
+            // Draw connecting lines with random behavior
+            if (Math.random() > 0.7) {
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                if (Math.random() > 0.5) {
+                    // Sometimes draw to unexpected position
+                    ctx.lineTo(
+                        x + (Math.random() - 0.5) * 100,
+                        y + (Math.random() - 0.5) * 100
+                    );
+                } else {
+                    // Sometimes draw to mirrored position
+                    ctx.lineTo(
+                        canvas.width - x,
+                        canvas.height - y
+                    );
+                }
+                ctx.strokeStyle = colorPicker.value;
+                ctx.lineWidth = brushSize.value * 0.5;
+                ctx.stroke();
+            }
+            
+            [lastX, lastY] = [x, y];
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function getPosition(e) {
+            let x, y;
+            if (e.touches) {
+                x = e.touches[0].clientX;
+                y = e.touches[0].clientY;
+            } else {
+                x = e.clientX;
+                y = e.clientY;
+            }
+            return [x, y];
+        }
+
+        // Event listeners for both mouse and touch
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startDrawing(e);
+        });
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            draw(e);
+        });
+        canvas.addEventListener('touchend', stopDrawing);
+
+        // Clear canvas
+        clearBtn.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+
+        // Save drawing
+        saveBtn.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = 'drawing.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    </script>
+</body>
+</html>
