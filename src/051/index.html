@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>遺伝的サウンドビジュアライザー</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: Arial, sans-serif;
+            touch-action: manipulation;
+        }
+        canvas {
+            display: block;
+        }
+        .info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 80%;
+            z-index: 10;
+        }
+        .stats {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: white;
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 10;
+        }
+        #demo-button {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #debug {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            color: white;
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 80%;
+            z-index: 10;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">マイクの音に反応して生命体が進化します。音の強さや周波数によって生命体の適応度が変化し、より適応した個体が子孫を残します。</div>
+    <div class="stats" id="stats"></div>
+    <div id="demo-button">デモモードで実行</div>
+    <div id="debug"></div>
+    <canvas id="visualizer"></canvas>
+
+    <script>
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+        const statsElement = document.getElementById('stats');
+        const debugElement = document.getElementById('debug');
+        let audioContext;
+        let analyser;
+        let microphone;
+        let dataArray;
+        let isRunning = false;
+        let isDemoMode = false;
+        
+        // 遺伝的アルゴリズムのパラメータ
+        const POPULATION_SIZE = 50;
+        const MUTATION_RATE = 0.1;
+        const CROSSOVER_RATE = 0.7;
+        const LIFESPAN = 300; // フレーム数での寿命
+        const REPRODUCTION_ENERGY = 0.7; // 繁殖に必要なエネルギーの閾値
+        const DEBUG_MODE = true; // デバッグモード
+        const MIC_TIMEOUT = 5000; // マイク初期化のタイムアウト（ミリ秒）
+        
+        // 生命体の集団
+        let organisms = [];
+        let generation = 1;
+        let frameCount = 0;
+        let totalBirths = 0;
+        let totalDeaths = 0;
+        
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // 生命体のクラス
+        class Organism {
+            constructor(genes = null) {
+                // 遺伝子が指定されていない場合はランダムに生成
+                this.genes = genes || {
+                // 見た目の特性
+                    baseSize: Math.random() * 15 + 5, // サイズを大きくして見やすく
+                    sizeVariation: Math.random() * 8,
+                    baseHue: Math.random() * 360,
+                    hueVariation: Math.random() * 100,
+                    opacity: Math.random() * 0.5 + 0.5, // 不透明度を上げて見やすく
+                    glowFactor: Math.random() * 3 + 1.5, // グロー効果を強く
+                    
+                    // 動きの特性
+                    speedFactor: Math.random() * 3 + 0.5,
+                    pulseRate: Math.random() * 0.1 + 0.01,
+                    pulseAmount: Math.random() * 30 + 5,
+                    
+                    // 音への反応性
+                    frequencyResponse: Math.floor(Math.random() * 128),
+                    frequencyRange: Math.floor(Math.random() * 20 + 5),
+                    bassResponse: Math.random() * 2,
+                    trebleResponse: Math.random() * 2,
+                    
+                    // 行動特性
+                    socialDistance: Math.random() * 200 + 50,
+                    connectionStrength: Math.random() * 0.5 + 0.1
+                };
+                
+                // 位置と状態
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * this.genes.speedFactor;
+                this.vy = (Math.random() - 0.5) * this.genes.speedFactor;
+                this.age = 0;
+                this.energy = 0.5; // 初期エネルギー
+                this.fitness = 0;
+                this.alive = true;
+                this.connections = [];
+                
+                // 音の周波数帯域を選択（各生命体は特定の周波数に反応）
+                this.freqStart = this.genes.frequencyResponse;
+                this.freqEnd = this.freqStart + this.genes.frequencyRange;
+            }
+            
+            // 更新処理
+            update(dataArray, time) {
+                if (!this.alive) return;
+                
+                this.age++;
+                
+                // 寿命による死亡判定
+                if (this.age > LIFESPAN) {
+                    this.alive = false;
+                    totalDeaths++;
+                    return;
+                }
+                
+                try {
+                    // 音響データから自分の周波数帯域の平均を計算
+                    let freqSum = 0;
+                    for (let i = this.freqStart; i < this.freqEnd && i < dataArray.length; i++) {
+                        freqSum += dataArray[i];
+                    }
+                    const freqAvg = freqSum / (this.freqEnd - this.freqStart) / 255;
+                    
+                    // 低音域と高音域の反応を計算
+                    const bassData = dataArray.slice(0, Math.min(10, dataArray.length));
+                    const trebleData = dataArray.slice(Math.max(0, dataArray.length - 20));
+                    
+                    const bassResponse = bassData.reduce((a, b) => a + b, 0) / bassData.length / 255 * this.genes.bassResponse;
+                    const trebleResponse = trebleData.reduce((a, b) => a + b, 0) / trebleData.length / 255 * this.genes.trebleResponse;
+                    
+                    // エネルギー更新（音に反応するほどエネルギーを得る）
+                    this.energy += (freqAvg * 0.05) - 0.005; // 基礎代謝でエネルギー消費
+                    this.energy = Math.max(0, Math.min(1, this.energy)); // 0～1の範囲に制限
+                    
+                    // エネルギー不足による死亡判定
+                    if (this.energy <= 0.05) {
+                        this.alive = false;
+                        totalDeaths++;
+                        return;
+                    }
+                    
+                    // 適応度の計算（年齢とエネルギーから）
+                    this.fitness = (this.age / LIFESPAN) * 0.3 + this.energy * 0.7;
+                    
+                    // 動きの更新
+                    const angle = time * this.genes.pulseRate;
+                    const pulse = Math.sin(angle) * this.genes.pulseAmount;
+                    
+                    // 音に反応して動く
+                    this.vx += (Math.random() - 0.5) * freqAvg * this.genes.speedFactor * 0.2;
+                    this.vy += (Math.random() - 0.5) * freqAvg * this.genes.speedFactor * 0.2;
+                    
+                    // 低音に反応して中心方向に動く傾向
+                    const centerX = canvas.width / 2;
+                    const centerY = canvas.height / 2;
+                    const dx = centerX - this.x;
+                    const dy = centerY - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist > 0) {  // 0除算を防ぐ
+                        this.vx += (dx / dist) * bassResponse * 0.5;
+                        this.vy += (dy / dist) * bassResponse * 0.5;
+                        
+                        // 高音に反応して外側に動く傾向
+                        this.vx -= (dx / dist) * trebleResponse * 0.3;
+                        this.vy -= (dy / dist) * trebleResponse * 0.3;
+                    }
+                    
+                    // 速度制限
+                    const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                    if (speed > this.genes.speedFactor * 2) {
+                        this.vx = (this.vx / speed) * this.genes.speedFactor * 2;
+                        this.vy = (this.vy / speed) * this.genes.speedFactor * 2;
+                    }
+                    
+                    // 位置の更新
+                    this.x += this.vx + Math.cos(angle) * pulse * freqAvg;
+                    this.y += this.vy + Math.sin(angle) * pulse * freqAvg;
+                    
+                    // 画面外に出ないように
+                    if (this.x < 0) this.x = 0;
+                    if (this.x > canvas.width) this.x = canvas.width;
+                    if (this.y < 0) this.y = 0;
+                    if (this.y > canvas.height) this.y = canvas.height;
+                    
+                    // 繁殖判定
+                    if (this.energy > REPRODUCTION_ENERGY && Math.random() < 0.01) {
+                        this.reproduce();
+                    }
+                } catch (err) {
+                    // エラーが発生しても処理を続行
+                    console.error("生命体更新エラー:", err);
+                }
+            }
+            
+            // 描画処理
+            draw(ctx, time) {
+                if (!this.alive) return;
+                
+                try {
+                    // サイズと色の計算
+                    const sizePulse = Math.sin(time * 2 + this.age * 0.05) * this.genes.sizeVariation;
+                    // 必ず正の値になるようにする
+                    const size = Math.max(1, this.genes.baseSize * (0.5 + this.energy * 0.5) + sizePulse);
+                    
+                    const hue = (this.genes.baseHue + time * 10) % 360;
+                    const hueVariation = Math.sin(time + this.age * 0.1) * this.genes.hueVariation;
+                    const finalHue = (hue + hueVariation) % 360;
+                    
+                    const alpha = this.genes.opacity * (0.5 + this.energy * 0.5);
+                    
+                    // 生命体の描画
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, size, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${finalHue}, 100%, 70%, ${alpha})`;
+                    ctx.fill();
+                    
+                    // グロー効果
+                    const glowSize = Math.max(1, size * this.genes.glowFactor);
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, glowSize, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${finalHue}, 100%, 60%, ${alpha * 0.3})`;
+                    ctx.fill();
+                    
+                    // エネルギーレベルを示す内側のリング
+                    if (size > 2 && this.energy > 0) {
+                        const ringSize = Math.max(1, size * 0.6);
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, ringSize, 0, Math.PI * 2 * this.energy);
+                        ctx.strokeStyle = `hsla(${(finalHue + 120) % 360}, 100%, 70%, ${alpha * 1.2})`;
+                        ctx.lineWidth = Math.max(0.5, size * 0.2);
+                        ctx.stroke();
+                    }
+                } catch (err) {
+                    console.error("生命体描画エラー:", err);
+                }
+            }
+            
+            // 他の生命体との接続を描画
+            drawConnections(ctx, time) {
+                if (!this.alive) return;
+                
+                for (const connection of this.connections) {
+                    const other = connection.organism;
+                    if (!other.alive) continue;
+                    
+                    const dist = connection.distance;
+                    const strength = 1 - (dist / this.genes.socialDistance);
+                    
+                    // 接続の強さに基づいて線の太さと透明度を決定
+                    const lineWidth = strength * this.genes.connectionStrength * 2;
+                    const alpha = strength * this.genes.connectionStrength * 0.8;
+                    
+                    // 2つの生命体のエネルギーの平均で色相を変化
+                    const avgEnergy = (this.energy + other.energy) / 2;
+                    const hue = (this.genes.baseHue + other.genes.baseHue) / 2;
+                    const saturation = 80 + avgEnergy * 20;
+                    const lightness = 40 + avgEnergy * 30;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(other.x, other.y);
+                    ctx.strokeStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
+                    ctx.lineWidth = lineWidth;
+                    ctx.stroke();
+                }
+            }
+            
+            // 繁殖処理
+            reproduce() {
+                // エネルギーを消費
+                this.energy -= 0.3;
+                
+                // 交配相手を探す（接続している生命体の中から最も適応度の高いものを選ぶ）
+                let partner = null;
+                let maxFitness = 0;
+                
+                for (const connection of this.connections) {
+                    const other = connection.organism;
+                    if (other.alive && other.energy > 0.4 && other.fitness > maxFitness) {
+                        partner = other;
+                        maxFitness = other.fitness;
+                    }
+                }
+                
+                // 交配相手が見つからない場合は単為生殖（自分の遺伝子のみで子を作る）
+                let childGenes;
+                if (partner && Math.random() < CROSSOVER_RATE) {
+                    // 交配相手のエネルギーも消費
+                    partner.energy -= 0.2;
+                    
+                    // 交叉（両親の遺伝子を組み合わせる）
+                    childGenes = this.crossover(partner);
+                } else {
+                    // クローン（突然変異あり）
+                    childGenes = JSON.parse(JSON.stringify(this.genes));
+                }
+                
+                // 突然変異
+                this.mutate(childGenes);
+                
+                // 子孫を生成して集団に追加
+                const child = new Organism(childGenes);
+                child.x = this.x + (Math.random() - 0.5) * 20;
+                child.y = this.y + (Math.random() - 0.5) * 20;
+                
+                organisms.push(child);
+                totalBirths++;
+            }
+            
+            // 交叉処理（2つの親の遺伝子を組み合わせる）
+            crossover(partner) {
+                const childGenes = {};
+                
+                // 各遺伝子について、どちらかの親から選ぶか、平均値を取る
+                for (const gene in this.genes) {
+                    if (typeof this.genes[gene] === 'number') {
+                        if (Math.random() < 0.5) {
+                            // どちらかの親から選ぶ
+                            childGenes[gene] = Math.random() < 0.5 ? this.genes[gene] : partner.genes[gene];
+                        } else {
+                            // 両親の平均値を取る（ブレンド交叉）
+                            childGenes[gene] = (this.genes[gene] + partner.genes[gene]) / 2;
+                        }
+                    }
+                }
+                
+                return childGenes;
+            }
+            
+            // 突然変異処理
+            mutate(genes) {
+                for (const gene in genes) {
+                    if (typeof genes[gene] === 'number' && Math.random() < MUTATION_RATE) {
+                        // 現在の値を基準に変異（±20%）
+                        const mutationAmount = genes[gene] * (Math.random() * 0.4 - 0.2);
+                        genes[gene] += mutationAmount;
+                        
+                        // 負の値にならないように
+                        if (genes[gene] < 0) genes[gene] = 0;
+                    }
+                }
+            }
+        }
+
+        // ダミーの音声データを生成する関数
+        function generateDummyAudioData() {
+            if (!dataArray) {
+                // データ配列が初期化されていない場合は作成
+                dataArray = new Uint8Array(128);
+            }
+            
+            const now = Date.now() * 0.001;
+            
+            // より複雑で視覚的に面白いパターンを生成
+            for (let i = 0; i < dataArray.length; i++) {
+                // 基本的なサイン波
+                const freq = i / dataArray.length;
+                const baseAmplitude = Math.sin(now * 0.5 + freq * 10) * 0.5 + 0.5;
+                
+                // 複数の波を組み合わせる
+                const wave1 = Math.sin(now * 1.0 + i * 0.1) * 0.3 + 0.3;
+                const wave2 = Math.sin(now * 0.2 + i * 0.05) * 0.2 + 0.2;
+                const wave3 = Math.sin(now * 3.0) * 0.2 + 0.2; // 全体的なパルス
+                
+                // 低周波と高周波で異なるパターン
+                let value;
+                if (i < dataArray.length * 0.2) {
+                    // 低周波（ベース）
+                    value = baseAmplitude * wave3 * 255;
+                } else if (i > dataArray.length * 0.8) {
+                    // 高周波
+                    value = wave1 * wave3 * 255;
+                } else {
+                    // 中周波
+                    value = (baseAmplitude * wave2 + wave1 * 0.5) * 255;
+                }
+                
+                // 時々大きなピークを作る
+                if (Math.random() < 0.01) {
+                    value = Math.min(255, value * 1.5);
+                }
+                
+                dataArray[i] = Math.floor(Math.min(255, Math.max(0, value)));
+            }
+        }
+
+        // Initialize audio
+        async function initAudio() {
+            // デモモードボタンを表示
+            document.getElementById('demo-button').style.display = 'block';
+            
+            // タイムアウト処理
+            let micTimeout = setTimeout(() => {
+                if (!isRunning) {
+                    console.log("マイク初期化タイムアウト");
+                    debugElement.textContent = "マイク初期化タイムアウト";
+                    statsElement.innerHTML = "マイク初期化がタイムアウトしました。デモモードで実行します。";
+                    initDemoMode();
+                }
+            }, MIC_TIMEOUT);
+            
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                
+                // マイクへのアクセスを要求
+                console.log("マイクへのアクセスを要求中...");
+                debugElement.textContent = "マイクへのアクセスを要求中...";
+                statsElement.innerHTML = "マイクへのアクセスを要求中...<br>許可ダイアログが表示されたら「許可」を選択してください。";
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+                    .catch(err => {
+                        clearTimeout(micTimeout);
+                        throw err;
+                    });
+                
+                // タイムアウトをクリア
+                clearTimeout(micTimeout);
+                
+                microphone = audioContext.createMediaStreamSource(stream);
+                microphone.connect(analyser);
+                
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+                
+                // 初期集団の生成
+                initPopulation();
+                
+                isRunning = true;
+                isDemoMode = false;
+                
+                // デモモードボタンを非表示
+                document.getElementById('demo-button').style.display = 'none';
+                
+                if (DEBUG_MODE) {
+                    console.log("マイク初期化成功！生命体の進化を開始します");
+                    debugElement.textContent = "マイク初期化成功！";
+                    statsElement.innerHTML = "<strong style='color: #4CAF50;'>マイク初期化成功！</strong><br>生命体の進化を開始します";
+                }
+                
+                animate();
+            } catch (err) {
+                // タイムアウトをクリア
+                clearTimeout(micTimeout);
+                
+                console.error('マイクエラー:', err);
+                debugElement.textContent = "マイクエラー: " + err;
+                statsElement.innerHTML = `<strong style='color: #F44336;'>マイクへのアクセスが拒否されました</strong><br>
+                                         エラー: ${err}<br>
+                                         ブラウザの設定でマイクへのアクセスを許可してください。<br>
+                                         デモモードで実行します。`;
+                
+                // マイクなしでもデモモードで動作するようにする
+                initDemoMode();
+            }
+        }
+        
+        // デモモード（マイクなしでも動作）
+        function initDemoMode() {
+            try {
+                console.log("デモモードを初期化中...");
+                debugElement.textContent = "デモモードを初期化中...";
+                
+                // デモモードボタンを非表示
+                document.getElementById('demo-button').style.display = 'none';
+                
+                // データ配列の初期化（必ず実行）
+                dataArray = new Uint8Array(128);
+                
+                // 初期データを生成
+                generateDummyAudioData();
+                
+                // 定期的にダミーデータを更新
+                const updateInterval = setInterval(generateDummyAudioData, 30);
+                
+                // 初期集団の生成
+                initPopulation();
+                
+                isRunning = true;
+                isDemoMode = true;
+                
+                if (DEBUG_MODE) {
+                    console.log("デモモードで実行中（マイクなし）");
+                    debugElement.textContent = "デモモードで実行中（マイクなし）";
+                    statsElement.innerHTML = "<strong style='color: #2196F3;'>デモモードで実行中</strong><br>マイクなしでシミュレーションを実行しています";
+                }
+                
+                animate();
+            } catch (err) {
+                console.error("デモモード初期化エラー:", err);
+                debugElement.textContent = "デモモード初期化エラー: " + err;
+                statsElement.innerHTML = `<strong style='color: #F44336;'>エラーが発生しました</strong><br>${err}<br>ページを再読み込みしてください。`;
+            }
+        }
+        
+        // 初期集団の生成
+        function initPopulation() {
+            organisms = [];
+            for (let i = 0; i < POPULATION_SIZE; i++) {
+                organisms.push(new Organism());
+            }
+            generation = 1;
+            frameCount = 0;
+            totalBirths = POPULATION_SIZE;
+            totalDeaths = 0;
+        }
+        
+        // 集団の更新
+        function updatePopulation(time) {
+            frameCount++;
+            
+            // 生命体同士の距離を計算して接続を更新
+            for (const org of organisms) {
+                org.connections = [];
+            }
+            
+            for (let i = 0; i < organisms.length; i++) {
+                const org1 = organisms[i];
+                if (!org1.alive) continue;
+                
+                for (let j = i + 1; j < organisms.length; j++) {
+                    const org2 = organisms[j];
+                    if (!org2.alive) continue;
+                    
+                    const dx = org1.x - org2.x;
+                    const dy = org1.y - org2.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // 社会的距離内なら接続を作成
+                    if (dist < org1.genes.socialDistance) {
+                        org1.connections.push({ organism: org2, distance: dist });
+                        org2.connections.push({ organism: org1, distance: dist });
+                    }
+                }
+            }
+            
+            // 各生命体の更新
+            for (const org of organisms) {
+                org.update(dataArray, time);
+            }
+            
+            // 死んだ生命体を除去（一定数以上）
+            const deadCount = organisms.filter(org => !org.alive).length;
+            if (deadCount > POPULATION_SIZE / 3) {
+                organisms = organisms.filter(org => org.alive);
+                
+                // 集団サイズが小さくなりすぎたら新しい世代を作成
+                if (organisms.length < POPULATION_SIZE / 2) {
+                    createNewGeneration();
+                }
+            }
+            
+            // 集団サイズが大きくなりすぎたら適応度の低い個体を間引く
+            if (organisms.length > POPULATION_SIZE * 1.5) {
+                // 適応度でソート
+                organisms.sort((a, b) => b.fitness - a.fitness);
+                // 上位個体のみ残す
+                organisms = organisms.slice(0, POPULATION_SIZE);
+            }
+            
+            // 統計情報の更新
+            updateStats();
+        }
+        
+        // 新しい世代の作成
+        function createNewGeneration() {
+            // 生きている個体を適応度でソート
+            const livingOrganisms = organisms.filter(org => org.alive);
+            livingOrganisms.sort((a, b) => b.fitness - a.fitness);
+            
+            // 上位50%を選択
+            const elites = livingOrganisms.slice(0, Math.max(2, Math.floor(livingOrganisms.length / 2)));
+            
+            // 新しい集団を作成
+            const newPopulation = [...elites]; // エリートはそのまま残す
+            
+            // 残りの個体を交配で作成
+            while (newPopulation.length < POPULATION_SIZE) {
+                // トーナメント選択（ランダムに2個体選んで適応度の高い方を親にする）
+                const parent1 = tournamentSelect(elites);
+                const parent2 = tournamentSelect(elites);
+                
+                // 交叉
+                const childGenes = parent1.crossover(parent2);
+                
+                // 突然変異
+                parent1.mutate(childGenes);
+                
+                // 子孫を追加
+                const child = new Organism(childGenes);
+                child.x = Math.random() * canvas.width;
+                child.y = Math.random() * canvas.height;
+                
+                newPopulation.push(child);
+                totalBirths++;
+            }
+            
+            organisms = newPopulation;
+            generation++;
+        }
+        
+        // トーナメント選択
+        function tournamentSelect(population) {
+            // 配列が空の場合はnullを返す
+            if (!population || population.length === 0) {
+                console.error("トーナメント選択エラー: 集団が空です");
+                return null;
+            }
+            
+            // 配列に1つしか要素がない場合はその要素を返す
+            if (population.length === 1) {
+                return population[0];
+            }
+            
+            // 2つのインデックスをランダムに選択（範囲内に収める）
+            const idx1 = Math.floor(Math.random() * population.length);
+            const idx2 = Math.floor(Math.random() * population.length);
+            
+            // 選択した個体が存在するか確認
+            const org1 = population[idx1];
+            const org2 = population[idx2];
+            
+            if (!org1 || !org2) {
+                console.error("トーナメント選択エラー: 選択した個体が存在しません", idx1, idx2, population.length);
+                return population[0]; // 安全のため最初の要素を返す
+            }
+            
+            return org1.fitness > org2.fitness ? org1 : org2;
+        }
+        
+        // 統計情報の更新
+        function updateStats() {
+            const livingCount = organisms.filter(org => org.alive).length;
+            const avgFitness = organisms.reduce((sum, org) => sum + (org.alive ? org.fitness : 0), 0) / livingCount || 0;
+            const avgEnergy = organisms.reduce((sum, org) => sum + (org.alive ? org.energy : 0), 0) / livingCount || 0;
+            
+            statsElement.innerHTML = `
+                <strong style="font-size: 14px;">生命体の統計情報</strong><br>
+                世代: ${generation}<br>
+                生存数: ${livingCount}<br>
+                平均適応度: ${avgFitness.toFixed(2)}<br>
+                平均エネルギー: ${avgEnergy.toFixed(2)}<br>
+                総出生数: ${totalBirths}<br>
+                総死亡数: ${totalDeaths}<br>
+                フレーム: ${frameCount}<br>
+                モード: ${isDemoMode ? 'デモ' : 'マイク'}
+            `;
+        }
+        
+        // Animation loop
+        function animate() {
+            if (!isRunning) return;
+            
+            requestAnimationFrame(animate);
+            
+            try {
+                // オーディオデータの取得（エラー処理付き）
+                if (isDemoMode) {
+                    // デモモードの場合は自動的にダミーデータを生成
+                    generateDummyAudioData();
+                } else if (analyser && dataArray) {
+                    try {
+                        analyser.getByteFrequencyData(dataArray);
+                    } catch (err) {
+                        console.error("オーディオデータ取得エラー:", err);
+                        debugElement.textContent = "オーディオデータ取得エラー: " + err;
+                        // エラーが発生した場合はダミーデータを生成
+                        generateDummyAudioData();
+                    }
+                }
+                
+                // Clear canvas
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                const time = Date.now() * 0.001;
+                
+                // 集団の更新
+                updatePopulation(time);
+                
+                // 接続の描画
+                for (const org of organisms) {
+                    org.drawConnections(ctx, time);
+                }
+                
+                // 生命体の描画
+                for (const org of organisms) {
+                    org.draw(ctx, time);
+                }
+                
+                // 中央のエネルギー源（低音に反応）
+                try {
+                    const bassData = dataArray.slice(0, Math.min(10, dataArray.length));
+                    const bass = bassData.reduce((a, b) => a + b, 0) / bassData.length / 255;
+                    
+                    if (bass > 0.3) {
+                        const centerX = canvas.width / 2;
+                        const centerY = canvas.height / 2;
+                        const pulseSize = bass * 100;
+                        
+                        ctx.beginPath();
+                        ctx.arc(centerX, centerY, pulseSize, 0, Math.PI * 2);
+                        ctx.fillStyle = `hsla(${time * 50 % 360}, 100%, 70%, ${bass * 0.3})`;
+                        ctx.fill();
+                    }
+                } catch (err) {
+                    // エネルギー源の描画に失敗しても続行
+                    console.error("エネルギー源描画エラー:", err);
+                }
+            } catch (err) {
+                console.error("アニメーションエラー:", err);
+                debugElement.textContent = "アニメーションエラー: " + err;
+                // エラーが発生しても停止しないように
+            }
+        }
+        
+        // Start on tap/click
+        canvas.addEventListener('click', (event) => {
+            console.log("Canvas clicked");
+            debugElement.textContent = "Canvas clicked";
+            
+            if (!isRunning) {
+                initAudio();
+                statsElement.innerHTML = "<strong>開始中...</strong>";
+            } else if (DEBUG_MODE) {
+                // デバッグ用：クリックで新しい生命体を追加
+                for (let i = 0; i < 5; i++) {
+                    const newOrg = new Organism();
+                    newOrg.x = event.clientX + (Math.random() - 0.5) * 50;
+                    newOrg.y = event.clientY + (Math.random() - 0.5) * 50;
+                    organisms.push(newOrg);
+                    totalBirths += 5;
+                }
+            }
+        });
+        
+        // Mobile touch support
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            console.log("Touch start");
+            debugElement.textContent = "Touch start";
+            
+            if (!isRunning) {
+                initAudio();
+                statsElement.innerHTML = "<strong>開始中...</strong>";
+            } else if (DEBUG_MODE) {
+                // デバッグ用：タップで新しい生命体を追加
+                const touch = e.touches[0];
+                for (let i = 0; i < 5; i++) {
+                    const newOrg = new Organism();
+                    newOrg.x = touch.clientX + (Math.random() - 0.5) * 50;
+                    newOrg.y = touch.clientY + (Math.random() - 0.5) * 50;
+                    organisms.push(newOrg);
+                    totalBirths += 5;
+                }
+            }
+        }, { passive: false });
+        
+        // デモモードボタンのイベントリスナー
+        document.getElementById('demo-button').addEventListener('click', () => {
+            console.log("Demo button clicked");
+            debugElement.textContent = "Demo button clicked";
+            
+            if (!isRunning) {
+                initDemoMode();
+            }
+        });
+        
+        // 初期メッセージ
+        statsElement.innerHTML = "<strong style='font-size: 14px;'>画面をクリック/タップして開始</strong>";
+    </script>
+</body>
+</html>

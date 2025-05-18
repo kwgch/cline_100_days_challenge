@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>遺伝的サウンドビジュアライザー テスト</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: Arial, sans-serif;
+            touch-action: manipulation;
+            color: white;
+        }
+        canvas {
+            display: block;
+        }
+        .info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 80%;
+            z-index: 10;
+        }
+        .stats {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: white;
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 10;
+        }
+        #demo-button {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #debug {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            color: white;
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 80%;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">シンプルなテスト版: 画面をクリックして開始</div>
+    <div class="stats" id="stats"></div>
+    <div id="demo-button">デモモードで実行</div>
+    <div id="debug"></div>
+    <canvas id="visualizer"></canvas>
+
+    <script>
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+        const statsElement = document.getElementById('stats');
+        const debugElement = document.getElementById('debug');
+        let isRunning = false;
+        let isDemoMode = false;
+        
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        // Simple circle class
+        class Circle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 20 + 10;
+                this.color = `hsl(${Math.random() * 360}, 100%, 70%)`;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                // Bounce off walls
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+        
+        // Create circles
+        const circles = [];
+        for (let i = 0; i < 50; i++) {
+            circles.push(new Circle());
+        }
+        
+        // Animation loop
+        function animate() {
+            if (!isRunning) return;
+            
+            requestAnimationFrame(animate);
+            
+            // Log debug info
+            debugElement.textContent = `Animation running: ${isRunning}, Demo mode: ${isDemoMode}, Circles: ${circles.length}`;
+            
+            // Clear canvas
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Update and draw circles
+            for (const circle of circles) {
+                circle.update();
+                circle.draw();
+            }
+            
+            // Update stats
+            statsElement.textContent = `Circles: ${circles.length}`;
+        }
+        
+        // Start demo mode
+        function startDemo() {
+            console.log("Starting demo mode");
+            debugElement.textContent = "Starting demo mode";
+            isRunning = true;
+            isDemoMode = true;
+            animate();
+        }
+        
+        // Start on tap/click
+        canvas.addEventListener('click', (event) => {
+            console.log("Canvas clicked");
+            debugElement.textContent = "Canvas clicked";
+            if (!isRunning) {
+                startDemo();
+            } else {
+                // Add new circles on click
+                for (let i = 0; i < 5; i++) {
+                    const circle = new Circle();
+                    circle.x = event.clientX;
+                    circle.y = event.clientY;
+                    circles.push(circle);
+                }
+            }
+        });
+        
+        // Demo button click
+        document.getElementById('demo-button').addEventListener('click', () => {
+            console.log("Demo button clicked");
+            debugElement.textContent = "Demo button clicked";
+            if (!isRunning) {
+                startDemo();
+            }
+        });
+        
+        // Initial message
+        statsElement.textContent = "Click to start";
+    </script>
+</body>
+</html>

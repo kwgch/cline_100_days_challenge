@@ -48,8 +48,8 @@
 48. Chat Joke
 49. Maze Game
 50. Particle Physics Playground
-51. TBD
-52. TBD
+51. Genetic Sound Visualizer
+52. Abstract Drawing App
 53. TBD
 54. TBD
 55. TBD
