@@ -16,7 +16,7 @@ resize();
 
 /* ---------- Parameters ---------- */
 const N          = 2500;        // initial particle count
-const PARTICLE_R = 1.5;
+const PARTICLE_R = 5;
 const G          = 0.08;        // gravity-like constant
 const MERGE_D2   = 4;           // merge distance squared
 const BH_RADIUS  = 30;          // visual radius of black-hole attractor
@@ -49,7 +49,8 @@ function init() {
   const centerX = W / 2 / dpr, centerY = H / 2 / dpr;
   for (let i = 0; i < N; i++) {
     const angle = Math.random()*Math.PI*2;
-    const rad   = Math.random()*150 + 20;
+    // const rad   = Math.random()*150 + 20;
+    const rad   = Math.random()*150 + 128;
     const px = centerX + Math.cos(angle)*rad;
     const py = centerY + Math.sin(angle)*rad;
     const speed = Math.sqrt(G) * Math.sqrt(centerX/rad);
@@ -92,8 +93,15 @@ addEventListener('keydown', e => {
 /* -------- Main Loop -------- */
 function step() {
   ctx.save();
-  ctx.setTransform(zoom, 0, 0, zoom, 0, 0);
+  // The canvas context is already scaled by dpr in resize().
+  // ClearRect operates in the current coordinate system (scaled by dpr).
+  // innerWidth and innerHeight are CSS pixels.
   ctx.clearRect(0, 0, innerWidth, innerHeight);
+
+  // Apply zoom on top of the dpr scaling.
+  // This will make the new CTM = S(dpr) * S(zoom)
+  // Assumes zoom is around (0,0) as per original setTransform.
+  ctx.scale(zoom, zoom);
 
   // update & draw particles
   for (let i = particles.length - 1; i >= 0; i--) {
