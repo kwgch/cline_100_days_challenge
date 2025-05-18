@@ -50,7 +50,7 @@
 50. Particle Physics Playground
 51. Genetic Sound Visualizer
 52. Abstract Drawing App
-53. TBD
+53. Interactive space exploration
 54. TBD
 55. TBD
 56. TBD

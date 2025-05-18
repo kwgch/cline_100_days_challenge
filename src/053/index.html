@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>インタラクティブ宇宙探索</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+            touch-action: none;
+        }
+        
+        button {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .ui-element {
+            touch-action: manipulation;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        // SpaceExplorer component
+        const SpaceExplorer = () => {
+          const containerRef = React.useRef(null);
+          const [activeScene, setActiveScene] = React.useState('starfield');
+          const [activePlanet, setActivePlanet] = React.useState(null);
+          const [loading, setLoading] = React.useState(true);
+          const [showInfo, setShowInfo] = React.useState(false);
+          const [infoContent, setInfoContent] = React.useState({});
+          
+          const scenes = React.useRef({
+            renderer: null,
+            camera: null,
+            scene: null,
+            stars: null,
+            planets: {},
+            constellations: {},
+            controls: {
+              isMouseDown: false,
+              mouseX: 0,
+              mouseY: 0,
+              targetRotationX: 0,
+              targetRotationY: 0,
+              windowHalfX: 0,
+              windowHalfY: 0,
+              autoRotate: true
+            }
+          });
+          
+          const planetData = {
+            mercury: {
+              name: '水星',
+              englishName: 'Mercury',
+              color: '#A5A5A5',
+              size: 0.4,
+              orbit: 5,
+              speed: 0.04,
+              info: '太陽系で最も小さく、最も内側の惑星。表面は隕石のクレーターで覆われています。',
+              composition: '岩石・金属',
+              distance: '太陽から約5,790万km',
+              day: '地球時間で約59日',
+              year: '地球時間で約88日'
+            },
+            venus: {
+              name: '金星',
+              englishName: 'Venus',
+              color: '#E8D080',
+              size: 0.9,
+              orbit: 7,
+              speed: 0.03,
+              info: '地球に最も近い惑星で、厚い雲に覆われています。表面温度は約462℃と非常に高温です。',
+              composition: '岩石・二酸化炭素大気',
+              distance: '太陽から約1億800万km',
+              day: '地球時間で約243日',
+              year: '地球時間で約225日'
+            },
+            earth: {
+              name: '地球',
+              englishName: 'Earth',
+              color: '#4060FF',
+              size: 1,
+              orbit: 10,
+              speed: 0.025,
+              info: '太陽系で唯一、生命が存在することが確認されている惑星。表面の約70%が水で覆われています。',
+              composition: '岩石・水・窒素/酸素大気',
+              distance: '太陽から約1億5000万km',
+              day: '24時間',
+              year: '365.25日'
+            },
+            mars: {
+              name: '火星',
+              englishName: 'Mars',
+              color: '#FF6060',
+              size: 0.5,
+              orbit: 13,
+              speed: 0.02,
+              info: '「赤い惑星」として知られ、表面の赤い色は酸化鉄（さび）によるものです。',
+              composition: '岩石・希薄な二酸化炭素大気',
+              distance: '太陽から約2億2800万km',
+              day: '地球時間で約24.6時間',
+              year: '地球時間で約687日'
+            },
+            jupiter: {
+              name: '木星',
+              englishName: 'Jupiter',
+              color: '#E0B080',
+              size: 2.5,
+              orbit: 17,
+              speed: 0.01,
+              info: '太陽系最大の惑星。大きな渦巻き模様の大赤斑や、多数の衛星を持つことで知られています。',
+              composition: '水素・ヘリウムガス',
+              distance: '太陽から約7億7900万km',
+              day: '地球時間で約9.9時間',
+              year: '地球時間で約11.9年'
+            },
+            saturn: {
+              name: '土星',
+              englishName: 'Saturn',
+              color: '#CAAD80',
+              size: 2.2,
+              orbit: 21,
+              speed: 0.008,
+              info: '美しい環を持つことで有名な惑星。環は氷の粒子や岩の破片でできています。',
+              composition: '水素・ヘリウムガス',
+              distance: '太陽から約14億3000万km',
+              day: '地球時間で約10.7時間',
+              year: '地球時間で約29.5年'
+            },
+            uranus: {
+              name: '天王星',
+              englishName: 'Uranus',
+              color: '#80CAFF',
+              size: 1.6,
+              orbit: 25,
+              speed: 0.006,
+              info: '太陽系で珍しく、自転軸が公転面に対してほぼ横向きになっている惑星。',
+              composition: '水素・ヘリウム・メタンガス',
+              distance: '太陽から約28億8000万km',
+              day: '地球時間で約17.2時間',
+              year: '地球時間で約84年'
+            },
+            neptune: {
+              name: '海王星',
+              englishName: 'Neptune',
+              color: '#4080FF',
+              size: 1.5,
+              orbit: 29,
+              speed: 0.005,
+              info: '太陽系の最も外側の惑星。強い風が吹き、時速2,100kmを超える嵐があります。',
+              composition: '水素・ヘリウム・メタンガス',
+              distance: '太陽から約45億km',
+              day: '地球時間で約16.1時間',
+              year: '地球時間で約165年'
+            }
+          };
+          
+          const constellationData = {
+            orion: {
+              name: 'オリオン座',
+              englishName: 'Orion',
+              stars: [
+                { x: 2, y: 1, z: -5, size: 0.08 },
+                { x: 3, y: 2, z: -5, size: 0.1 },
+                { x: 1, y: 0, z: -5, size: 0.06 },
+                { x: 2, y: -1, z: -5, size: 0.09 },
+                { x: 3, y: -2, z: -5, size: 0.07 },
+                { x: 0, y: 0, z: -5, size: 0.08 },
+                { x: 4, y: 0, z: -5, size: 0.08 }
+              ],
+              lines: [
+                [0, 2], [2, 5], [5, 6], [6, 3], [3, 4], [0, 1], [1, 6]
+              ],
+              info: '夜空で最も認識しやすい星座の一つ。「狩人」を表し、明るい星ベテルギウスとリゲルを含みます。'
+            },
+            ursa_major: {
+              name: '北斗七星（大熊座の一部）',
+              englishName: 'Big Dipper (part of Ursa Major)',
+              stars: [
+                { x: -4, y: 3, z: -6, size: 0.08 },
+                { x: -3, y: 3.5, z: -6, size: 0.07 },
+                { x: -2, y: 3.8, z: -6, size: 0.06 },
+                { x: -1, y: 3.6, z: -6, size: 0.07 },
+                { x: -0.8, y: 2.6, z: -6, size: 0.08 },
+                { x: -1.8, y: 2.4, z: -6, size: 0.07 },
+                { x: -2.8, y: 2.2, z: -6, size: 0.08 }
+              ],
+              lines: [
+                [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 0]
+              ],
+              info: '北半球で最もよく知られた星の並び。ひしゃくの形をしており、北極星を見つける目印になります。'
+            },
+            cassiopeia: {
+              name: 'カシオペア座',
+              englishName: 'Cassiopeia',
+              stars: [
+                { x: -3, y: -2, z: -5, size: 0.08 },
+                { x: -2, y: -3, z: -5, size: 0.07 },
+                { x: -1, y: -2, z: -5, size: 0.09 },
+                { x: 0, y: -3, z: -5, size: 0.06 },
+                { x: 1, y: -2, z: -5, size: 0.08 }
+              ],
+              lines: [
+                [0, 1], [1, 2], [2, 3], [3, 4]
+              ],
+              info: '特徴的なW型またはM型の形をした星座。ギリシャ神話のエチオピアの女王の名前に由来します。'
+            }
+          };
+
+          React.useEffect(() => {
+            if (!containerRef.current) return;
+            
+            scenes.current.controls.windowHalfX = window.innerWidth / 2;
+            scenes.current.controls.windowHalfY = window.innerHeight / 2;
+            
+            // Initialize the scene
+            initScene();
+            
+            // Handle resize
+            const handleResize = () => {
+              if (!scenes.current.camera || !scenes.current.renderer) return;
+              scenes.current.camera.aspect = window.innerWidth / window.innerHeight;
+              scenes.current.camera.updateProjectionMatrix();
+              scenes.current.renderer.setSize(window.innerWidth, window.innerHeight);
+              scenes.current.controls.windowHalfX = window.innerWidth / 2;
+              scenes.current.controls.windowHalfY = window.innerHeight / 2;
+            };
+            
+            window.addEventListener('resize', handleResize);
+            
+            // Handle mouse and touch events
+            const handleMouseDown = (event) => {
+              event.preventDefault();
+              scenes.current.controls.isMouseDown = true;
+              scenes.current.controls.mouseX = event.clientX;
+              scenes.current.controls.mouseY = event.clientY;
+              scenes.current.controls.autoRotate = false;
+            };
+            
+            const handleMouseMove = (event) => {
+              if (!scenes.current.controls.isMouseDown) return;
+              
+              const mouseX = event.clientX;
+              const mouseY = event.clientY;
+              
+              scenes.current.controls.targetRotationY += (mouseX - scenes.current.controls.mouseX) * 0.002;
+              scenes.current.controls.targetRotationX += (mouseY - scenes.current.controls.mouseY) * 0.002;
+              
+              scenes.current.controls.mouseX = mouseX;
+              scenes.current.controls.mouseY = mouseY;
+            };
+            
+            const handleMouseUp = () => {
+              scenes.current.controls.isMouseDown = false;
+            };
+            
+            const handleTouchStart = (event) => {
+              // Only handle touch events on the canvas, not on UI elements
+              if (event.target.tagName === 'CANVAS' && event.touches.length === 1) {
+                event.preventDefault();
+                scenes.current.controls.isMouseDown = true;
+                scenes.current.controls.mouseX = event.touches[0].pageX;
+                scenes.current.controls.mouseY = event.touches[0].pageY;
+                scenes.current.controls.autoRotate = false;
+              }
+            };
+            
+            const handleTouchMove = (event) => {
+              // Only handle touch events on the canvas, not on UI elements
+              if (event.target.tagName === 'CANVAS' && event.touches.length === 1 && scenes.current.controls.isMouseDown) {
+                event.preventDefault();
+                
+                scenes.current.controls.targetRotationY += (event.touches[0].pageX - scenes.current.controls.mouseX) * 0.002;
+                scenes.current.controls.targetRotationX += (event.touches[0].pageY - scenes.current.controls.mouseY) * 0.002;
+                
+                scenes.current.controls.mouseX = event.touches[0].pageX;
+                scenes.current.controls.mouseY = event.touches[0].pageY;
+              }
+            };
+            
+            const handleTouchEnd = () => {
+              scenes.current.controls.isMouseDown = false;
+            };
+            
+            // Add event listeners to the canvas element only, not the whole document
+            const canvas = scenes.current.renderer.domElement;
+            canvas.addEventListener('mousedown', handleMouseDown);
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
+            document.addEventListener('touchend', handleTouchEnd);
+            
+            // Start the animation loop
+            animate();
+            
+            // Clean up
+            return () => {
+              window.removeEventListener('resize', handleResize);
+              const canvas = scenes.current.renderer?.domElement;
+              if (canvas) {
+                canvas.removeEventListener('mousedown', handleMouseDown);
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+                canvas.removeEventListener('touchstart', handleTouchStart);
+                document.removeEventListener('touchmove', handleTouchMove);
+                canvas.removeEventListener('touchend', handleTouchEnd);
+              }
+              
+              if (scenes.current.renderer) {
+                scenes.current.renderer.dispose();
+              }
+            };
+          }, []);
+
+          const initScene = () => {
+            // Create the scene
+            scenes.current.scene = new THREE.Scene();
+            
+            // Create the camera
+            scenes.current.camera = new THREE.PerspectiveCamera(
+              60, 
+              window.innerWidth / window.innerHeight, 
+              0.1, 
+              1000
+            );
+            scenes.current.camera.position.z = 15;
+            
+            // Create the renderer
+            scenes.current.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            scenes.current.renderer.setSize(window.innerWidth, window.innerHeight);
+            scenes.current.renderer.setClearColor(0x000000, 1);
+            
+            // Append the renderer to the DOM
+            containerRef.current.innerHTML = '';
+            containerRef.current.appendChild(scenes.current.renderer.domElement);
+            
+            // Create a starfield
+            createStarfield();
+            
+            // Create planets
+            createPlanets();
+            
+            // Create constellations
+            createConstellations();
+            
+            // Initially show starfield
+            toggleScene('starfield');
+            
+            // Set loading to false
+            setTimeout(() => setLoading(false), 1000);
+          };
+
+          const createStarfield = () => {
+            const starGeometry = new THREE.BufferGeometry();
+            const starMaterial = new THREE.PointsMaterial({
+              color: 0xFFFFFF,
+              size: 0.1,
+              transparent: true
+            });
+            
+            const starVertices = [];
+            for (let i = 0; i < 10000; i++) {
+              const x = (Math.random() - 0.5) * 2000;
+              const y = (Math.random() - 0.5) * 2000;
+              const z = (Math.random() - 0.5) * 2000;
+              starVertices.push(x, y, z);
+            }
+            
+            starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+            scenes.current.stars = new THREE.Points(starGeometry, starMaterial);
+            scenes.current.scene.add(scenes.current.stars);
+          };
+
+          const createPlanets = () => {
+            // Create a sun
+            const sunGeometry = new THREE.SphereGeometry(2, 32, 32);
+            const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFF00 });
+            const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+            scenes.current.planets.sun = {
+              object: sun,
+              orbitGroup: null
+            };
+            scenes.current.scene.add(sun);
+            
+            // Create planets
+            Object.keys(planetData).forEach(key => {
+              const planet = planetData[key];
+              
+              const orbitGroup = new THREE.Group();
+              scenes.current.scene.add(orbitGroup);
+              
+              const planetGeometry = new THREE.SphereGeometry(planet.size, 32, 32);
+              const planetMaterial = new THREE.MeshBasicMaterial({ color: planet.color });
+              const planetMesh = new THREE.Mesh(planetGeometry, planetMaterial);
+              
+              planetMesh.position.x = planet.orbit;
+              
+              orbitGroup.add(planetMesh);
+              
+              scenes.current.planets[key] = {
+                object: planetMesh,
+                orbitGroup: orbitGroup,
+                data: planet
+              };
+              
+              // Create orbit line
+              const orbitGeometry = new THREE.BufferGeometry();
+              const orbitMaterial = new THREE.LineBasicMaterial({ color: 0x444444 });
+              
+              const orbitVertices = [];
+              const segments = 64;
+              
+              for (let i = 0; i <= segments; i++) {
+                const theta = (i / segments) * Math.PI * 2;
+                orbitVertices.push(
+                  Math.cos(theta) * planet.orbit,
+                  0,
+                  Math.sin(theta) * planet.orbit
+                );
+              }
+              
+              orbitGeometry.setAttribute('position', new THREE.Float32BufferAttribute(orbitVertices, 3));
+              const orbitLine = new THREE.Line(orbitGeometry, orbitMaterial);
+              scenes.current.scene.add(orbitLine);
+            });
+          };
+
+          const createConstellations = () => {
+            Object.keys(constellationData).forEach(key => {
+              const constellation = constellationData[key];
+              const group = new THREE.Group();
+              
+              // Create stars
+              const stars = [];
+              constellation.stars.forEach(starData => {
+                const starGeometry = new THREE.SphereGeometry(starData.size, 16, 16);
+                const starMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+                const star = new THREE.Mesh(starGeometry, starMaterial);
+                star.position.set(starData.x, starData.y, starData.z);
+                group.add(star);
+                stars.push(star);
+              });
+              
+              // Create lines between stars
+              constellation.lines.forEach(line => {
+                const start = stars[line[0]].position;
+                const end = stars[line[1]].position;
+                
+                const lineGeometry = new THREE.BufferGeometry().setFromPoints([start, end]);
+                const lineMaterial = new THREE.LineBasicMaterial({ color: 0x4444FF, transparent: true, opacity: 0.5 });
+                const lineMesh = new THREE.Line(lineGeometry, lineMaterial);
+                group.add(lineMesh);
+              });
+              
+              scenes.current.constellations[key] = {
+                group: group,
+                data: constellation
+              };
+              
+              scenes.current.scene.add(group);
+              group.visible = false;
+            });
+          };
+
+          const animate = () => {
+            requestAnimationFrame(animate);
+            
+            if (scenes.current.controls.autoRotate) {
+              scenes.current.controls.targetRotationY += 0.001;
+            }
+            
+            // Update the camera's rotation
+            if (scenes.current.camera) {
+              scenes.current.camera.position.x = 15 * Math.sin(scenes.current.controls.targetRotationY) * Math.cos(scenes.current.controls.targetRotationX);
+              scenes.current.camera.position.y = 15 * Math.sin(scenes.current.controls.targetRotationX);
+              scenes.current.camera.position.z = 15 * Math.cos(scenes.current.controls.targetRotationY) * Math.cos(scenes.current.controls.targetRotationX);
+              scenes.current.camera.lookAt(0, 0, 0);
+            }
+            
+            // Rotate planets around the sun
+            Object.keys(scenes.current.planets).forEach(key => {
+              if (key !== 'sun' && scenes.current.planets[key].orbitGroup) {
+                scenes.current.planets[key].orbitGroup.rotation.y += planetData[key].speed * 0.1;
+              }
+            });
+            
+            // Render the scene
+            if (scenes.current.renderer && scenes.current.scene && scenes.current.camera) {
+              scenes.current.renderer.render(scenes.current.scene, scenes.current.camera);
+            }
+          };
+
+          const toggleScene = (scene) => {
+            setActiveScene(scene);
+            setActivePlanet(null);
+            setShowInfo(false);
+            
+            // Reset camera position
+            scenes.current.camera.position.z = 15;
+            scenes.current.controls.targetRotationX = 0;
+            scenes.current.controls.targetRotationY = 0;
+            
+            // Show/hide objects
+            scenes.current.stars.visible = scene === 'starfield';
+            
+            Object.keys(scenes.current.planets).forEach(key => {
+              if (scenes.current.planets[key].object) {
+                scenes.current.planets[key].object.visible = scene === 'planets';
+              }
+              if (scenes.current.planets[key].orbitGroup) {
+                scenes.current.planets[key].orbitGroup.visible = scene === 'planets';
+              }
+            });
+            
+            Object.keys(scenes.current.constellations).forEach(key => {
+              if (scenes.current.constellations[key].group) {
+                scenes.current.constellations[key].group.visible = scene === 'constellations';
+              }
+            });
+          };
+
+          const showPlanetDetails = (planet) => {
+            setActivePlanet(planet);
+            setInfoContent(planetData[planet]);
+            setShowInfo(true);
+          };
+
+          const showConstellationDetails = (constellation) => {
+            setActivePlanet(constellation);
+            setInfoContent(constellationData[constellation]);
+            setShowInfo(true);
+          };
+
+          return (
+            <div className="relative h-screen w-full overflow-hidden bg-black">
+              {loading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black z-50">
+                  <div className="text-white text-center">
+                    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p className="text-xl">宇宙を読み込み中...</p>
+                  </div>
+                </div>
+              )}
+              
+              <div ref={containerRef} className="w-full h-full"></div>
+              
+              <div className="absolute top-4 left-4 right-4 flex justify-between items-center">
+                <h1 className="text-white text-2xl font-bold ui-element">インタラクティブ宇宙探索</h1>
+                <div className="flex space-x-2 ui-element">
+                  <button 
+                    className={`px-4 py-2 rounded-md transition-all ui-element ${activeScene === 'starfield' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+                    onClick={() => toggleScene('starfield')}
+                  >
+                    星空
+                  </button>
+                  <button 
+                    className={`px-4 py-2 rounded-md transition-all ui-element ${activeScene === 'planets' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+                    onClick={() => toggleScene('planets')}
+                  >
+                    惑星
+                  </button>
+                  <button 
+                    className={`px-4 py-2 rounded-md transition-all ui-element ${activeScene === 'constellations' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+                    onClick={() => toggleScene('constellations')}
+                  >
+                    星座
+                  </button>
+                  <button 
+                    className="px-4 py-2 rounded-md bg-gray-800 text-gray-300 hover:bg-gray-700 transition-all ui-element"
+                    onClick={() => scenes.current.controls.autoRotate = !scenes.current.controls.autoRotate}
+                  >
+                    {scenes.current.controls.autoRotate ? '自動回転停止' : '自動回転開始'}
+                  </button>
+                </div>
+              </div>
+              
+              {activeScene === 'planets' && (
+                <div className="absolute bottom-4 left-4 right-4 bg-gray-900 bg-opacity-80 rounded-lg p-4 ui-element">
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {Object.keys(planetData).map((key) => (
+                      <button
+                        key={key}
+                        className={`px-3 py-1 rounded-md transition-all ui-element ${activePlanet === key ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+                        onClick={() => showPlanetDetails(key)}
+                      >
+                        {planetData[key].name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {activeScene === 'constellations' && (
+                <div className="absolute bottom-4 left-4 right-4 bg-gray-900 bg-opacity-80 rounded-lg p-4 ui-element">
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {Object.keys(constellationData).map((key) => (
+                      <button
+                        key={key}
+                        className={`px-3 py-1 rounded-md transition-all ui-element ${activePlanet === key ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+                        onClick={() => showConstellationDetails(key)}
+                      >
+                        {constellationData[key].name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {showInfo && (
+                <div className="absolute top-20 right-4 bg-gray-900 bg-opacity-90 rounded-lg p-4 max-w-md text-white ui-element">
+                  <button 
+                    className="absolute top-2 right-2 text-gray-400 hover:text-white ui-element"
+                    onClick={() => setShowInfo(false)}
+                  >
+                    ✕
+                  </button>
+                  <h2 className="text-xl font-bold mb-2">{infoContent.name}</h2>
+                  <p className="mb-2 text-gray-300">{infoContent.englishName}</p>
+                  <p className="mb-4">{infoContent.info}</p>
+                  
+                  {infoContent.composition && (
+                    <div className="mb-2">
+                      <span className="font-semibold">組成:</span> {infoContent.composition}
+                    </div>
+                  )}
+                  
+                  {infoContent.distance && (
+                    <div className="mb-2">
+                      <span className="font-semibold">距離:</span> {infoContent.distance}
+                    </div>
+                  )}
+                  
+                  {infoContent.day && (
+                    <div className="mb-2">
+                      <span className="font-semibold">自転周期:</span> {infoContent.day}
+                    </div>
+                  )}
+                  
+                  {infoContent.year && (
+                    <div className="mb-2">
+                      <span className="font-semibold">公転周期:</span> {infoContent.year}
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              <div className="absolute bottom-4 right-4 text-xs text-gray-500 ui-element">
+                <p>マウスまたはタッチで視点を回転させることができます</p>
+              </div>
+            </div>
+          );
+        };
+
+        // Render the SpaceExplorer component to the DOM
+        ReactDOM.render(
+          <SpaceExplorer />,
+          document.getElementById('root')
+        );
