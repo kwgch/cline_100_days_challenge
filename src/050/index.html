@@ -2,37 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Particle Physics Playground</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Genetic Algorithm Image Sorter</title>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Particle Physics Playground</h1>
-        <div class="controls">
-            <button id="gravity-toggle">Toggle Gravity</button>
-            <button id="interaction-toggle">Toggle Interaction</button>
-            <button id="trail-toggle">Toggle Trails</button>
-            <button id="clear">Clear All</button>
-            <div class="color-picker">
-                <label for="particle-color">Particle Color:</label>
-                <input type="color" id="particle-color" value="#00aaff">
+    <div class="app-container">
+        <header>
+            <h1>Genetic Image Evolution</h1>
+            <div class="stats">
+                <span class="generation">Generation: <span id="generation-count">1</span></span>
+                <span class="queue">Queue: <span id="queue-count">0</span></span>
             </div>
-            <div class="size-slider">
-                <label for="particle-size">Particle Size:</label>
-                <input type="range" id="particle-size" min="5" max="50" value="15">
+        </header>
+
+        <main>
+            <div class="card-container">
+                <div id="card" class="card">
+                    <canvas id="image-canvas" width="300" height="300"></canvas>
+                </div>
+                <div class="swipe-overlay">
+                    <div class="swipe-left">Like</div>
+                    <div class="swipe-right">Dislike</div>
+                </div>
             </div>
-            <div class="quantity-slider">
-                <label for="particle-quantity">Burst Quantity:</label>
-                <input type="range" id="particle-quantity" min="1" max="10" value="3">
+
+            <div class="controls">
+                <button id="like-btn" class="btn like-btn">♥</button>
+                <button id="save-btn" class="btn save-btn">💾</button>
+                <button id="dislike-btn" class="btn dislike-btn">✗</button>
             </div>
+        </main>
+
+        <div id="no-more-images" class="hidden">
+            <p>No more images in queue!</p>
+            <button id="restart-btn" class="btn restart-btn">Start Over</button>
         </div>
-        <canvas id="canvas"></canvas>
-        <div class="instructions">
-            <p>Tap or click to create particles. Hold and drag to create particle trails.</p>
-            <p>Use the controls to toggle gravity, particle interaction, and visual effects.</p>
+
+        <div id="intro-screen">
+            <div class="intro-content">
+                <h2>Welcome to Genetic Image Evolution</h2>
+                <p>This app uses genetic algorithms to evolve images based on your preferences.</p>
+                <p>Swipe left or tap ♥ for images you like.</p>
+                <p>Swipe right or tap ✗ for images you don't like.</p>
+                <p>Tap 💾 to save an image you want to keep.</p>
+                <button id="start-btn" class="btn start-btn">Start Evolving</button>
+            </div>
         </div>
     </div>
-    <script src="script.js"></script>
+
+    <!-- JavaScript Modules -->
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>

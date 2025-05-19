@@ -47,12 +47,12 @@
 47. Memory Game
 48. Chat Joke
 49. Maze Game
-50. Particle Physics Playground
+50. Genetic Image Evolution
 51. Genetic Sound Visualizer
 52. Abstract Drawing App
 53. Interactive space exploration
 54. Black Hole Simulator
-55. TBD
+55. Particle Physics Playground
 56. TBD
 57. TBD
 58. TBD
