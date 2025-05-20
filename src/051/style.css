@@ -1,0 +1,77 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #0a0a10; /* 暗い背景色 */
+    color: #e0e0e0; /* 明るい文字色 */
+    touch-action: manipulation;
+}
+
+.container {
+    text-align: center;
+    background-color: #1a1a2a; /* 少し明るいコンテナ背景 */
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.3); /* 魔法っぽい影 */
+    border: 1px solid rgba(76, 175, 80, 0.5);
+}
+
+h1 {
+    color: #90caf9; /* タイトルの色 */
+    text-shadow: 0 0 5px rgba(144, 202, 249, 0.5);
+}
+
+input[type="text"] {
+    padding: 12px;
+    margin: 15px 0;
+    border: 1px solid #4CAF50; /* 緑系のボーダー */
+    border-radius: 5px;
+    width: calc(100% - 26px);
+    box-sizing: border-box;
+    background-color: #2c2c3c;
+    color: #e0e0e0;
+    font-size: 16px;
+}
+
+input[type="text"]::placeholder {
+    color: #888;
+}
+
+button {
+    padding: 12px 25px;
+    background: linear-gradient(45deg, #4CAF50, #81C784); /* グラデーションボタン */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+button:hover {
+    background: linear-gradient(45deg, #66BB6A, #A5D6A7);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+#magicCircleCanvas {
+    margin-top: 25px;
+    border: 1px solid #4CAF50; /* キャンバスの枠線も合わせる */
+    width: 300px;
+    height: 300px;
+    /* 発光効果はJavaScript側でshadowBlurを使うため、CSSのbox-shadowは一旦コメントアウト
+    box-shadow: 0 0 15px 5px rgba(76, 200, 80, 0.5);
+    */
+}

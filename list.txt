@@ -48,12 +48,12 @@
 48. Chat Joke
 49. Maze Game
 50. Genetic Image Evolution
-51. Genetic Sound Visualizer
+51. Magic Circle Generator
 52. Abstract Drawing App
 53. Interactive space exploration
 54. Black Hole Simulator
 55. Particle Physics Playground
-56. TBD
+56. Genetic Sound Visualizer
 57. TBD
 58. TBD
 59. TBD
