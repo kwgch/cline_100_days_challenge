@@ -1,297 +1,224 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Get canvas and context
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    // Set canvas size to match container
-    function resizeCanvas() {
-        canvas.width = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
-    }
-    
-    // Initial resize and add event listener for window resize
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-    
-    // Particle class
-    class Particle {
-        constructor(x, y, radius, color) {
-            this.x = x;
-            this.y = y;
-            this.radius = radius;
-            this.color = color;
-            this.velocity = {
-                x: (Math.random() - 0.5) * 4,
-                y: (Math.random() - 0.5) * 4
-            };
-            this.opacity = 1;
-            this.gravity = 0.1;
-            this.friction = 0.99;
-            this.lifespan = 200 + Math.random() * 100;
-        }
+    const gameArea = document.getElementById('game-area');
+    const shapeBox = document.getElementById('shape-box');
+    const mouth = document.querySelector('.mouth');
+    const dialogueBox = document.getElementById('dialogue-box');
+
+    // ヘルパー関数：ランダムな整数を生成
+    const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    // ヘルパー関数：ランダムな16進数カラーコードを生成
+    const getRandomColor = () => '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+
+    // ヘルパー関数：色の明度を計算
+    const getLuminance = (hex) => {
+        const r = parseInt(hex.slice(1, 3), 16) / 255;
+        const g = parseInt(hex.slice(3, 5), 16) / 255;
+        const b = parseInt(hex.slice(5, 7), 16) / 255;
         
-        draw() {
-            ctx.save();
-            ctx.globalAlpha = this.opacity;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-            ctx.fillStyle = this.color;
-            ctx.fill();
-            ctx.closePath();
-            ctx.restore();
-        }
+        const toLinear = (c) => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
         
-        update() {
-            this.draw();
-            
-            // Apply gravity if enabled
-            if (gravityEnabled) {
-                this.velocity.y += this.gravity;
-            }
-            
-            // Apply friction
-            this.velocity.x *= this.friction;
-            this.velocity.y *= this.friction;
-            
-            // Update position
-            this.x += this.velocity.x;
-            this.y += this.velocity.y;
-            
-            // Bounce off walls
-            if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
-                this.velocity.x = -this.velocity.x * 0.8;
-                
-                // Prevent particles from getting stuck at the sides
-                if (this.x + this.radius > canvas.width) {
-                    this.x = canvas.width - this.radius;
-                }
-                
-                if (this.x - this.radius < 0) {
-                    this.x = this.radius;
-                }
-            }
-            
-            if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
-                this.velocity.y = -this.velocity.y * 0.8;
-                
-                // Prevent particles from getting stuck at the bottom
-                if (this.y + this.radius > canvas.height) {
-                    this.y = canvas.height - this.radius;
-                }
-                
-                if (this.y - this.radius < 0) {
-                    this.y = this.radius;
-                }
-            }
-            
-            // Decrease lifespan and opacity
-            this.lifespan--;
-            if (this.lifespan <= 100) {
-                this.opacity = this.lifespan / 100;
+        return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+    };
+
+    // ヘルパー関数：コントラスト比を計算
+    const getContrastRatio = (color1, color2) => {
+        const lum1 = getLuminance(color1);
+        const lum2 = getLuminance(color2);
+        const brightest = Math.max(lum1, lum2);
+        const darkest = Math.min(lum1, lum2);
+        return (brightest + 0.05) / (darkest + 0.05);
+    };
+
+    // ヘルパー関数：十分なコントラストを持つ色のペアを生成
+    const getContrastingColors = () => {
+        let backgroundColor, shapeColor;
+        let attempts = 0;
+        const maxAttempts = 50;
+        
+        do {
+            backgroundColor = getRandomColor();
+            shapeColor = getRandomColor();
+            attempts++;
+        } while (getContrastRatio(backgroundColor, shapeColor) < 3.0 && attempts < maxAttempts);
+        
+        // 十分なコントラストが得られない場合は、明暗を強制的に分ける
+        if (attempts >= maxAttempts) {
+            const bgLuminance = getLuminance(backgroundColor);
+            if (bgLuminance > 0.5) {
+                // 背景が明るい場合は、暗い色を生成
+                shapeColor = '#' + Math.floor(Math.random() * 8388608).toString(16).padStart(6, '0'); // 0x000000-0x7FFFFF
+            } else {
+                // 背景が暗い場合は、明るい色を生成
+                shapeColor = '#' + (Math.floor(Math.random() * 8388608) + 8388608).toString(16).padStart(6, '0'); // 0x800000-0xFFFFFF
             }
         }
-    }
-    
-    // Variables
-    let particles = [];
-    let gravityEnabled = true;
-    let interactionEnabled = false;
-    let trailsEnabled = true;
-    let particleColor = '#00aaff';
-    let particleSize = 15;
-    let particleQuantity = 3;
-    
-    // Event listeners for controls
-    document.getElementById('gravity-toggle').addEventListener('click', () => {
-        gravityEnabled = !gravityEnabled;
-    });
-    
-    document.getElementById('clear').addEventListener('click', () => {
-        particles = [];
-    });
-    
-    document.getElementById('particle-color').addEventListener('input', (e) => {
-        particleColor = e.target.value;
-    });
-    
-    document.getElementById('particle-size').addEventListener('input', (e) => {
-        particleSize = parseInt(e.target.value);
-    });
-    
-    document.getElementById('particle-quantity').addEventListener('input', (e) => {
-        particleQuantity = parseInt(e.target.value);
-    });
-    
-    document.getElementById('interaction-toggle').addEventListener('click', () => {
-        interactionEnabled = !interactionEnabled;
-    });
-    
-    document.getElementById('trail-toggle').addEventListener('click', () => {
-        trailsEnabled = !trailsEnabled;
-    });
-    
-    // Create particles on click/touch
-    function createParticle(x, y) {
-        const radius = particleSize;
-        for (let i = 0; i < particleQuantity; i++) {
-            particles.push(new Particle(x, y, radius * (0.5 + Math.random() * 0.5), particleColor));
-        }
-    }
-    
-    // Handle mouse/touch events
-    function handlePointerDown(e) {
-        e.preventDefault();
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        createParticle(x, y);
-    }
-    
-    function handleTouchMove(e) {
-        e.preventDefault();
-        const rect = canvas.getBoundingClientRect();
-        const touch = e.touches[0];
-        const x = touch.clientX - rect.left;
-        const y = touch.clientY - rect.top;
         
-        // Only create particles every few frames to avoid overwhelming the system
-        if (Math.random() > 0.5) {
-            createParticle(x, y);
-        }
-    }
-    
-    // Add event listeners
-    canvas.addEventListener('mousedown', handlePointerDown);
-    canvas.addEventListener('mousemove', (e) => {
-        if (e.buttons === 1) { // Left mouse button is pressed
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            // Only create particles every few frames to avoid overwhelming the system
-            if (Math.random() > 0.7) {
-                createParticle(x, y);
-            }
-        }
-    });
-    
-    canvas.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        const rect = canvas.getBoundingClientRect();
-        const touch = e.touches[0];
-        const x = touch.clientX - rect.left;
-        const y = touch.clientY - rect.top;
-        createParticle(x, y);
-    }, { passive: false });
-    
-    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-    
-    // Calculate distance between two particles
-    function distance(particle1, particle2) {
-        const dx = particle1.x - particle2.x;
-        const dy = particle1.y - particle2.y;
-        return Math.sqrt(dx * dx + dy * dy);
-    }
-    
-    // Handle particle interactions
-    function handleParticleInteractions() {
-        if (!interactionEnabled) return;
+        return { backgroundColor, shapeColor };
+    };
+
+    // ヘルパー関数：顔色の明度を調整して黒い目と口が見えるようにする
+    const adjustShapeColorForVisibility = (originalColor) => {
+        const luminance = getLuminance(originalColor);
+        const minLuminanceForBlackEyes = 0.3; // 黒い目と口が見える最低明度
         
-        for (let i = 0; i < particles.length; i++) {
-            for (let j = i + 1; j < particles.length; j++) {
-                const p1 = particles[i];
-                const p2 = particles[j];
-                
-                // Calculate distance between particles
-                const dist = distance(p1, p2);
-                const minDist = p1.radius + p2.radius;
-                
-                // If particles are overlapping
-                if (dist < minDist) {
-                    // Calculate collision vector
-                    const dx = p2.x - p1.x;
-                    const dy = p2.y - p1.y;
-                    
-                    // Calculate collision normal
-                    const nx = dx / dist;
-                    const ny = dy / dist;
-                    
-                    // Calculate relative velocity
-                    const vx = p1.velocity.x - p2.velocity.x;
-                    const vy = p1.velocity.y - p2.velocity.y;
-                    
-                    // Calculate relative velocity in terms of the normal direction
-                    const velocityAlongNormal = vx * nx + vy * ny;
-                    
-                    // Do not resolve if velocities are separating
-                    if (velocityAlongNormal > 0) continue;
-                    
-                    // Calculate restitution (bounciness)
-                    const restitution = 0.8;
-                    
-                    // Calculate impulse scalar
-                    let impulseScalar = -(1 + restitution) * velocityAlongNormal;
-                    impulseScalar /= 2; // Equal mass assumption
-                    
-                    // Apply impulse
-                    p1.velocity.x -= impulseScalar * nx;
-                    p1.velocity.y -= impulseScalar * ny;
-                    p2.velocity.x += impulseScalar * nx;
-                    p2.velocity.y += impulseScalar * ny;
-                    
-                    // Move particles apart to prevent sticking
-                    const overlap = minDist - dist;
-                    const moveX = overlap * nx * 0.5;
-                    const moveY = overlap * ny * 0.5;
-                    
-                    p1.x -= moveX;
-                    p1.y -= moveY;
-                    p2.x += moveX;
-                    p2.y += moveY;
-                }
-            }
-        }
-    }
-    
-    // Animation loop
-    function animate() {
-        requestAnimationFrame(animate);
-        
-        if (trailsEnabled) {
-            // Create a semi-transparent background for trail effect
-            ctx.fillStyle = 'rgba(30, 30, 30, 0.2)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        } else {
-            // Clear the canvas completely
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (luminance >= minLuminanceForBlackEyes) {
+            // 十分明るい場合はそのまま返す
+            return originalColor;
         }
         
-        // Handle particle interactions
-        handleParticleInteractions();
+        // 暗すぎる場合は明度を調整
+        const r = parseInt(originalColor.slice(1, 3), 16);
+        const g = parseInt(originalColor.slice(3, 5), 16);
+        const b = parseInt(originalColor.slice(5, 7), 16);
         
-        // Update and remove dead particles
-        particles = particles.filter(particle => {
-            particle.update();
-            return particle.lifespan > 0;
+        // 明度を上げるための調整係数を計算
+        const targetLuminance = minLuminanceForBlackEyes;
+        const adjustmentFactor = Math.sqrt(targetLuminance / luminance);
+        
+        // RGB値を調整（255を超えないように制限）
+        const newR = Math.min(255, Math.round(r * adjustmentFactor));
+        const newG = Math.min(255, Math.round(g * adjustmentFactor));
+        const newB = Math.min(255, Math.round(b * adjustmentFactor));
+        
+        // 16進数に変換して返す
+        const hexR = newR.toString(16).padStart(2, '0');
+        const hexG = newG.toString(16).padStart(2, '0');
+        const hexB = newB.toString(16).padStart(2, '0');
+        
+        return `#${hexR}${hexG}${hexB}`;
+    };
+
+    // ヘルパー関数：ランダムなborder-radius値を生成
+    const getRandomBorderRadius = () => {
+        const values = Array.from({ length: 4 }, () => `${getRandomInt(0, 100)}%`).join(' ');
+        const slash = Math.random() > 0.5 ? ` / ${Array.from({ length: 4 }, () => `${getRandomInt(0, 100)}%`).join(' ')}` : '';
+        return values + slash;
+    };
+
+    // 口の表情パターン
+    const mouthExpressions = [
+        { borderRadius: '0 0 50% 50% / 0 0 100% 100%', transform: 'translateX(-50%) rotate(0deg)', width: '50px', height: '10px' }, // 笑顔 (大きな下向きの弧)
+        { borderRadius: '50% 50% 0 0 / 100% 100% 0 0', transform: 'translateX(-50%) rotate(0deg)', width: '50px', height: '10px' }, // 困り顔 (大きな上向きの弧)
+        { borderRadius: '0', transform: 'translateX(-50%) rotate(0deg) scaleX(0.8)', width: '50px', height: '10px' }, // 真顔 (直線)
+        { borderRadius: '50%', transform: 'translateX(-50%) rotate(0deg) scale(0.5)', width: '50px', height: '10px' }, // 驚き顔 (小さい円)
+        { borderRadius: '0 0 50% 50% / 0 0 100% 100%', transform: 'translateX(-50%) rotate(-15deg)', width: '50px', height: '10px' }, // 斜め笑顔 (左下がり)
+        { borderRadius: '0 0 50% 50% / 0 0 100% 100%', transform: 'translateX(-50%) rotate(15deg)', width: '50px', height: '10px' }, // 斜め笑顔 (右下がり)
+        { borderRadius: '50% 50% 0 0 / 100% 100% 0 0', transform: 'translateX(-50%) rotate(-15deg)', width: '50px', height: '10px' }, // 斜め困り顔 (左上がり)
+        { borderRadius: '50% 50% 0 0 / 100% 100% 0 0', transform: 'translateX(-50%) rotate(15deg)', width: '50px', height: '10px' }  // 斜め困り顔 (右上がり)
+    ];
+
+    // 発言パターン
+    const dialogues = [
+        "オレ　オマエ　トモダチ",
+        "タップ　スル　タノシイ",
+        "ヘンナ　カタチ　ダネ",
+        "コレ　ナニイロ？",
+        "マタ　アエタネ",
+        "キョウ　イイヒ　ダネ",
+        "ナニカ　オモシロイ？",
+        "モット　タップ　シテ",
+        "ビックリ　シタ？",
+        "フムフム…",
+        "ナルホド！",
+        "ワクワク　スル！",
+        "アタラシイ　ハッケン！",
+        "キミ　サイコウ！",
+        "ゲンキ　シテル？",
+        "ナニ　カンガエテル？",
+        "ヒミツ　ダヨ！",
+        "マタネ！",
+        "タノシイ　ジカン！",
+        "モット　モット！",
+        "オレ　ココ　イル",
+        "キミ　スキ",
+        "アツイ　ネ",
+        "サムイ　ネ",
+        "オナカ　スイタ",
+        "ネムイ　ネ",
+        "オレ　ツヨイ",
+        "オレ　ヨワイ",
+        "オレ　マケル",
+        "オレ　カツ",
+        "オレ　ワカル",
+        "オレ　ワカラナイ",
+        "オレ　ガンバル",
+        "オレ　ヤルゾ",
+        "オレ　コワイ",
+        "オレ　ウレシイ",
+        "オレ　カナシイ",
+        "オレ　オコッタ",
+        "オレ　ヒマ",
+        "オレ　イソガシイ",
+        "オマエ　ウマソウダナ",
+        "オレ　ハラヘッタ",
+        "オレ　オマエ　タベル",
+        "カユイ　ウマイ",
+        "カユ　ウマ",
+        "ハヤク　ニンゲンニ　ナリタイ",
+        "クライ　アナニ　ハイル",
+        "オウチニ　カエリタイ",
+        "ニャーン",
+        "ユウキュウ　トリタイ",
+        "モテタイ"
+    ];
+
+    let dialogueTimeout; // セリフ表示のタイムアウトID
+
+    const updateElements = () => {
+        // 十分なコントラストを持つ背景色と図形色を生成
+        const colors = getContrastingColors();
+        
+        // 背景色の変更
+        gameArea.style.backgroundColor = colors.backgroundColor;
+
+        // 顔色の明度を調整して黒い目と口が見えるようにする
+        const adjustedShapeColor = adjustShapeColorForVisibility(colors.shapeColor);
+
+        // 形、大きさ、図形の色、回転の変更
+        shapeBox.style.borderRadius = getRandomBorderRadius();
+        shapeBox.style.setProperty('--rotate', `${getRandomInt(-15, 15)}deg`); // 左右に少し傾く程度に制限
+        shapeBox.style.width = `${getRandomInt(80, 250)}px`; // ランダムな幅
+        shapeBox.style.height = `${getRandomInt(80, 250)}px`; // ランダムな高さ
+        shapeBox.style.backgroundColor = adjustedShapeColor; // 明度調整済みの図形の色
+
+        // 目と口は常に黒色
+        const eyeMouthColor = '#000000';
+        
+        // 目と口の色を更新
+        const eyes = document.querySelectorAll('.eye');
+        eyes.forEach(eye => {
+            eye.style.backgroundColor = eyeMouthColor;
         });
-        
-        // Display particle count and status
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.font = '12px Arial';
-        ctx.fillText(`Particles: ${particles.length}`, 10, 20);
-        ctx.fillText(`Gravity: ${gravityEnabled ? 'ON' : 'OFF'}`, 10, 40);
-        ctx.fillText(`Interaction: ${interactionEnabled ? 'ON' : 'OFF'}`, 10, 60);
-        ctx.fillText(`Trails: ${trailsEnabled ? 'ON' : 'OFF'}`, 10, 80);
-    }
-    
-    // Start animation
-    animate();
-    
-    // Add some initial particles
-    for (let i = 0; i < 20; i++) {
-        const x = Math.random() * canvas.width;
-        const y = Math.random() * canvas.height;
-        createParticle(x, y);
-    }
+        mouth.style.backgroundColor = eyeMouthColor;
+
+        // 口の表情の変更 (ランダム)
+        const randomMouthExpression = mouthExpressions[getRandomInt(0, mouthExpressions.length - 1)];
+        mouth.style.borderRadius = randomMouthExpression.borderRadius;
+        mouth.style.transform = randomMouthExpression.transform;
+
+        // セリフの表示
+        clearTimeout(dialogueTimeout); // 既存のタイムアウトをクリア
+        dialogueBox.textContent = dialogues[getRandomInt(0, dialogues.length - 1)];
+        dialogueBox.style.opacity = 1; // 表示
+
+        // 口を「しゃべっている」表情に固定 (一時的に)
+        mouth.style.borderRadius = '50%'; // 丸い口
+        mouth.style.transform = 'translateX(-50%) scaleY(0.5)'; // 縦に潰れた口
+
+        dialogueTimeout = setTimeout(() => {
+            dialogueBox.style.opacity = 0; // 非表示
+            // セリフが消えたら口の表情をランダムに戻す
+            const randomMouthExpressionAfterSpeech = mouthExpressions[getRandomInt(0, mouthExpressions.length - 1)];
+            mouth.style.borderRadius = randomMouthExpressionAfterSpeech.borderRadius;
+            mouth.style.transform = randomMouthExpressionAfterSpeech.transform;
+            mouth.style.width = randomMouthExpressionAfterSpeech.width; // widthも戻す
+            mouth.style.height = randomMouthExpressionAfterSpeech.height; // heightも戻す
+        }, 2000); // 2秒後に消える
+    };
+
+    gameArea.addEventListener('click', updateElements);
+
+    // 初期状態を設定
+    updateElements();
 });
