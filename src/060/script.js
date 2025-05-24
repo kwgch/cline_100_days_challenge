@@ -57,6 +57,38 @@ document.addEventListener('DOMContentLoaded', () => {
         return { backgroundColor, shapeColor };
     };
 
+    // ヘルパー関数：顔色の明度を調整して黒い目と口が見えるようにする
+    const adjustShapeColorForVisibility = (originalColor) => {
+        const luminance = getLuminance(originalColor);
+        const minLuminanceForBlackEyes = 0.3; // 黒い目と口が見える最低明度
+        
+        if (luminance >= minLuminanceForBlackEyes) {
+            // 十分明るい場合はそのまま返す
+            return originalColor;
+        }
+        
+        // 暗すぎる場合は明度を調整
+        const r = parseInt(originalColor.slice(1, 3), 16);
+        const g = parseInt(originalColor.slice(3, 5), 16);
+        const b = parseInt(originalColor.slice(5, 7), 16);
+        
+        // 明度を上げるための調整係数を計算
+        const targetLuminance = minLuminanceForBlackEyes;
+        const adjustmentFactor = Math.sqrt(targetLuminance / luminance);
+        
+        // RGB値を調整（255を超えないように制限）
+        const newR = Math.min(255, Math.round(r * adjustmentFactor));
+        const newG = Math.min(255, Math.round(g * adjustmentFactor));
+        const newB = Math.min(255, Math.round(b * adjustmentFactor));
+        
+        // 16進数に変換して返す
+        const hexR = newR.toString(16).padStart(2, '0');
+        const hexG = newG.toString(16).padStart(2, '0');
+        const hexB = newB.toString(16).padStart(2, '0');
+        
+        return `#${hexR}${hexG}${hexB}`;
+    };
+
     // ヘルパー関数：ランダムなborder-radius値を生成
     const getRandomBorderRadius = () => {
         const values = Array.from({ length: 4 }, () => `${getRandomInt(0, 100)}%`).join(' ');
@@ -140,12 +172,25 @@ document.addEventListener('DOMContentLoaded', () => {
         // 背景色の変更
         gameArea.style.backgroundColor = colors.backgroundColor;
 
+        // 顔色の明度を調整して黒い目と口が見えるようにする
+        const adjustedShapeColor = adjustShapeColorForVisibility(colors.shapeColor);
+
         // 形、大きさ、図形の色、回転の変更
         shapeBox.style.borderRadius = getRandomBorderRadius();
         shapeBox.style.setProperty('--rotate', `${getRandomInt(-15, 15)}deg`); // 左右に少し傾く程度に制限
         shapeBox.style.width = `${getRandomInt(80, 250)}px`; // ランダムな幅
         shapeBox.style.height = `${getRandomInt(80, 250)}px`; // ランダムな高さ
-        shapeBox.style.backgroundColor = colors.shapeColor; // コントラストを考慮した図形の色
+        shapeBox.style.backgroundColor = adjustedShapeColor; // 明度調整済みの図形の色
+
+        // 目と口は常に黒色
+        const eyeMouthColor = '#000000';
+        
+        // 目と口の色を更新
+        const eyes = document.querySelectorAll('.eye');
+        eyes.forEach(eye => {
+            eye.style.backgroundColor = eyeMouthColor;
+        });
+        mouth.style.backgroundColor = eyeMouthColor;
 
         // 口の表情の変更 (ランダム)
         const randomMouthExpression = mouthExpressions[getRandomInt(0, mouthExpressions.length - 1)];
