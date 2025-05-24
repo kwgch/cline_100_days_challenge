@@ -52,12 +52,12 @@
 52. Abstract Drawing App
 53. Interactive space exploration
 54. Black Hole Simulator
-55. Particle Physics Playground
+55. Friend
 56. Genetic Sound Visualizer
-57. TBD
-58. TBD
-59. TBD
-60. TBD
+57. D3.js Interesting Thing
+58. Interactive Art with three.js
+59. WebGL Shader Sample
+60. Particle Physics Playground
 61. TBD
 62. TBD
 63. TBD
