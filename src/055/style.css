@@ -89,3 +89,31 @@ body {
     z-index: 2; /* 他の要素より手前に表示 */
     pointer-events: none; /* クリックイベントを透過させる */
 }
+
+/* スマホ横画面での調整 */
+@media screen and (orientation: landscape) and (max-height: 600px) {
+    #dialogue-box {
+        top: 5%; /* 横画面では上部により近く配置 */
+        font-size: 0.7em; /* フォントサイズを少し小さく */
+        padding: 8px 16px; /* パディングを少し小さく */
+    }
+    
+    /* #shape-box {
+        max-width: 120px;
+        max-height: 120px;
+    } */
+}
+
+/* より小さい横画面での追加調整 */
+@media screen and (orientation: landscape) and (max-height: 400px) {
+    #dialogue-box {
+        top: 2%; /* さらに上部に配置 */
+        font-size: 0.6em; /* さらに小さく */
+        padding: 6px 12px;
+    }
+    
+    /* #shape-box {
+        max-width: 100px;
+        max-height: 100px;
+    } */
+}
