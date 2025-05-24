@@ -1,19 +1,37 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>インタラクティブな何か</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Particle Physics Playground</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-area">
-        <div id="shape-box">
-            <div class="eye left-eye"></div>
-            <div class="eye right-eye"></div>
-            <div class="mouth"></div>
+    <div class="container">
+        <h1>Particle Physics Playground</h1>
+        <div class="controls">
+            <button id="gravity-toggle">Toggle Gravity</button>
+            <button id="interaction-toggle">Toggle Interaction</button>
+            <button id="trail-toggle">Toggle Trails</button>
+            <button id="clear">Clear All</button>
+            <div class="color-picker">
+                <label for="particle-color">Particle Color:</label>
+                <input type="color" id="particle-color" value="#00aaff">
+            </div>
+            <div class="size-slider">
+                <label for="particle-size">Particle Size:</label>
+                <input type="range" id="particle-size" min="5" max="50" value="15">
+            </div>
+            <div class="quantity-slider">
+                <label for="particle-quantity">Burst Quantity:</label>
+                <input type="range" id="particle-quantity" min="1" max="10" value="3">
+            </div>
         </div>
-        <div id="dialogue-box"></div>
+        <canvas id="canvas"></canvas>
+        <div class="instructions">
+            <p>Tap or click to create particles. Hold and drag to create particle trails.</p>
+            <p>Use the controls to toggle gravity, particle interaction, and visual effects.</p>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>
