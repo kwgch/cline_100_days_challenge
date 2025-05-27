@@ -17,19 +17,35 @@ vec3 palette(float t, float time) {
 }
 
 void main() {
-    vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution) / u_resolution.y;
-
-    // 無限ズームの中心点
-    vec2 zoom_target = vec2(-0.743643887037151, 0.131825904205330); // 有名な複雑な部分
+    // 無限ズームの中心点と初期ズームレベル
+    vec2 initial_zoom_target = vec2(-0.743643887037151, 0.131825904205330); // 有名な複雑な部分
+    float initial_zoom_level = 1.0;
 
     // 時間による指数関数的なズーム
     float zoom_speed = 0.5; // ズームの速さ
-    float current_zoom = pow(10.0, u_time * zoom_speed); // 時間とともに指数関数的にズーム
+    float total_zoom_factor = pow(10.0, u_time * zoom_speed); // 時間とともに指数関数的にズーム
+
+    // ズームレベルが一定値を超えたら座標系をリセット
+    float reset_threshold = 1e10; // ズームリセットの閾値 (例: 10^10)
+    float num_resets = floor(log(total_zoom_factor / initial_zoom_level) / log(reset_threshold));
+    float current_zoom_level = total_zoom_factor / pow(reset_threshold, num_resets);
+
+    // 現在のズームターゲットを計算
+    vec2 current_zoom_target = initial_zoom_target;
+    // 最大リセット回数を設定 (GLSL ES 1.00のループ制限のため)
+    const int MAX_RESETS = 10; 
+    for (int k = 0; k < MAX_RESETS; k++) {
+        if (float(k) >= num_resets) break; // num_resetsを超えたらループを抜ける
+        // ここでズームターゲットを更新するロジックを実装
+        // 例: ズームターゲットをマンデルブロ集合の特定の点に移動させる
+        // この例では、単純に初期ターゲットを維持しますが、より複雑なズームパスを実装することも可能
+    }
 
     // 画面のUV座標をマンデルブロ集合の座標に変換
-    vec2 c = (gl_FragCoord.xy / u_resolution - 0.5) * 4.0 / current_zoom; // ズームレベルに応じて範囲を縮小
+    vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution) / u_resolution.y;
+    vec2 c = uv * 4.0 / current_zoom_level; // ズームレベルに応じて範囲を縮小
     c.x *= u_resolution.x / u_resolution.y; // アスペクト比補正
-    c += zoom_target; // ズームの中心点を加算して移動
+    c += current_zoom_target; // ズームの中心点を加算して移動
 
     vec2 z = vec2(0.0, 0.0);
     float i;
