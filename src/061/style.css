@@ -1,453 +1,111 @@
-/* リセットとベーススタイル */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 0;
+    overflow: hidden; /* スクロールを無効にする */
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     min-height: 100vh;
-    color: #333;
-    touch-action: manipulation; /* スマホでのタップ時の画面移動を防ぐ */
-    user-select: none; /* テキスト選択を防ぐ */
+    background-color: #FF00FF; /* 蛍光マゼンタ */
+    color: #00FF00; /* 蛍光グリーン */
+    text-align: center;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23FF0000" d="M12 2L1 21h22L12 2z"/></svg>') 12 12, auto; /* 不気味なカーソル */
+    animation: glitchBackground 0.1s infinite alternate; /* 背景のグリッチ */
+    -webkit-user-select: none; /* テキスト選択無効 */
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    touch-action: none; /* スマホでのタップによる画面移動・拡大縮小を無効 */
 }
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 8px;
-    min-height: 100vh;
+@keyframes glitchBackground {
+    0% { background-color: #FF00FF; }
+    50% { background-color: #00FFFF; } /* シアン */
+    100% { background-color: #FFFF00; } /* 黄色 */
+}
+
+#container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    animation: flicker 0.1s infinite alternate; /* 全体のちらつき */
 }
 
-/* ヘッダー */
-header {
-    text-align: center;
-    margin-bottom: 15px;
-    background: rgba(255, 255, 255, 0.95);
-    padding: 15px 10px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
+@keyframes flicker {
+    0% { opacity: 1; }
+    50% { opacity: 0.8; }
+    100% { opacity: 1; }
+}
+
+h1, p, button {
+    animation: pulse 1s infinite alternate, colorShift 2s infinite alternate; /* 脈動と色変化 */
+    text-shadow: 0 0 10px #00FF00, 0 0 20px #00FF00, 0 0 30px #00FF00; /* ネオングリーン */
+    z-index: 10;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
+}
+
+@keyframes colorShift {
+    0% { color: #00FF00; }
+    33% { color: #FF00FF; }
+    66% { color: #FFFF00; }
+    100% { color: #00FF00; }
 }
 
 h1 {
-    font-size: 1.8rem;
-    margin-bottom: 10px;
-    background: linear-gradient(45deg, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: 3em;
+    margin-bottom: 20px;
 }
 
-.game-info {
-    display: flex;
-    justify-content: space-around;
-    gap: 8px;
-    font-size: 0.9rem;
-    font-weight: bold;
+p {
+    font-size: 1.5em;
+    margin-bottom: 30px;
 }
 
-.game-info > div {
-    background: rgba(102, 126, 234, 0.1);
-    padding: 6px 10px;
-    border-radius: 8px;
-    border: 2px solid rgba(102, 126, 234, 0.3);
-    flex: 1;
-    text-align: center;
-    min-width: 0;
-}
-
-/* メインゲームエリア */
-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.game-area {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 15px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.instructions {
-    text-align: center;
-    margin-bottom: 15px;
-    font-size: 0.95rem;
-    color: #555;
-}
-
-/* グリッドコンテナ */
-.grid-container {
-    margin-bottom: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex: 1;
-    max-height: 350px;
-}
-
-.color-grid {
-    display: grid;
-    gap: 6px;
-    padding: 15px;
-    background: rgba(0, 0, 0, 0.05);
-    border-radius: 12px;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-.color-tile {
-    width: 55px;
-    height: 55px;
-    border-radius: 6px;
+button {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    background-color: #FF0000; /* 赤 */
+    color: #FFFFFF;
+    border: 5px solid #00FF00;
     cursor: pointer;
-    transition: all 0.2s ease;
-    border: 3px solid transparent;
-    position: relative;
-    overflow: hidden;
+    box-shadow: 0 0 15px #FF0000, 0 0 25px #FF0000;
+    animation: buttonGlitch 0.2s infinite alternate; /* ボタンのグリッチ */
 }
 
-.color-tile:hover {
-    transform: scale(1.05);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+@keyframes buttonGlitch {
+    0% { transform: skewX(0deg); }
+    25% { transform: skewX(5deg); }
+    50% { transform: skewX(0deg); }
+    75% { transform: skewX(-5deg); }
+    100% { transform: skewX(0deg); }
 }
 
-.color-tile:active {
-    transform: scale(0.95);
+/* ランダムな記号や画像のためのスタイル */
+.random-element {
+    position: absolute;
+    font-size: 2em;
+    animation: moveAndRotate 5s infinite alternate, colorShift 2s infinite alternate;
+    z-index: 5;
+    pointer-events: none; /* クリックイベントを透過 */
 }
 
-.color-tile.correct {
-    border-color: #4CAF50;
-    animation: correctPulse 0.6s ease;
+@keyframes moveAndRotate {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    25% { transform: translate(10vw, 10vh) rotate(90deg) scale(1.1); }
+    50% { transform: translate(-10vw, 20vh) rotate(180deg) scale(0.9); }
+    75% { transform: translate(5vw, -15vh) rotate(270deg) scale(1.2); }
+    100% { transform: translate(0, 0) rotate(360deg) scale(1); }
 }
 
-.color-tile.wrong {
-    border-color: #f44336;
-    animation: wrongShake 0.6s ease;
-}
-
-@keyframes correctPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-}
-
-@keyframes wrongShake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
-}
-
-/* ボタン */
-.btn {
-    padding: 12px 24px;
-    font-size: 1rem;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin: 0 5px;
-    min-width: 100px;
-}
-
-.btn.primary {
-    background: linear-gradient(45deg, #667eea, #764ba2);
-    color: white;
-    box-shadow: 0 3px 12px rgba(102, 126, 234, 0.4);
-}
-
-.btn.primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.6);
-}
-
-.btn.secondary {
-    background: #f0f0f0;
-    color: #333;
-    border: 2px solid #ddd;
-}
-
-.btn.secondary:hover {
-    background: #e0e0e0;
-    transform: translateY(-1px);
-}
-
-.btn:active {
-    transform: translateY(0);
-}
-
-/* ゲームオーバー・レベルアップ */
-.game-over, .level-up {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(255, 255, 255, 0.98);
-    padding: 30px 20px;
-    border-radius: 15px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-    text-align: center;
-    z-index: 1000;
-    backdrop-filter: blur(10px);
-    border: 3px solid rgba(102, 126, 234, 0.3);
-    max-width: calc(100vw - 40px);
-}
-
-.game-over h2, .level-up h3 {
-    margin-bottom: 15px;
-    color: #333;
-}
-
-.level-up {
-    background: linear-gradient(135deg, rgba(76, 175, 80, 0.95), rgba(139, 195, 74, 0.95));
-    color: white;
-    animation: levelUpBounce 0.8s ease;
-}
-
-@keyframes levelUpBounce {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-    50% { transform: translate(-50%, -50%) scale(1.05); }
-}
-
-/* フッター - スマホでは非表示 */
-footer {
-    display: none;
-}
-
-/* レスポンシブデザイン */
-@media (max-width: 768px) {
-    .container {
-        padding: 5px;
-    }
-    
-    h1 {
-        font-size: 1.6rem;
-        margin-bottom: 8px;
-    }
-    
-    header {
-        margin-bottom: 10px;
-        padding: 12px 8px;
-    }
-    
-    .game-info {
-        font-size: 0.85rem;
-        gap: 6px;
-    }
-    
-    .game-info > div {
-        padding: 5px 8px;
-    }
-    
-    .game-area {
-        padding: 12px;
-    }
-    
-    .instructions {
-        font-size: 0.9rem;
-        margin-bottom: 12px;
-    }
-    
-    .grid-container {
-        margin-bottom: 12px;
-        max-height: 300px;
-    }
-    
-    .color-grid {
-        gap: 5px;
-        padding: 12px;
-    }
-    
-    .color-tile {
-        width: 48px;
-        height: 48px;
-    }
-    
-    .btn {
-        padding: 10px 20px;
-        font-size: 0.9rem;
-        margin: 0 3px;
-        min-width: 90px;
-    }
-}
-
-@media (max-width: 480px) {
-    .container {
-        padding: 3px;
-    }
-    
-    h1 {
-        font-size: 1.4rem;
-        margin-bottom: 6px;
-    }
-    
-    header {
-        margin-bottom: 8px;
-        padding: 10px 6px;
-    }
-    
-    .game-info {
-        font-size: 0.8rem;
-        gap: 4px;
-    }
-    
-    .game-info > div {
-        padding: 4px 6px;
-    }
-    
-    .game-area {
-        padding: 10px;
-    }
-    
-    .instructions {
-        font-size: 0.85rem;
-        margin-bottom: 10px;
-    }
-    
-    .grid-container {
-        margin-bottom: 10px;
-        max-height: 280px;
-    }
-    
-    .color-grid {
-        gap: 4px;
-        padding: 10px;
-    }
-    
-    .color-tile {
-        width: 42px;
-        height: 42px;
-    }
-    
-    .btn {
-        padding: 8px 16px;
-        font-size: 0.85rem;
-        margin: 0 2px;
-        min-width: 80px;
-    }
-    
-    .game-over, .level-up {
-        padding: 20px 15px;
-        margin: 0 15px;
-    }
-}
-
-/* 縦画面での最適化 */
-@media (max-height: 700px) and (max-width: 480px) {
-    .container {
-        padding: 2px;
-    }
-    
-    header {
-        margin-bottom: 6px;
-        padding: 8px 5px;
-    }
-    
-    h1 {
-        font-size: 1.3rem;
-        margin-bottom: 5px;
-    }
-    
-    .game-area {
-        padding: 8px;
-    }
-    
-    .instructions {
-        font-size: 0.8rem;
-        margin-bottom: 8px;
-    }
-    
-    .grid-container {
-        margin-bottom: 8px;
-        max-height: 250px;
-    }
-    
-    .color-grid {
-        padding: 8px;
-        gap: 3px;
-    }
-    
-    .color-tile {
-        width: 38px;
-        height: 38px;
-    }
-}
-
-/* アクセシビリティ */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-/* タッチデバイス用の調整 */
-@media (hover: none) and (pointer: coarse) {
-    .color-tile:hover {
-        transform: none;
-        box-shadow: none;
-    }
-    
-    .color-tile:active {
-        transform: scale(0.95);
-        background-color: rgba(0, 0, 0, 0.1);
-    }
-    
-    .btn:hover {
-        transform: none;
-    }
-    
-    .btn:active {
-        transform: scale(0.98);
-    }
-}
-
-/* 大画面での表示 */
-@media (min-width: 769px) {
-    footer {
-        display: block;
-        margin-top: 20px;
-        background: rgba(255, 255, 255, 0.9);
-        padding: 15px;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
-    
-    .tips h3 {
-        margin-bottom: 12px;
-        color: #667eea;
-        text-align: center;
-        font-size: 1.1rem;
-    }
-    
-    .tips ul {
-        list-style: none;
-        padding: 0;
-    }
-    
-    .tips li {
-        padding: 6px 0;
-        padding-left: 18px;
-        position: relative;
-        color: #555;
-        font-size: 0.9rem;
-    }
-    
-    .tips li:before {
-        content: "✨";
-        position: absolute;
-        left: 0;
-    }
+/* スマホでのタップによる拡大縮小を無効にするための追加スタイル */
+html, body {
+    touch-action: manipulation;
 }

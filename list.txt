@@ -58,8 +58,8 @@
 58. Interactive Art with three.js
 59. WebGL Shader Sample
 60. Unusual Tetris
-61. TBD
-62. TBD
+61. Something sinister
+62. Self-replicating code
 63. TBD
 64. TBD
 65. TBD
