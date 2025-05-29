@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自己改変・自己増殖コード</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden; /* 横スクロールを禁止 */
+            touch-action: manipulation; /* スマホでのタップで画面が動かないように */
+        }
+        pre {
+            background-color: #2d2d2d;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            white-space: pre-wrap; /* 長い行を折り返す */
+            word-break: break-all; /* 単語の途中で改行 */
+            margin-bottom: 20px;
+            border: 1px solid #3a3a3a;
+        }
+        .code-container {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #444;
+            padding-bottom: 20px;
+        }
+        #codeDisplayContainer {
+            max-height: 80vh; /* 画面の高さの80%を最大高さとする */
+            overflow-y: auto; /* 縦方向にスクロール可能にする */
+            padding-right: 10px; /* スクロールバーとの隙間 */
+        }
+    </style>
+</head>
+<body>
+    <div id="codeDisplayContainer">
+        <div class="code-container">
+            <pre id="codeDisplay"></pre>
+        </div>
+    </div>
+
+    <script>
+        let mutationCount = 0;
+        let replicationCount = 0;
+        let selfCodeContent = ''; // Variable to store the script's own code
+
+        // Get the script's own code immediately when it's loaded
+        // document.currentScript is only valid while the script is executing
+        const scriptElement = document.currentScript;
+        if (scriptElement) {
+            selfCodeContent = scriptElement.textContent;
+        } else {
+            selfCodeContent = 'Failed to retrieve script code.';
+        }
+
+        // Function to get the script's own code (returns the stored code)
+        function getSelfCode() {
+            return selfCodeContent;
+        }
+
+        // Function to display code on the screen with a typing effect (line by line)
+        function displayCode(code, targetElementId, speed = 50, callback = null) { // Adjusted default speed for lines
+            const preElement = document.getElementById(targetElementId);
+            if (!preElement) {
+                if (callback) callback();
+                return;
+            }
+
+            preElement.textContent = ''; // Clear existing content
+            const lines = code.split('\n'); // Split code into lines
+            let i = 0;
+            const container = document.getElementById('codeDisplayContainer'); // Get the main container
+
+            function typeWriter() {
+                if (i < lines.length) {
+                    preElement.textContent += lines[i] + '\n'; // Add line and a newline character
+                    i++;
+                    // Scroll the main container to the bottom to show the typing progress
+                    if (container) {
+                        container.scrollTop = container.scrollHeight;
+                    }
+                    setTimeout(typeWriter, speed);
+                } else {
+                    if (callback) callback(); // Call callback when typing is complete
+                }
+            }
+            typeWriter();
+        }
+
+        // Function to simulate code mutation
+        function mutateCode(callback) { // Added callback
+            mutationCount++;
+            let currentCode = getSelfCode();
+
+            // Replace specific strings to represent mutation
+            // Example: Embed the value of mutationCount into the code
+            const newCode = currentCode.replace(
+                /let mutationCount = \d+;/,
+                `let mutationCount = ${mutationCount};`
+            ).replace(
+                /console\.log\('Code mutated! Mutation count: '\s*\+\s*\d+\);/,
+                `console.log('Code mutated! Mutation count: ' + ${mutationCount});`
+            );
+
+            // Update the display on the screen with typing effect
+            displayCode(newCode, 'codeDisplay', 10, callback); // Pass callback
+            console.log('Code mutated! Mutation count: ' + mutationCount);
+        }
+
+        // Function to simulate code replication
+        function replicateCode(callback) { // Added callback
+            replicationCount++;
+            const selfCode = getSelfCode();
+            const container = document.getElementById('codeDisplayContainer');
+
+            const newCodeContainer = document.createElement('div');
+            newCodeContainer.className = 'code-container';
+            newCodeContainer.innerHTML = `<p>Replicated Code #${replicationCount}</p><pre id="replicatedCodeDisplay${replicationCount}"></pre>`;
+            
+            container.appendChild(newCodeContainer);
+            // Apply typing effect to the new code block
+            displayCode(selfCode, `replicatedCodeDisplay${replicationCount}`, 10, callback); // Pass callback
+
+            // Scroll to the bottom to show the newly added code
+            container.scrollTop = container.scrollHeight;
+
+            console.log('Code replicated! Replication count: ' + replicationCount);
+        }
+
+        // On page load, display own code and start auto-execution
+        document.addEventListener('DOMContentLoaded', () => {
+            const selfCode = getSelfCode();
+            displayCode(selfCode, 'codeDisplay', 10, () => {
+                // Initial display complete, start the loop
+                startAutoExecutionLoop();
+            });
+
+            const maxCodeBlocks = 5; // Maximum number of code blocks to display
+            const loopInterval = 2000; // Interval between full cycles (mutation + replication)
+
+            function startAutoExecutionLoop() {
+                mutateCode(() => {
+                    // Mutation display complete, now replicate
+                    replicateCode(() => {
+                        const container = document.getElementById('codeDisplayContainer');
+                        // Remove oldest code blocks if exceeding maxCodeBlocks
+                        while (container.children.length > maxCodeBlocks) {
+                            container.removeChild(container.children[0]);
+                        }
+                        // Schedule the next loop iteration
+                        setTimeout(startAutoExecutionLoop, loopInterval);
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>
