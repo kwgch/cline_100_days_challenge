@@ -1,0 +1,61 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #1a1a1a;
+    color: #00ff00;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* 画面全体を占めるように */
+    overflow: hidden; /* 全体のスクロールを禁止 */
+}
+
+.container {
+    width: 90%;
+    max-width: 800px;
+    background-color: #000000;
+    border: 2px solid #00ff00;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    height: 90vh; /* コンテナの高さを画面の90%に設定 */
+}
+
+h1 {
+    color: #00ff00;
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+    margin-bottom: 20px;
+}
+
+#output {
+    flex-grow: 1; /* 残りのスペースを埋める */
+    background-color: #0d0d0d;
+    border: 1px solid #00cc00;
+    padding: 10px;
+    overflow-y: scroll; /* 内容がはみ出したらスクロール */
+    white-space: pre-wrap; /* 長い行を折り返す */
+    word-break: break-all; /* 単語の途中で改行 */
+    font-size: 0.8em; /* フォントサイズを小さく */
+    line-height: 1.2;
+    text-align: left;
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #00ff00 #0d0d0d; /* Firefox */
+}
+
+/* Webkit browsers (Chrome, Safari) */
+#output::-webkit-scrollbar {
+    width: 8px;
+}
+
+#output::-webkit-scrollbar-track {
+    background: #0d0d0d;
+}
+
+#output::-webkit-scrollbar-thumb {
+    background-color: #00ff00;
+    border-radius: 10px;
+    border: 2px solid #0d0d0d;
+}
