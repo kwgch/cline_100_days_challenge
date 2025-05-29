@@ -57,8 +57,8 @@
 57. D3.js Interesting Thing
 58. Interactive Art with three.js
 59. WebGL Shader Sample
-60. Particle Physics Playground
-61. Colour sense test
+60. Unusual Tetris
+61. TBD
 62. TBD
 63. TBD
 64. TBD

@@ -1,101 +1,230 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 body {
+    display: flex;
+    flex-direction: column; /* 縦方向に要素を並べる */
+    justify-content: center;
+    /* align-items: center; */ /* 中央揃えを削除 */
+    min-height: 100vh;
+    margin: 0;
+    background-color: #222;
+    color: #eee;
     font-family: 'Arial', sans-serif;
-    background-color: #121212;
-    color: #ffffff;
-    overflow: hidden;
-    touch-action: none; /* Prevents default touch actions on mobile */
+    overflow: hidden; /* スマホでタップ時に画面が動かないようにする */
 }
 
-.container {
+#game-container {
+    text-align: center;
+    background-color: #333;
+    padding: 10px; /* パディングを減らす */
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    margin-top: auto; /* 上部に余白を自動で追加 */
+    margin-bottom: auto; /* 下部に余白を自動で追加 */
+}
+
+/* h1 スタイルは不要になったため削除 */
+
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(10, 30px); /* 10列 */
+    grid-template-rows: repeat(20, 30px); /* 20行 */
+    width: 300px; /* 10 * 30px */
+    height: 600px; /* 20 * 30px */
+    background-color: #000;
+    border: 2px solid #4CAF50;
+    margin: 0 auto 20px auto;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.7);
+}
+
+.cell {
+    width: 30px;
+    height: 30px;
+    box-sizing: border-box;
+    border: 1px solid #333;
+}
+
+.block {
+    background-color: #00F; /* 例: 青色のブロック */
+    border: 1px solid #00A;
+    box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.5);
+    position: relative; /* 絵文字を重ねるために必要 */
+}
+
+.block.has-face::before {
+    content: attr(data-face);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5em; /* 絵文字のサイズ */
+    pointer-events: none; /* クリックイベントを透過させる */
+    z-index: 1;
+}
+
+#score-display {
+    font-size: 1.5em;
+    margin-bottom: 10px; /* マージンを減らす */
+    color: #FFD700;
+}
+
+#message-display {
+    font-size: 1.8em;
+    color: #FF4500;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    height: 1.8em; /* メッセージがないときに高さを確保 */
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+#message-display.show {
+    opacity: 1;
+}
+
+
+.block {
+    /* 既存のスタイル */
+    position: relative; /* 子要素の絶対配置の基準 */
+    overflow: hidden; /* 絵文字がはみ出さないように */
+}
+
+.eyes, .mouth {
+    position: absolute;
+    font-size: 1.2em; /* 絵文字のサイズ */
+    pointer-events: none; /* クリックイベントを透過させる */
+    z-index: 1;
+    transition: transform 0.2s ease-out; /* アニメーション用 */
+}
+
+.eyes {
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.mouth {
+    top: 70%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* ランダムな絵文字の落下用スタイル */
+.falling-emoji {
+    position: absolute;
+    font-size: 2em;
+    pointer-events: none;
+    z-index: 10;
+    animation: fall linear forwards;
+}
+
+@keyframes fall {
+    from { transform: translateY(-100px); opacity: 1; }
+    to { transform: translateY(700px); opacity: 0; }
+}
+
+/* 爆発時のエフェクト */
+.explosion-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 165, 0, 0.5); /* オレンジ色の半透明 */
+    border-radius: 50%;
+    transform: scale(0);
+    animation: explode 0.5s ease-out forwards;
+    z-index: 5;
+}
+
+@keyframes explode {
+    from { transform: scale(0); opacity: 1; }
+    to { transform: scale(2); opacity: 0; }
+}
+
+.explosion-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3em;
+    color: white;
+    text-shadow: 2px 2px 5px black;
+    animation: fadeOut 1s ease-out forwards;
+    z-index: 6;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+#game-over-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    padding: 10px;
-}
-
-h1 {
-    text-align: center;
-    margin: 10px 0;
-    font-size: 1.8rem;
-}
-
-.controls {
-    display: flex;
-    flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
-    margin-bottom: 10px;
-    padding: 10px;
-    background-color: rgba(30, 30, 30, 0.8);
-    border-radius: 8px;
+    align-items: center;
+    color: white;
+    font-size: 2em;
+    z-index: 20; /* 他の要素より手前に表示 */
 }
 
-button {
-    padding: 8px 12px;
-    background-color: #3498db;
+#game-over-screen h2 {
+    margin-bottom: 20px;
+    color: #FFD700;
+}
+
+#game-over-screen p {
+    margin-bottom: 30px;
+}
+
+#game-over-screen button {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    background-color: #4CAF50;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s ease;
 }
 
-button:hover {
-    background-color: #2980b9;
+#game-over-screen button:hover {
+    background-color: #45a049;
 }
 
-.color-picker, .size-slider, .quantity-slider {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+#game-over-screen button:active {
+    background-color: #3e8e41;
 }
 
-input[type="color"] {
-    width: 40px;
-    height: 30px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+#game-over-screen.hidden {
+    display: none;
 }
 
-input[type="range"] {
-    width: 100px;
-}
-
-canvas {
-    flex-grow: 1;
-    background-color: #1e1e1e;
-    border-radius: 8px;
-    touch-action: none; /* Prevents default touch actions on canvas */
-}
-
-.instructions {
-    text-align: center;
-    margin-top: 10px;
-    font-size: 0.9rem;
-    color: #aaaaaa;
-}
-
-/* Media queries for responsive design */
+/* スマホ向け調整 */
 @media (max-width: 600px) {
-    h1 {
-        font-size: 1.5rem;
+    #game-board {
+        width: 250px; /* 10 * 25px */
+        height: 500px; /* 20 * 25px */
+        grid-template-columns: repeat(10, 25px);
+        grid-template-rows: repeat(20, 25px);
     }
-    
-    .controls {
-        flex-direction: column;
-        align-items: center;
+
+    .cell {
+        width: 25px;
+        height: 25px;
     }
-    
-    .color-picker, .size-slider, .quantity-slider {
-        width: 100%;
-        justify-content: center;
+
+    #game-over-screen {
+        font-size: 1.5em;
+    }
+
+    #game-over-screen button {
+        padding: 10px 20px;
+        font-size: 1em;
     }
 }
