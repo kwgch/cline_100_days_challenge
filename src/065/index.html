@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS BREAKER</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="ui-panel">
+            <div class="score">スコア: <span id="score">0</span></div>
+            <div class="lives">残機: <span id="lives">3</span></div>
+            <div class="level">レベル: <span id="level">1</span></div>
+            <div class="special">特殊効果: <span id="special-effect">なし</span></div>
+        </div>
+        
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div class="controls">
+            <button id="startBtn">開始</button>
+            <button id="pauseBtn">一時停止</button>
+            <button id="resetBtn">リセット</button>
+        </div>
+        
+        <div class="power-ups">
+            <div class="power-up-item" data-type="multi-ball">マルチボール</div>
+            <div class="power-up-item" data-type="laser">レーザー</div>
+            <div class="power-up-item" data-type="big-paddle">大きなパドル</div>
+            <div class="power-up-item" data-type="gravity">重力変更</div>
+            <div class="power-up-item" data-type="rainbow">レインボーボール</div>
+        </div>
+    </div>
+    
+    <div id="game-over" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>ゲームオーバー</h2>
+            <p>最終スコア: <span id="final-score">0</span></p>
+            <button onclick="restartGame()">もう一度</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

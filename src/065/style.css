@@ -1,0 +1,470 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    overflow-x: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    margin: 0;
+    padding: 0;
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 10px;
+    box-sizing: border-box;
+    justify-content: flex-start;
+    gap: 10px;
+}
+
+.ui-panel {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ui-panel div {
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    font-size: 14px;
+}
+
+.ui-panel span {
+    color: #4ecdc4;
+    margin-left: 5px;
+}
+
+#gameCanvas {
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    background: linear-gradient(45deg, #1a1a2e, #16213e);
+    box-shadow: 
+        0 0 30px rgba(78, 205, 196, 0.3),
+        inset 0 0 20px rgba(0, 0, 0, 0.5);
+    max-width: 100%;
+    height: auto;
+    display: block;
+    touch-action: none;
+}
+
+.controls {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 800px;
+}
+
+.controls button {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 25px;
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.controls button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+    background: linear-gradient(45deg, #ee5a24, #ff6b6b);
+}
+
+.controls button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(255, 107, 107, 0.4);
+}
+
+.power-ups {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 800px;
+}
+
+.power-up-item {
+    padding: 8px 16px;
+    background: linear-gradient(45deg, #4ecdc4, #44a08d);
+    color: white;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 10px rgba(78, 205, 196, 0.3);
+}
+
+.power-up-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(78, 205, 196, 0.5);
+    background: linear-gradient(45deg, #44a08d, #4ecdc4);
+}
+
+.power-up-item:active {
+    transform: scale(0.95);
+}
+
+.power-up-item::before {
+    content: "💫 ";
+    margin-right: 5px;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    max-width: 400px;
+    width: 90%;
+}
+
+.modal-content h2 {
+    margin-bottom: 20px;
+    font-size: 32px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    color: #fff;
+}
+
+.modal-content p {
+    margin-bottom: 25px;
+    font-size: 18px;
+    color: #f0f0f0;
+}
+
+.modal-content button {
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 25px;
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.modal-content button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+}
+
+/* デスクトップ対応 */
+@media (min-width: 769px) {
+    .game-container {
+        padding: 20px;
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+    
+    #gameCanvas {
+        max-width: 800px;
+        max-height: 70vh;
+    }
+    
+    .controls {
+        margin-top: 10px;
+        position: sticky;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        border-radius: 10px;
+        backdrop-filter: blur(5px);
+    }
+    
+    .power-ups {
+        position: sticky;
+        bottom: 70px;
+        background: rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        border-radius: 10px;
+        backdrop-filter: blur(5px);
+    }
+}
+
+/* モバイル対応 - 全画面表示 */
+@media (max-width: 768px) {
+    body {
+        overflow: hidden;
+    }
+    
+    .game-container {
+        padding: 0;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+        position: fixed;
+        top: 0;
+        left: 0;
+        gap: 0;
+    }
+    
+    .ui-panel {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        font-size: 11px;
+        padding: 5px 10px;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        border: none;
+        border-radius: 0;
+        margin: 0;
+    }
+    
+    .ui-panel div {
+        font-size: 11px;
+        min-width: auto;
+        text-align: left;
+        margin: 0;
+        white-space: nowrap;
+    }
+    
+    #gameCanvas {
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: none !important;
+        max-height: none !important;
+        border: none;
+        border-radius: 0;
+        position: fixed;
+        top: 0;
+        left: 0;
+    }
+    
+    .controls {
+        position: fixed;
+        top: 50px;
+        left: 10px;
+        right: 10px;
+        z-index: 100;
+        gap: 5px;
+        margin: 0;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 5px;
+        border-radius: 10px;
+        backdrop-filter: blur(5px);
+        opacity: 0.8;
+        transition: opacity 0.3s ease;
+    }
+    
+    .controls button {
+        padding: 6px 12px;
+        font-size: 11px;
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .power-ups {
+        position: fixed;
+        top: 95px;
+        left: 10px;
+        right: 10px;
+        z-index: 100;
+        gap: 3px;
+        margin: 0;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 5px;
+        border-radius: 10px;
+        backdrop-filter: blur(5px);
+        flex-wrap: wrap;
+        opacity: 0.8;
+        transition: opacity 0.3s ease;
+    }
+    
+    .power-up-item {
+        padding: 3px 6px;
+        font-size: 9px;
+        flex: 1 1 auto;
+        min-width: 0;
+        text-align: center;
+    }
+    
+    /* ゲーム中はUIを薄くする */
+    .game-running .controls,
+    .game-running .power-ups {
+        opacity: 0.3;
+    }
+    
+    .game-running .controls:hover,
+    .game-running .power-ups:hover {
+        opacity: 0.8;
+    }
+    
+    .modal-content {
+        padding: 20px;
+        margin: 20px;
+        max-width: 90vw;
+        max-height: 80vh;
+    }
+    
+    .modal-content h2 {
+        font-size: 20px;
+    }
+    
+    .modal-content p {
+        font-size: 14px;
+    }
+    
+    .modal-content button {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+}
+
+/* より小さなモバイル画面 */
+@media (max-width: 480px) {
+    .ui-panel {
+        padding: 3px 8px;
+    }
+    
+    .ui-panel div {
+        font-size: 9px;
+    }
+    
+    .controls {
+        padding: 3px;
+        gap: 3px;
+    }
+    
+    .controls button {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+    
+    .power-ups {
+        padding: 3px;
+        gap: 2px;
+    }
+    
+    .power-up-item {
+        padding: 2px 4px;
+        font-size: 8px;
+    }
+}
+
+/* アニメーション効果 */
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(78, 205, 196, 0.6);
+    }
+}
+
+#gameCanvas {
+    animation: glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.power-up-item:hover {
+    animation: pulse 0.6s ease-in-out infinite;
+}
+
+/* カスタムスクロールバー */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(78, 205, 196, 0.7);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(78, 205, 196, 1);
+}
+
+/* タッチデバイス用の調整 */
+@media (hover: none) and (pointer: coarse) {
+    .controls button:hover,
+    .power-up-item:hover {
+        transform: none;
+        animation: none;
+    }
+    
+    .controls button:active {
+        transform: scale(0.95);
+        background: linear-gradient(45deg, #ee5a24, #ff6b6b);
+    }
+    
+    .power-up-item:active {
+        transform: scale(0.9);
+        background: linear-gradient(45deg, #44a08d, #4ecdc4);
+    }
+}
+
+/* アクセシビリティ */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
