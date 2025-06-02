@@ -89,8 +89,11 @@ class ExtraordinaryBreakout {
         this.canvas.addEventListener('mousemove', (e) => {
             if (!this.mouse.isActive) return;
             const rect = this.canvas.getBoundingClientRect();
-            this.mouse.x = e.clientX - rect.left;
-            this.mouse.y = e.clientY - rect.top;
+            // キャンバスの実際のサイズとスタイル上のサイズの比率を計算
+            const scaleX = this.canvas.width / rect.width;
+            const scaleY = this.canvas.height / rect.height;
+            this.mouse.x = (e.clientX - rect.left) * scaleX;
+            this.mouse.y = (e.clientY - rect.top) * scaleY;
         });
         
         this.canvas.addEventListener('click', (e) => {
