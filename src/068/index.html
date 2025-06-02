@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Particle Life Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #canvas {
+            display: block;
+            cursor: crosshair;
+        }
+
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            max-width: 250px;
+        }
+
+        h1 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #00ff88;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        .value-display {
+            font-size: 11px;
+            color: #888;
+            text-align: right;
+        }
+
+        button {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #00cc66;
+            transform: scale(1.05);
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .preset-button {
+            background: #444;
+            color: #fff;
+            font-size: 12px;
+            padding: 5px 10px;
+        }
+
+        .preset-button:hover {
+            background: #666;
+        }
+
+        #info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .particle-types {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .particle-type {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .color-indicator {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+        }
+
+        @media (max-width: 600px) {
+            #controls {
+                max-width: 200px;
+            }
+            
+            h1 {
+                font-size: 16px;
+            }
+            
+            button {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div id="controls">
+        <h1>Particle Life</h1>
+        
+        <div class="preset-buttons">
+            <button class="preset-button" onclick="loadPreset('default')">Default</button>
+            <button class="preset-button" onclick="loadPreset('clusters')">Clusters</button>
+            <button class="preset-button" onclick="loadPreset('orbits')">Orbits</button>
+            <button class="preset-button" onclick="loadPreset('chaos')">Chaos</button>
+        </div>
+        
+        <div class="control-group">
+            <label for="particleCount">Particles: <span id="particleCountValue">500</span></label>
+            <input type="range" id="particleCount" min="100" max="2000" value="500" step="50">
+        </div>
+        
+        <div class="control-group">
+            <label for="attractionRange">Attraction Range: <span id="attractionRangeValue">80</span></label>
+            <input type="range" id="attractionRange" min="20" max="200" value="80" step="5">
+        </div>
+        
+        <div class="control-group">
+            <label for="repulsionRange">Repulsion Range: <span id="repulsionRangeValue">20</span></label>
+            <input type="range" id="repulsionRange" min="5" max="50" value="20" step="1">
+        </div>
+        
+        <div class="control-group">
+            <label for="friction">Friction: <span id="frictionValue">0.95</span></label>
+            <input type="range" id="friction" min="0.8" max="0.99" value="0.95" step="0.01">
+        </div>
+        
+        <button onclick="resetSimulation()">Reset</button>
+        <button onclick="randomizeRules()">Randomize</button>
+        
+        <div class="particle-types">
+            <div class="particle-type">
+                <div class="color-indicator" style="background: #ff4444;"></div>
+                <span>Red</span>
+            </div>
+            <div class="particle-type">
+                <div class="color-indicator" style="background: #44ff44;"></div>
+                <span>Green</span>
+            </div>
+            <div class="particle-type">
+                <div class="color-indicator" style="background: #4444ff;"></div>
+                <span>Blue</span>
+            </div>
+            <div class="particle-type">
+                <div class="color-indicator" style="background: #ffff44;"></div>
+                <span>Yellow</span>
+            </div>
+        </div>
+    </div>
+    
+    <div id="info">
+        <p>Click and drag to create particles</p>
+        <p>FPS: <span id="fps">60</span></p>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
