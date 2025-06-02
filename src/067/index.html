@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Music Box Sequencer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <header>
+            <h1>Music Box Sequencer</h1>
+            <div class="info">
+                <span id="bpm-display">BPM: 120</span>
+                <span id="scale-display">Scale: Pentatonic</span>
+            </div>
+        </header>
+
+        <main>
+            <div class="sequencer-container">
+                <div class="note-labels"></div>
+                <div class="grid-wrapper">
+                    <div class="playhead"></div>
+                    <div class="sequencer-grid" id="sequencer-grid"></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <button id="play-btn" class="control-btn play">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                    <button id="stop-btn" class="control-btn stop">
+                        <svg viewBox="0 0 24 24">
+                            <rect x="6" y="6" width="12" height="12"/>
+                        </svg>
+                    </button>
+                    <button id="clear-btn" class="control-btn clear">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="control-group">
+                    <label for="bpm-slider">BPM</label>
+                    <input type="range" id="bpm-slider" min="60" max="200" value="120">
+                </div>
+
+                <div class="control-group">
+                    <label for="scale-select">Scale</label>
+                    <select id="scale-select">
+                        <option value="pentatonic">Pentatonic</option>
+                        <option value="major">Major</option>
+                        <option value="minor">Minor</option>
+                        <option value="blues">Blues</option>
+                        <option value="chromatic">Chromatic</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="instrument-select">Instrument</label>
+                    <select id="instrument-select">
+                        <option value="sine">Music Box</option>
+                        <option value="triangle">Bell</option>
+                        <option value="square">Chiptune</option>
+                        <option value="sawtooth">Synth</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="pattern-presets">
+                <h3>Patterns</h3>
+                <div class="preset-buttons">
+                    <button class="preset-btn" data-preset="random">Random</button>
+                    <button class="preset-btn" data-preset="arpeggio">Arpeggio</button>
+                    <button class="preset-btn" data-preset="melody">Melody</button>
+                    <button class="preset-btn" data-preset="bass">Bass Line</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
