@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 絵文字記憶ゲーム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+        }
+
+        .score, .level {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .sequence-display {
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(118, 75, 162, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            border: 3px dashed #764ba2;
+        }
+
+        .emoji-sequence {
+            font-size: 4em;
+            line-height: 1.2;
+            animation: bounce 0.6s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            80% { transform: translateY(-5px); }
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .emoji-btn {
+            background: linear-gradient(145deg, #f0f0f0, #cacaca);
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 2.5em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .emoji-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 7px 7px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .emoji-btn:active {
+            transform: translateY(0);
+            box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .emoji-btn.correct {
+            background: linear-gradient(145deg, #90EE90, #32CD32);
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        .emoji-btn.wrong {
+            background: linear-gradient(145deg, #FFB6C1, #FF69B4);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success {
+            color: #32CD32;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .error {
+            color: #FF69B4;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .info {
+            color: #667eea;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(102, 126, 234, 0.2);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .emoji-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+
+            .emoji-btn {
+                padding: 15px;
+                font-size: 2em;
+            }
+
+            .emoji-sequence {
+                font-size: 3em;
+            }
+
+            .game-info {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .control-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 絵文字記憶ゲーム</h1>
+        
+        <div class="game-info">
+            <div class="score">スコア: <span id="score">0</span></div>
+            <div class="level">レベル: <span id="level">1</span></div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="sequence-display" id="sequenceDisplay">
+            <div class="info">🎮 スタートボタンを押してゲームを開始！</div>
+        </div>
+
+        <div class="emoji-grid" id="emojiGrid">
+            <!-- 絵文字ボタンがJavaScriptで生成されます -->
+        </div>
+
+        <div class="control-buttons">
+            <button class="btn" id="startBtn" onclick="startGame()">🎮 スタート</button>
+            <button class="btn" id="resetBtn" onclick="resetGame()">🔄 リセット</button>
+            <button class="btn" id="hintBtn" onclick="showHint()" disabled>💡 ヒント</button>
+        </div>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        // ゲーム用の絵文字配列
+        const emojis = [
+            '😀', '😂', '🥰', '😎', '🤔', '😴', '🤗', '😋',
+            '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼',
+            '🍎', '🍌', '🍓', '🍇', '🍊', '🥝', '🍑', '🥭',
+            '⚽', '🏀', '🎾', '🏐', '🏈', '⚾', '🎱', '🏓'
+        ];
+
+        let gameState = {
+            sequence: [],
+            playerSequence: [],
+            currentLevel: 1,
+            score: 0,
+            isPlaying: false,
+            isShowingSequence: false,
+            sequenceIndex: 0,
+            hintsUsed: 0
+        };
+
+        // ゲーム初期化
+        function initGame() {
+            createEmojiGrid();
+            updateDisplay();
+        }
+
+        // 絵文字グリッドを作成
+        function createEmojiGrid() {
+            const grid = document.getElementById('emojiGrid');
+            grid.innerHTML = '';
+            
+            // レベルに応じて表示する絵文字数を調整
+            const emojiCount = Math.min(12 + gameState.currentLevel * 2, emojis.length);
+            const shuffledEmojis = [...emojis].sort(() => Math.random() - 0.5).slice(0, emojiCount);
+            
+            shuffledEmojis.forEach((emoji, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'emoji-btn';
+                btn.textContent = emoji;
+                btn.onclick = () => selectEmoji(emoji, btn);
+                btn.disabled = true;
+                grid.appendChild(btn);
+            });
+        }
+
+        // ゲーム開始
+        function startGame() {
+            if (gameState.isPlaying) return;
+            
+            gameState.isPlaying = true;
+            gameState.sequence = [];
+            gameState.playerSequence = [];
+            gameState.sequenceIndex = 0;
+            gameState.hintsUsed = 0;
+            
+            // 新しいシーケンスを生成
+            generateSequence();
+            showSequence();
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('hintBtn').disabled = false;
+            updateMessage('シーケンスを覚えてください...', 'info');
+        }
+
+        // シーケンス生成
+        function generateSequence() {
+            const sequenceLength = Math.min(3 + gameState.currentLevel, 8);
+            const availableEmojis = Array.from(document.querySelectorAll('.emoji-btn')).map(btn => btn.textContent);
+            
+            for (let i = 0; i < sequenceLength; i++) {
+                const randomEmoji = availableEmojis[Math.floor(Math.random() * availableEmojis.length)];
+                gameState.sequence.push(randomEmoji);
+            }
+        }
+
+        // シーケンス表示
+        function showSequence() {
+            gameState.isShowingSequence = true;
+            const display = document.getElementById('sequenceDisplay');
+            let index = 0;
+
+            function showNext() {
+                if (index < gameState.sequence.length) {
+                    display.innerHTML = `<div class="emoji-sequence">${gameState.sequence[index]}</div>`;
+                    index++;
+                    setTimeout(showNext, 1000);
+                } else {
+                    display.innerHTML = '<div class="info">あなたの番です！順番通りにタップしてください</div>';
+                    gameState.isShowingSequence = false;
+                    enableEmojiButtons(true);
+                    updateProgress();
+                }
+            }
+
+            setTimeout(showNext, 500);
+        }
+
+        // 絵文字選択
+        function selectEmoji(emoji, btnElement) {
+            if (!gameState.isPlaying || gameState.isShowingSequence) return;
+
+            gameState.playerSequence.push(emoji);
+            const currentIndex = gameState.playerSequence.length - 1;
+
+            // 正解チェック
+            if (emoji === gameState.sequence[currentIndex]) {
+                btnElement.classList.add('correct');
+                setTimeout(() => btnElement.classList.remove('correct'), 500);
+                
+                // シーケンス完了チェック
+                if (gameState.playerSequence.length === gameState.sequence.length) {
+                    levelComplete();
+                } else {
+                    updateMessage(`正解！ ${gameState.playerSequence.length}/${gameState.sequence.length}`, 'success');
+                    updateProgress();
+                }
+            } else {
+                btnElement.classList.add('wrong');
+                setTimeout(() => btnElement.classList.remove('wrong'), 500);
+                gameOver();
+            }
+        }
+
+        // レベル完了
+        function levelComplete() {
+            gameState.score += gameState.currentLevel * 100;
+            gameState.currentLevel++;
+            
+            updateMessage('🎉 レベルクリア！次のレベルへ...', 'success');
+            updateDisplay();
+            
+            setTimeout(() => {
+                createEmojiGrid();
+                startGame();
+            }, 2000);
+        }
+
+        // ゲームオーバー
+        function gameOver() {
+            gameState.isPlaying = false;
+            enableEmojiButtons(false);
+            
+            updateMessage(`❌ ゲームオーバー！正解は: ${gameState.sequence.join(' ')}`, 'error');
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('hintBtn').disabled = true;
+            
+            // ハイスコア保存
+            const highScore = localStorage.getItem('emojiMemoryHighScore') || 0;
+            if (gameState.score > highScore) {
+                localStorage.setItem('emojiMemoryHighScore', gameState.score);
+                setTimeout(() => {
+                    updateMessage(`🏆 新記録！スコア: ${gameState.score}`, 'success');
+                }, 2000);
+            }
+        }
+
+        // ヒント表示
+        function showHint() {
+            if (gameState.hintsUsed >= 2 || !gameState.isPlaying) return;
+            
+            gameState.hintsUsed++;
+            const nextEmoji = gameState.sequence[gameState.playerSequence.length];
+            
+            updateMessage(`💡 次の絵文字: ${nextEmoji} (ヒント ${gameState.hintsUsed}/2)`, 'info');
+            
+            if (gameState.hintsUsed >= 2) {
+                document.getElementById('hintBtn').disabled = true;
+            }
+            
+            // ヒント使用でスコア減点
+            gameState.score = Math.max(0, gameState.score - 50);
+            updateDisplay();
+        }
+
+        // ゲームリセット
+        function resetGame() {
+            gameState = {
+                sequence: [],
+                playerSequence: [],
+                currentLevel: 1,
+                score: 0,
+                isPlaying: false,
+                isShowingSequence: false,
+                sequenceIndex: 0,
+                hintsUsed: 0
+            };
+            
+            createEmojiGrid();
+            updateDisplay();
+            updateMessage('🎮 スタートボタンを押してゲームを開始！', 'info');
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('hintBtn').disabled = true;
+            document.getElementById('progressFill').style.width = '0%';
+        }
+
+        // 絵文字ボタンの有効/無効切り替え
+        function enableEmojiButtons(enabled) {
+            document.querySelectorAll('.emoji-btn').forEach(btn => {
+                btn.disabled = !enabled;
+            });
+        }
+
+        // 表示更新
+        function updateDisplay() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('level').textContent = gameState.currentLevel;
+            
+            // ハイスコア表示
+            const highScore = localStorage.getItem('emojiMemoryHighScore') || 0;
+            if (highScore > 0) {
+                document.querySelector('.score').innerHTML = `スコア: <span id="score">${gameState.score}</span><br><small>最高: ${highScore}</small>`;
+            }
+        }
+
+        // プログレスバー更新
+        function updateProgress() {
+            const progress = (gameState.playerSequence.length / gameState.sequence.length) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+        }
+
+        // メッセージ更新
+        function updateMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+        }
+
+        // ページ読み込み時の初期化
+        window.addEventListener('load', initGame);
+
+        // タッチイベントでのスクロール防止
+        document.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+
+        // ダブルタップズーム防止
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+</html>
