@@ -75,7 +75,7 @@
 75. Art Generator
 76. Emoji catch
 77. 4D Fractal Projection
-78. TBD
+78. NotGPT
 79. TBD
 80. TBD
 81. TBD

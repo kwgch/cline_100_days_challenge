@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NotGPT - 人工無能チャット</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <button class="new-chat-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                新しいチャット
+            </button>
+            
+            <div class="chat-history">
+                <div class="history-section">
+                    <h3>今日</h3>
+                    <div class="history-item active">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M8 10h8M8 14h4M7 4h10a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3z"/>
+                        </svg>
+                        <span>人工無能との対話</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="avatar">U</div>
+                    <span>ユーザー</span>
+                </div>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="welcome-message">
+                        <h1>NotGPT</h1>
+                        <p>こんにちは！私は人工無能です。ChatGPTのような見た目ですが、実際は単純なパターンマッチングで動いています。何でも聞いてください！</p>
+                    </div>
+                </div>
+                
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <textarea 
+                            id="messageInput" 
+                            placeholder="メッセージを入力..."
+                            rows="1"
+                        ></textarea>
+                        <button id="sendButton" class="send-button" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="input-footer">
+                        <span>NotGPTは間違える可能性があります。重要な情報は確認してください。</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="js/app.js"></script>
+</body>
+</html>
