@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カンバンタスクゲーム</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>カンバンタスクゲーム</h1>
+        <div class="score-board">
+            <div class="score">完了タスク: <span id="completedCount">0</span></div>
+            <div class="target">目標: <span id="targetCount">10</span></div>
+        </div>
+        
+        <div class="kanban-board">
+            <div class="column" id="todo-column">
+                <h2>TODO</h2>
+                <div class="task-list" id="todo-list">
+                    <!-- タスクがここに動的に追加される -->
+                </div>
+            </div>
+            
+            <div class="column" id="doing-column">
+                <h2>DOING</h2>
+                <div class="task-list" id="doing-list">
+                    <!-- 進行中のタスクがここに移動される -->
+                </div>
+            </div>
+            
+            <div class="column" id="done-column">
+                <h2>DONE</h2>
+                <div class="task-list" id="done-list">
+                    <!-- 完了したタスクがここに移動される -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="newGameBtn">新しいゲーム</button>
+        </div>
+    </div>
+    
+    <!-- 紙吹雪のキャンバス -->
+    <canvas id="confetti-canvas"></canvas>
+    
+    <!-- クリア画面 -->
+    <div id="clear-screen" class="clear-screen hidden">
+        <div class="clear-message">
+            <h2>🎉 おめでとうございます！ 🎉</h2>
+            <p>すべてのタスクを完了しました！</p>
+            <button id="playAgainBtn">もう一度プレイ</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
