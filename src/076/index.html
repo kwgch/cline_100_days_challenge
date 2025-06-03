@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Emoji Catcher 3D</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div id="game-container">
+        <div id="score-display">
+            <div class="score-item">🎯 Score: <span id="score">0</span></div>
+            <div class="score-item">⏱️ Time: <span id="time">60</span></div>
+            <div class="score-item">💎 Level: <span id="level">1</span></div>
+        </div>
+        <div id="game-over" class="hidden">
+            <h2>Game Over! 🎮</h2>
+            <p>Final Score: <span id="final-score">0</span></p>
+            <p>Level Reached: <span id="final-level">1</span></p>
+            <button onclick="resetGame()">Play Again 🔄</button>
+        </div>
+        <div id="start-screen">
+            <h1>Emoji Catcher 3D 🎯</h1>
+            <p>Catch the falling emojis! 🌟</p>
+            <p>Move with mouse/touch, avoid the bad ones! 💣</p>
+            <button onclick="startGame()">Start Game 🎮</button>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
