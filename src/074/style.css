@@ -1,0 +1,238 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 500px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 24px;
+}
+
+.input-section {
+    margin-bottom: 30px;
+}
+
+.password-container {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+#passwordInput {
+    width: 100%;
+    padding: 15px 50px 15px 20px;
+    font-size: 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+#passwordInput:focus {
+    outline: none;
+    border-color: #667eea;
+    background: white;
+}
+
+.toggle-visibility {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    color: #666;
+    transition: color 0.3s ease;
+}
+
+.toggle-visibility:hover {
+    color: #667eea;
+}
+
+.eye-icon {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+.eye-closed {
+    display: none;
+}
+
+.password-visible .eye-open {
+    display: none;
+}
+
+.password-visible .eye-closed {
+    display: block;
+}
+
+.strength-meter {
+    margin-top: 20px;
+}
+
+.strength-bar {
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    transition: all 0.5s ease;
+    border-radius: 4px;
+}
+
+.strength-label {
+    text-align: center;
+    font-weight: 600;
+    color: #666;
+    font-size: 14px;
+}
+
+.visualization-section {
+    margin-bottom: 30px;
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+#visualCanvas {
+    max-width: 100%;
+    height: auto;
+}
+
+.criteria-section {
+    margin-bottom: 20px;
+}
+
+.criteria-section h2 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.criteria-list {
+    list-style: none;
+}
+
+.criterion {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    color: #666;
+    transition: all 0.3s ease;
+}
+
+.criterion.met {
+    color: #4caf50;
+}
+
+.check-icon {
+    display: inline-block;
+    width: 20px;
+    margin-right: 10px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.criterion.met .check-icon {
+    color: #4caf50;
+}
+
+.tips-section {
+    background: #f0f4ff;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+.tips-section h3 {
+    font-size: 16px;
+    color: #667eea;
+    margin-bottom: 10px;
+}
+
+#securityTip {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.5;
+}
+
+/* Strength levels */
+.strength-none {
+    background: #e0e0e0;
+}
+
+.strength-weak {
+    background: linear-gradient(90deg, #ff4757 0%, #ff6348 100%);
+}
+
+.strength-fair {
+    background: linear-gradient(90deg, #ffa502 0%, #ff7675 100%);
+}
+
+.strength-good {
+    background: linear-gradient(90deg, #feca57 0%, #ff9ff3 100%);
+}
+
+.strength-strong {
+    background: linear-gradient(90deg, #32ff7e 0%, #7bed9f 100%);
+}
+
+.strength-very-strong {
+    background: linear-gradient(90deg, #18dcff 0%, #7d5fff 100%);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+    .container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 20px;
+    }
+
+    #passwordInput {
+        font-size: 16px;
+        padding: 12px 45px 12px 15px;
+    }
+
+    .visualization-section {
+        min-height: 150px;
+    }
+}
