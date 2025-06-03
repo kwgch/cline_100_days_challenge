@@ -68,7 +68,7 @@
 68. Particle Life Simulator
 69. Emoji Memory Game
 70. Confused UI
-71. TBD
+71. Singularity Cult
 72. TBD
 73. TBD
 74. TBD
