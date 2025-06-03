@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>時空無視アートジェネレータ | Timeless Space Art Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>時空無視アートジェネレータ</h1>
+            <p class="subtitle">Time and Space Transcendent Art</p>
+        </header>
+
+        <main>
+            <canvas id="artCanvas"></canvas>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label>次元密度 | Dimension Density</label>
+                    <input type="range" id="dimensionDensity" min="1" max="20" value="10">
+                    <span class="value" id="dimensionValue">10</span>
+                </div>
+
+                <div class="control-group">
+                    <label>時間歪曲 | Time Distortion</label>
+                    <input type="range" id="timeDistortion" min="0" max="100" value="50">
+                    <span class="value" id="timeValue">50</span>
+                </div>
+
+                <div class="control-group">
+                    <label>空間折り畳み | Space Folding</label>
+                    <input type="range" id="spaceFolding" min="1" max="10" value="5">
+                    <span class="value" id="spaceValue">5</span>
+                </div>
+
+                <div class="control-group">
+                    <label>量子揺らぎ | Quantum Fluctuation</label>
+                    <input type="range" id="quantumFluctuation" min="0" max="100" value="30">
+                    <span class="value" id="quantumValue">30</span>
+                </div>
+
+                <div class="control-group">
+                    <label>色彩次元 | Color Dimension</label>
+                    <select id="colorDimension">
+                        <option value="rgb">RGB空間</option>
+                        <option value="hsv">HSV空間</option>
+                        <option value="quantum">量子色空間</option>
+                        <option value="hyperdimensional">超次元色彩</option>
+                    </select>
+                </div>
+
+                <div class="button-group">
+                    <button id="generateBtn" class="primary-btn">生成 | Generate</button>
+                    <button id="animateBtn" class="secondary-btn">時空変動 | Animate</button>
+                    <button id="saveBtn" class="secondary-btn">保存 | Save</button>
+                    <button id="resetBtn" class="secondary-btn">リセット | Reset</button>
+                </div>
+
+                <div class="mode-selector">
+                    <label>生成モード | Generation Mode</label>
+                    <div class="mode-buttons">
+                        <button class="mode-btn active" data-mode="fractal">フラクタル</button>
+                        <button class="mode-btn" data-mode="wave">波動関数</button>
+                        <button class="mode-btn" data-mode="particle">粒子雲</button>
+                        <button class="mode-btn" data-mode="string">超弦理論</button>
+                        <button class="mode-btn" data-mode="void">虚空結晶</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>現在の時空座標</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">時間位相:</span>
+                        <span class="value" id="timePhase">0.00</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">空間曲率:</span>
+                        <span class="value" id="spaceCurvature">0.00</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">次元交差数:</span>
+                        <span class="value" id="dimensionCrossing">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">エントロピー:</span>
+                        <span class="value" id="entropy">0.00</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
