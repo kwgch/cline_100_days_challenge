@@ -1,0 +1,334 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+    background-size: 400% 400%;
+    animation: gradientShift 3s ease infinite;
+    min-height: 100vh;
+    overflow-x: hidden;
+    touch-action: manipulation; /* スマホでのタップ時の画面移動を防ぐ */
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+h1:hover {
+    transform: scale(1.2) rotate(5deg);
+    color: #ff6b6b;
+}
+
+.form-section {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    transition: all 0.5s ease;
+}
+
+.form-section:hover {
+    transform: translateX(20px);
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    border-color: #ff6b6b;
+    transform: rotate(2deg);
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0) rotate(2deg); }
+    25% { transform: translateX(-5px) rotate(2deg); }
+    75% { transform: translateX(5px) rotate(2deg); }
+}
+
+.button-section, .fake-buttons, .disappearing-elements {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:hover {
+    transform: scale(1.1);
+}
+
+.btn.primary {
+    background: #4ecdc4;
+    color: white;
+}
+
+.btn.secondary {
+    background: #ff6b6b;
+    color: white;
+}
+
+.btn.info {
+    background: #45b7d1;
+    color: white;
+}
+
+.btn.fake {
+    background: #96ceb4;
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.btn.vanish {
+    background: #ffa726;
+    color: white;
+}
+
+.moving-elements {
+    margin: 30px 0;
+    height: 150px;
+    position: relative;
+}
+
+.moving-box {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.5s ease;
+    border: 2px solid #333;
+}
+
+#box1 {
+    top: 0;
+    left: 0;
+    animation: float 3s ease-in-out infinite;
+}
+
+#box2 {
+    top: 50px;
+    right: 0;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-30px); }
+}
+
+.rotating-section {
+    text-align: center;
+    margin: 30px 0;
+}
+
+#rotating-text {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    animation: rotate 4s linear infinite;
+    display: inline-block;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.color-changing-area {
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px;
+    margin: 20px 0;
+    animation: colorChange 2s ease-in-out infinite;
+}
+
+@keyframes colorChange {
+    0% { background-color: #ff6b6b; color: white; }
+    25% { background-color: #4ecdc4; color: white; }
+    50% { background-color: #45b7d1; color: white; }
+    75% { background-color: #96ceb4; color: white; }
+    100% { background-color: #ff6b6b; color: white; }
+}
+
+.fake-progress {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+    width: 0%;
+    transition: width 0.3s ease;
+    animation: progressFake 5s ease-in-out infinite;
+}
+
+@keyframes progressFake {
+    0% { width: 0%; }
+    50% { width: 80%; }
+    70% { width: 30%; }
+    100% { width: 95%; }
+}
+
+.confusion-counter {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.floating-annoyance {
+    position: fixed;
+    top: 50%;
+    right: 20px;
+    background: #ff6b6b;
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    z-index: 1000;
+    animation: floatAnnoy 3s ease-in-out infinite;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+@keyframes floatAnnoy {
+    0%, 100% { transform: translateY(-10px); }
+    50% { transform: translateY(10px); }
+}
+
+.floating-annoyance button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    float: right;
+    margin-left: 10px;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .button-section, .fake-buttons, .disappearing-elements {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .moving-elements {
+        height: 200px;
+    }
+    
+    .floating-annoyance {
+        right: 10px;
+        left: 10px;
+        right: 10px;
+    }
+}
+
+/* 混乱を増すための追加スタイル */
+.chaos-mode {
+    animation: chaosRotate 1s ease-in-out infinite;
+}
+
+@keyframes chaosRotate {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(2deg); }
+    50% { transform: rotate(0deg); }
+    75% { transform: rotate(-2deg); }
+    100% { transform: rotate(0deg); }
+}
+
+.upside-down {
+    transform: rotate(180deg);
+    transition: transform 1s ease;
+}
+
+.invisible {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.giant {
+    transform: scale(2);
+    transition: transform 0.5s ease;
+}
+
+.tiny {
+    transform: scale(0.5);
+    transition: transform 0.5s ease;
+}

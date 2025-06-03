@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>混乱UI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1 id="title">簡単な操作画面</h1>
+        
+        <div class="form-section">
+            <label for="username">ユーザー名:</label>
+            <input type="text" id="username" placeholder="名前を入力してください">
+            
+            <label for="password">パスワード:</label>
+            <input type="password" id="password" placeholder="パスワードを入力してください">
+        </div>
+        
+        <div class="button-section">
+            <button id="login-btn" class="btn primary">ログイン</button>
+            <button id="cancel-btn" class="btn secondary">キャンセル</button>
+            <button id="help-btn" class="btn info">ヘルプ</button>
+        </div>
+        
+        <div class="fake-buttons">
+            <button class="btn fake" id="fake1">保存</button>
+            <button class="btn fake" id="fake2">削除</button>
+            <button class="btn fake" id="fake3">設定</button>
+        </div>
+        
+        <div class="moving-elements">
+            <div class="moving-box" id="box1">クリックしてください</div>
+            <div class="moving-box" id="box2">重要な情報</div>
+        </div>
+        
+        <div class="rotating-section">
+            <p id="rotating-text">この文字は回転します</p>
+        </div>
+        
+        <div class="color-changing-area" id="color-area">
+            <p>この領域の色が変わります</p>
+        </div>
+        
+        <div class="disappearing-elements">
+            <button class="btn vanish" id="vanish1">消える前にクリック</button>
+            <button class="btn vanish" id="vanish2">私も消えます</button>
+        </div>
+        
+        <div class="fake-progress">
+            <p>処理中...</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+        </div>
+        
+        <div class="confusion-counter">
+            <p>混乱度: <span id="confusion-level">0</span></p>
+        </div>
+    </div>
+    
+    <div class="floating-annoyance" id="floater">
+        <p>邪魔な要素</p>
+        <button onclick="this.parentElement.style.display='none'">×</button>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
