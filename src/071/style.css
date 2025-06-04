@@ -4,13 +4,19 @@
     box-sizing: border-box;
 }
 
+html {
+    width: 100%;
+}
+
 body {
     font-family: 'Arial', sans-serif;
     line-height: 1.6;
     color: #e0e0e0;
     background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
     min-height: 100vh;
-    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 .container {
@@ -21,7 +27,8 @@ body {
 
 /* Header */
 header {
-    position: fixed;
+    position: sticky;
+    position: -webkit-sticky;
     top: 0;
     width: 100%;
     background: rgba(10, 10, 10, 0.95);
@@ -41,6 +48,9 @@ nav {
     color: #00ffff;
     font-size: 1.5rem;
     text-shadow: 0 0 10px #00ffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .nav-menu {
@@ -98,7 +108,6 @@ nav {
     justify-content: space-between;
     padding: 0 2rem;
     position: relative;
-    overflow: hidden;
 }
 
 .hero::before {
@@ -532,6 +541,27 @@ footer p:last-child {
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
+    body {
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .logo {
+        max-width: 70%;
+    }
+
+    .logo h1 {
+        font-size: 0.9rem;
+        white-space: normal;
+        line-height: 1.2;
+    }
+
+    nav {
+        padding: 0.8rem 1rem;
+        gap: 1rem;
+    }
+
     .nav-menu {
         position: fixed;
         left: -100%;
@@ -570,6 +600,8 @@ footer p:last-child {
         flex-direction: column;
         text-align: center;
         padding: 2rem 1rem;
+        min-height: auto;
+        height: auto;
     }
 
     .hero-content h2 {
@@ -621,14 +653,45 @@ footer p:last-child {
     }
 }
 
-/* Prevent touch scrolling issues on mobile */
+/* Mobile and iOS fixes */
 @media (max-width: 768px) {
-    body {
-        -webkit-overflow-scrolling: touch;
-        touch-action: pan-y;
-    }
-    
     * {
         -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Force scrolling on iOS */
+    html {
+        overflow: visible;
+        height: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    body {
+        overflow: visible;
+        overflow-y: scroll;
+        height: auto;
+        min-height: 100vh;
+        -webkit-overflow-scrolling: touch;
+        position: static;
+    }
+    
+    /* Remove all fixed positioning on mobile */
+    header {
+        position: static;
+        width: 100%;
+        z-index: 9999;
+        background: rgba(10, 10, 10, 0.98);
+    }
+    
+    /* Remove padding since header is not fixed */
+    main {
+        padding-top: 0;
+        position: static;
+    }
+    
+    /* Force all sections to be scrollable */
+    section {
+        position: static;
+        overflow: visible;
     }
 }

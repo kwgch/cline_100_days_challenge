@@ -1,3 +1,9 @@
+// スクロール可能にするシンプルな設定
+document.addEventListener('DOMContentLoaded', function() {
+    // タッチデバイスでのスムーススクロールを有効化
+    document.body.style.webkitOverflowScrolling = 'touch';
+});
+
 // DOM要素の取得
 const hamburger = document.querySelector('.hamburger');
 const navMenu = document.querySelector('.nav-menu');
@@ -360,13 +366,6 @@ window.addEventListener('scroll', () => {
 // タッチデバイスでのスクロール最適化
 if ('ontouchstart' in window) {
     document.body.style.webkitOverflowScrolling = 'touch';
-    
-    // タッチ時のハイライト無効化
-    document.addEventListener('touchstart', function(e) {
-        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-            e.preventDefault();
-        }
-    }, { passive: false });
 }
 
 // エラーハンドリング
