@@ -79,22 +79,22 @@
 79. Fake x
 80. Fake wikipedia
 81. Vertical writing SNS
-82. TBD
-83. TBD
-84. TBD
-85. TBD
-86. TBD
-87. TBD
-88. TBD
-89. TBD
-90. TBD
-91. TBD
-92. TBD
-93. TBD
-94. TBD
-95. TBD
-96. TBD
-97. TBD
-98. TBD
-99. TBD
-100. TBD
+82. Diagnosis Generator
+83. Creepy-Cute Art Generator
+84. Anti-Viral Post Generator
+85. Staring Game
+86. Low-Effort Meme Generator
+87. Concepts of Time
+88. Visualizing Infinity
+89. Embodying Contradictions
+90. Making Non-Existence Exist
+91. Perfectly Imperfect
+92. Motion Without Movement
+93. Invisible Colors
+94. Where Beginning Meets End
+95. Wabi-Sabi Digital Art
+96. Mesmerizing Flow
+97. Instant Wow
+98. Hyper-Realistic 3D
+99. Tactile Playground
+100. Color Chain Reaction
