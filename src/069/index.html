@@ -19,62 +19,73 @@
         body {
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            height: 100vh;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            overflow-x: hidden;
+            padding: 10px;
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+            overflow: hidden;
+            margin: 0;
         }
 
         .container {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            padding: 30px;
+            padding: 20px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             text-align: center;
             max-width: 500px;
             width: 100%;
             backdrop-filter: blur(10px);
+            max-height: calc(100vh - 40px);
+            height: calc(100vh - 40px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         h1 {
             color: #333;
-            margin-bottom: 20px;
-            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-size: 2em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
         }
 
         .game-info {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 30px;
-            padding: 15px;
+            margin-bottom: 8px;
+            padding: 8px;
             background: rgba(102, 126, 234, 0.1);
             border-radius: 10px;
+            flex-shrink: 0;
         }
 
         .score, .level {
-            font-size: 1.2em;
+            font-size: 1em;
             font-weight: bold;
             color: #667eea;
         }
 
         .sequence-display {
-            min-height: 150px;
+            min-height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             background: rgba(118, 75, 162, 0.1);
             border-radius: 15px;
-            padding: 20px;
-            border: 3px dashed #764ba2;
+            padding: 10px;
+            border: 2px dashed #764ba2;
+            flex-shrink: 0;
         }
 
         .emoji-sequence {
-            font-size: 4em;
+            font-size: 3em;
             line-height: 1.2;
             animation: bounce 0.6s ease-in-out;
         }
@@ -88,24 +99,36 @@
         .emoji-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 12px;
+            margin-bottom: 10px;
             max-width: 400px;
             margin-left: auto;
             margin-right: auto;
+            flex: 1 1 auto;
+            overflow-y: auto;
+            overflow-x: hidden;
+            align-content: start;
+            min-height: 0;
+            padding: 5px;
         }
 
         .emoji-btn {
             background: linear-gradient(145deg, #f0f0f0, #cacaca);
             border: none;
-            border-radius: 15px;
-            padding: 20px;
-            font-size: 2.5em;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 2em;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.1);
             position: relative;
             overflow: hidden;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 50px;
+            min-height: 50px;
         }
 
         .emoji-btn:hover {
@@ -142,22 +165,23 @@
 
         .control-buttons {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             justify-content: center;
             flex-wrap: wrap;
+            flex-shrink: 0;
         }
 
         .btn {
             background: linear-gradient(145deg, #667eea, #764ba2);
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 12px 25px;
             border-radius: 25px;
-            font-size: 1.1em;
+            font-size: 1em;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
         .btn:hover {
@@ -176,13 +200,14 @@
         }
 
         .message {
-            margin-top: 20px;
-            font-size: 1.3em;
+            margin-top: 10px;
+            font-size: 1.1em;
             font-weight: bold;
-            min-height: 30px;
+            min-height: 25px;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
 
         .success {
@@ -207,11 +232,12 @@
 
         .progress-bar {
             width: 100%;
-            height: 8px;
+            height: 6px;
             background: rgba(102, 126, 234, 0.2);
             border-radius: 4px;
-            margin-bottom: 20px;
+            margin-bottom: 8px;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .progress-fill {
@@ -223,43 +249,75 @@
         }
 
         @media (max-width: 480px) {
+            body {
+                padding: 5px;
+                padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+            }
+
             .container {
-                padding: 20px;
-                margin: 10px;
+                padding: 15px;
+                padding-bottom: 20px;
+                max-height: calc(100vh - 10px);
+                height: calc(100vh - 10px);
             }
 
             h1 {
-                font-size: 2em;
-            }
-
-            .emoji-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 10px;
-            }
-
-            .emoji-btn {
-                padding: 15px;
-                font-size: 2em;
-            }
-
-            .emoji-sequence {
-                font-size: 3em;
+                font-size: 1.5em;
+                margin-bottom: 8px;
             }
 
             .game-info {
-                flex-direction: column;
-                gap: 10px;
-                text-align: center;
+                margin-bottom: 8px;
+                padding: 8px;
+                font-size: 0.9em;
+            }
+
+            .score, .level {
+                font-size: 1em;
+            }
+
+            .progress-bar {
+                height: 6px;
+                margin-bottom: 8px;
+            }
+
+            .sequence-display {
+                min-height: 80px;
+                padding: 10px;
+                margin-bottom: 10px;
+                font-size: 0.9em;
+            }
+
+            .emoji-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+
+            .emoji-btn {
+                padding: 10px;
+                font-size: 1.5em;
+            }
+
+            .emoji-sequence {
+                font-size: 2.5em;
             }
 
             .control-buttons {
-                flex-direction: column;
-                align-items: center;
+                gap: 5px;
+                flex-wrap: nowrap;
             }
 
             .btn {
-                width: 100%;
-                max-width: 200px;
+                padding: 8px 15px;
+                font-size: 0.85em;
+            }
+
+            .message {
+                font-size: 0.9em;
+                margin-top: 5px;
+                min-height: 20px;
+                margin-bottom: 10px;
             }
         }
     </style>
@@ -424,8 +482,16 @@
             
             updateMessage('🎉 レベルクリア！次のレベルへ...', 'success');
             updateDisplay();
+            enableEmojiButtons(false);
             
             setTimeout(() => {
+                // 新しいレベルのためにゲーム状態をリセット
+                gameState.isPlaying = false;
+                gameState.playerSequence = [];
+                gameState.sequence = [];
+                gameState.sequenceIndex = 0;
+                gameState.hintsUsed = 0;
+                
                 createEmojiGrid();
                 startGame();
             }, 2000);
