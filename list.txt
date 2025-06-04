@@ -69,7 +69,7 @@
 69. Emoji Memory Game
 70. Confused UI
 71. Singularity Cult
-72. Beautiful things
+72. Mouse Pointer Game
 73. KANBAN Game
 74. Password Strength Visualizer
 75. Art Generator
