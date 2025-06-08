@@ -4,17 +4,36 @@
     box-sizing: border-box;
 }
 
+html {
+    height: 100%;
+    height: -webkit-fill-available;
+}
+
+:root {
+    --vh: 1vh;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background-color: #343541;
     color: #ececf1;
     height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile */
+    height: calc(var(--vh, 1vh) * 100); /* Fallback for custom property */
     overflow: hidden;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    -webkit-overflow-scrolling: touch;
 }
 
 .app-container {
     display: flex;
     height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile */
+    height: calc(var(--vh, 1vh) * 100); /* Fallback for custom property */
+    position: relative;
 }
 
 /* サイドバー */
@@ -230,7 +249,9 @@ body {
 /* 入力エリア */
 .input-container {
     padding: 20px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
     border-top: 1px solid #565869;
+    background-color: #343541;
 }
 
 .input-wrapper {
@@ -291,8 +312,19 @@ body {
         display: none;
     }
     
+    .main-content {
+        width: 100%;
+        height: 100%;
+    }
+    
     .chat-container {
         padding: 0;
+        height: 100%;
+    }
+    
+    .chat-messages {
+        padding-bottom: 20px;
+        padding-top: calc(20px + env(safe-area-inset-top));
     }
     
     .welcome-message {
@@ -313,6 +345,13 @@ body {
     
     .input-container {
         padding: 12px;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+    
+    #messageInput {
+        font-size: 16px;
+        /* Prevent zoom on iOS when focusing input */
+        -webkit-text-size-adjust: 100%;
     }
 }
 
