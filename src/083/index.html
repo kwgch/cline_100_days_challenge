@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>キモかわアートジェネレーター</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>キモかわアートジェネレーター</h1>
+        <div class="controls">
+            <button id="generateBtn" class="generate-btn">生成する</button>
+            <div class="slider-group">
+                <label for="creepiness">キモさ度: <span id="creepinessValue">50</span>%</label>
+                <input type="range" id="creepiness" min="0" max="100" value="50">
+            </div>
+            <div class="slider-group">
+                <label for="cuteness">かわいさ度: <span id="cutenessValue">50</span>%</label>
+                <input type="range" id="cuteness" min="0" max="100" value="50">
+            </div>
+        </div>
+        <canvas id="artCanvas"></canvas>
+        <div class="save-controls">
+            <button id="saveBtn" class="save-btn">画像を保存</button>
+            <button id="shareBtn" class="share-btn">シェア</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
