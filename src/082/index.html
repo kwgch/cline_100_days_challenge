@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>診断メーカー</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>診断メーカー</h1>
+            <p class="subtitle">あなたの診断を作成しよう！</p>
+        </header>
+
+        <main>
+            <!-- 診断作成セクション -->
+            <section id="create-section" class="section">
+                <h2>新しい診断を作成</h2>
+                
+                <div class="form-group">
+                    <label for="diagnosis-title">診断タイトル</label>
+                    <input type="text" id="diagnosis-title" placeholder="例: あなたの前世診断">
+                </div>
+
+                <div class="form-group">
+                    <label for="input-label">入力項目の名前</label>
+                    <input type="text" id="input-label" placeholder="例: 名前">
+                </div>
+
+                <div class="form-group">
+                    <label for="result-template">結果テンプレート</label>
+                    <textarea id="result-template" rows="4" 
+                        placeholder="例: {name}さんの前世は{result}でした！&#10;{description}">{name}さんは{result}タイプです！
+
+{description}
+
+相性の良い人: {compatible}
+ラッキーアイテム: {lucky_item}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>結果パターン</label>
+                    <div id="result-patterns">
+                        <div class="pattern-item">
+                            <input type="text" class="pattern-result" placeholder="結果（例: 戦士）">
+                            <textarea class="pattern-description" rows="2" placeholder="説明（例: 勇敢で正義感が強い）"></textarea>
+                            <input type="text" class="pattern-compatible" placeholder="相性の良い人（例: 魔法使い）">
+                            <input type="text" class="pattern-lucky" placeholder="ラッキーアイテム（例: 剣）">
+                            <button class="remove-pattern" onclick="removePattern(this)">×</button>
+                        </div>
+                    </div>
+                    <button id="add-pattern" class="btn-secondary">パターンを追加</button>
+                </div>
+
+                <button id="save-diagnosis" class="btn-primary">診断を保存</button>
+            </section>
+
+            <!-- 診断実行セクション -->
+            <section id="play-section" class="section">
+                <h2>診断を実行</h2>
+                
+                <div id="saved-diagnoses">
+                    <!-- 保存された診断がここに表示される -->
+                </div>
+
+                <div id="diagnosis-player" style="display: none;">
+                    <h3 id="player-title"></h3>
+                    <div class="form-group">
+                        <label id="player-input-label"></label>
+                        <input type="text" id="player-input" placeholder="入力してください">
+                    </div>
+                    <button id="execute-diagnosis" class="btn-primary">診断する！</button>
+                    
+                    <div id="diagnosis-result" style="display: none;">
+                        <h3>診断結果</h3>
+                        <div id="result-content"></div>
+                        <button id="share-result" class="btn-secondary">結果をシェア</button>
+                        <button id="retry-diagnosis" class="btn-secondary">もう一度診断</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
