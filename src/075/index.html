@@ -2,98 +2,612 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>時空無視アートジェネレータ | Timeless Space Art Generator</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quaternionic Fractal</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+            touch-action: none;
+        }
+        canvas {
+            display: block;
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>時空無視アートジェネレータ</h1>
-            <p class="subtitle">Time and Space Transcendent Art</p>
-        </header>
+    <canvas id="glCanvas"></canvas>
 
-        <main>
-            <canvas id="artCanvas"></canvas>
+    <script>
+        // 頂点シェーダー
+        const vertexShaderSource = `
+            precision highp float;
             
-            <div class="controls">
-                <div class="control-group">
-                    <label>次元密度 | Dimension Density</label>
-                    <input type="range" id="dimensionDensity" min="1" max="20" value="10">
-                    <span class="value" id="dimensionValue">10</span>
-                </div>
+            attribute vec2 a_position;
+            
+            void main() {
+                gl_Position = vec4(a_position, 0.0, 1.0);
+            }
+        `;
 
-                <div class="control-group">
-                    <label>時間歪曲 | Time Distortion</label>
-                    <input type="range" id="timeDistortion" min="0" max="100" value="50">
-                    <span class="value" id="timeValue">50</span>
-                </div>
+        // フラグメントシェーダー
+        const fragmentShaderSource = `
+            precision highp float;
+            
+            uniform vec2 u_resolution;
+            uniform float u_time;
+            uniform mat3 u_rotation;
+            uniform float u_zoom;
+            uniform vec4 u_juliaC;
+            uniform float u_sliceW;
+            uniform int u_fractalType;
+            uniform float u_power;
+            uniform float u_colorMode;
+            
+            #define MAX_STEPS 128
+            #define MIN_DIST 0.001
+            #define MAX_DIST 20.0
+            #define MAX_ITER 16
+            #define PI 3.14159265359
+            
+            // クォータニオン構造（x,y,z,w）
+            // q = w + xi + yj + zk
+            
+            // クォータニオン乗算
+            vec4 qmul(vec4 q1, vec4 q2) {
+                return vec4(
+                    q1.w * q2.x + q1.x * q2.w + q1.y * q2.z - q1.z * q2.y,
+                    q1.w * q2.y - q1.x * q2.z + q1.y * q2.w + q1.z * q2.x,
+                    q1.w * q2.z + q1.x * q2.y - q1.y * q2.x + q1.z * q2.w,
+                    q1.w * q2.w - q1.x * q2.x - q1.y * q2.y - q1.z * q2.z
+                );
+            }
+            
+            // クォータニオンの共役
+            vec4 qconj(vec4 q) {
+                return vec4(-q.xyz, q.w);
+            }
+            
+            // クォータニオンのノルム
+            float qnorm(vec4 q) {
+                return length(q);
+            }
+            
+            // クォータニオンの平方
+            vec4 qsqr(vec4 q) {
+                return vec4(
+                    2.0 * q.w * q.x,
+                    2.0 * q.w * q.y,
+                    2.0 * q.w * q.z,
+                    q.w * q.w - dot(q.xyz, q.xyz)
+                );
+            }
+            
+            // クォータニオンの立方
+            vec4 qcube(vec4 q) {
+                vec4 q2 = qsqr(q);
+                return qmul(q, q2);
+            }
+            
+            // クォータニオンのべき乗（整数）
+            vec4 qpow(vec4 q, float n) {
+                // 整数べき乗の近似
+                if (n == 2.0) return qsqr(q);
+                if (n == 3.0) return qcube(q);
+                
+                // 一般的なべき乗（極形式を使用）
+                float r = qnorm(q);
+                if (r < 0.001) return vec4(0.0);
+                
+                float theta = acos(q.w / r);
+                vec3 v = normalize(q.xyz);
+                
+                float rn = pow(r, n);
+                float ntheta = n * theta;
+                
+                return rn * vec4(
+                    v * sin(ntheta),
+                    cos(ntheta)
+                );
+            }
+            
+            // クォータニオンジュリア集合の距離推定
+            float quaternionJuliaDE(vec3 pos, vec4 c, float power) {
+                vec4 z = vec4(pos, u_sliceW);
+                vec4 dz = vec4(1.0, 0.0, 0.0, 0.0);
+                
+                float r2 = 0.0;
+                
+                for (int i = 0; i < MAX_ITER; i++) {
+                    // 導関数の更新
+                    dz = 2.0 * qmul(z, dz);
+                    
+                    // z = z^power + c
+                    z = qpow(z, power) + c;
+                    
+                    r2 = dot(z, z);
+                    if (r2 > 4.0) break;
+                }
+                
+                float r = sqrt(r2);
+                return 0.5 * r * log(r) / qnorm(dz);
+            }
+            
+            // クォータニオンマンデルブロ集合
+            float quaternionMandelbrotDE(vec3 pos) {
+                vec4 c = vec4(pos, u_sliceW);
+                vec4 z = vec4(0.0);
+                vec4 dz = vec4(1.0, 0.0, 0.0, 0.0);
+                
+                float r2 = 0.0;
+                
+                for (int i = 0; i < MAX_ITER; i++) {
+                    // 導関数の更新
+                    dz = 2.0 * qmul(z, dz) + vec4(1.0, 0.0, 0.0, 0.0);
+                    
+                    // z = z^2 + c
+                    z = qsqr(z) + c;
+                    
+                    r2 = dot(z, z);
+                    if (r2 > 4.0) break;
+                }
+                
+                float r = sqrt(r2);
+                return 0.5 * r * log(r) / qnorm(dz);
+            }
+            
+            // ハイブリッドフラクタル（ジュリアバルブ）
+            float juliabulbDE(vec3 pos, vec4 c) {
+                vec4 z = vec4(pos, u_sliceW);
+                float dr = 1.0;
+                float r = 0.0;
+                
+                for (int i = 0; i < MAX_ITER; i++) {
+                    r = qnorm(z);
+                    if (r > 2.0) break;
+                    
+                    // 3次元極座標変換
+                    float theta = acos(z.z / r);
+                    float phi = atan(z.y, z.x);
+                    
+                    dr = pow(r, u_power - 1.0) * u_power * dr + 1.0;
+                    
+                    // べき乗
+                    float zr = pow(r, u_power);
+                    theta *= u_power;
+                    phi *= u_power;
+                    
+                    // 直交座標に戻す
+                    z.x = zr * sin(theta) * cos(phi);
+                    z.y = zr * sin(theta) * sin(phi);
+                    z.z = zr * cos(theta);
+                    
+                    // ジュリア定数を加える
+                    z += c;
+                }
+                
+                return 0.5 * log(r) * r / dr;
+            }
+            
+            // シーン距離関数
+            float sceneSDF(vec3 p) {
+                if (u_fractalType == 0) {
+                    return quaternionJuliaDE(p, u_juliaC, u_power);
+                } else if (u_fractalType == 1) {
+                    return quaternionMandelbrotDE(p);
+                } else {
+                    return juliabulbDE(p, u_juliaC);
+                }
+            }
+            
+            // 法線計算
+            vec3 calcNormal(vec3 p) {
+                vec2 e = vec2(0.001, 0.0);
+                return normalize(vec3(
+                    sceneSDF(p + e.xyy) - sceneSDF(p - e.xyy),
+                    sceneSDF(p + e.yxy) - sceneSDF(p - e.yxy),
+                    sceneSDF(p + e.yyx) - sceneSDF(p - e.yyx)
+                ));
+            }
+            
+            // 軌道トラップカラー
+            vec3 getOrbitColor(vec3 p) {
+                vec4 z = vec4(p, u_sliceW);
+                vec4 c = u_fractalType == 1 ? z : u_juliaC;
+                
+                float minDist = 1000.0;
+                float avgDist = 0.0;
+                vec3 trap = vec3(0.0);
+                
+                for (int i = 0; i < MAX_ITER; i++) {
+                    if (u_fractalType == 2) {
+                        // Juliabulb
+                        float r = qnorm(z);
+                        float theta = acos(z.z / r);
+                        float phi = atan(z.y, z.x);
+                        float zr = pow(r, u_power);
+                        theta *= u_power;
+                        phi *= u_power;
+                        z.x = zr * sin(theta) * cos(phi);
+                        z.y = zr * sin(theta) * sin(phi);
+                        z.z = zr * cos(theta);
+                        z += c;
+                    } else {
+                        z = qpow(z, u_power) + c;
+                    }
+                    
+                    float d = qnorm(z);
+                    minDist = min(minDist, d);
+                    avgDist += d;
+                    
+                    // 軌道の特徴点
+                    trap += abs(z.xyz);
+                    
+                    if (d > 2.0) break;
+                }
+                
+                trap /= float(MAX_ITER);
+                avgDist /= float(MAX_ITER);
+                
+                // 色相マッピング
+                float hue = minDist * 2.0 + u_colorMode;
+                float sat = 1.0 - exp(-avgDist * 0.5);
+                float val = 0.3 + 0.7 * (1.0 - minDist);
+                
+                // HSVからRGB
+                vec3 c2 = vec3(hue, sat, val);
+                vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+                vec3 p2 = abs(fract(c2.xxx + K.xyz) * 6.0 - K.www);
+                vec3 color = c2.z * mix(K.xxx, clamp(p2 - K.xxx, 0.0, 1.0), c2.y);
+                
+                // 軌道トラップの影響
+                color = mix(color, trap * 0.5, 0.3);
+                
+                return color;
+            }
+            
+            // レイマーチング
+            vec4 raymarch(vec3 ro, vec3 rd) {
+                float t = 0.0;
+                vec3 col = vec3(0.0);
+                float minDist = MAX_DIST;
+                vec3 p;
+                
+                // レイマーチング
+                for (int i = 0; i < MAX_STEPS; i++) {
+                    p = ro + rd * t;
+                    float d = sceneSDF(p);
+                    
+                    if (d < MIN_DIST) {
+                        // ヒット
+                        vec3 n = calcNormal(p);
+                        vec3 lightDir = normalize(vec3(1.0, 1.0, -0.5));
+                        vec3 viewDir = -rd;
+                        vec3 halfDir = normalize(lightDir + viewDir);
+                        
+                        // 基本色（軌道トラップ）
+                        vec3 baseColor = getOrbitColor(p);
+                        
+                        // ライティング
+                        float diff = max(dot(n, lightDir), 0.0);
+                        float spec = pow(max(dot(n, halfDir), 0.0), 32.0);
+                        float fresnel = pow(1.0 - dot(n, viewDir), 2.0);
+                        
+                        // アンビエントオクルージョン
+                        float ao = 1.0 - float(i) / float(MAX_STEPS);
+                        
+                        // 最終色
+                        col = baseColor * (diff * 0.7 + 0.3) * ao;
+                        col += vec3(0.5, 0.7, 1.0) * spec * 0.5;
+                        col += vec3(0.3, 0.5, 0.8) * fresnel * 0.3;
+                        
+                        break;
+                    }
+                    
+                    minDist = min(minDist, d);
+                    t += d * 0.8;
+                    
+                    if (t > MAX_DIST) break;
+                }
+                
+                // グロー効果
+                if (t > MAX_DIST) {
+                    float glow = 0.03 / minDist;
+                    col = vec3(0.1, 0.3, 0.6) * glow;
+                    
+                    // 背景グラデーション
+                    vec3 bg = mix(
+                        vec3(0.02, 0.02, 0.05),
+                        vec3(0.0, 0.0, 0.02),
+                        rd.y * 0.5 + 0.5
+                    );
+                    col += bg;
+                }
+                
+                return vec4(col, 1.0);
+            }
+            
+            void main() {
+                vec2 uv = (gl_FragCoord.xy - u_resolution * 0.5) / min(u_resolution.x, u_resolution.y);
+                uv *= u_zoom;
+                
+                // カメラ設定
+                vec3 ro = vec3(0.0, 0.0, -3.0);
+                vec3 rd = normalize(vec3(uv, 1.0));
+                
+                // 回転適用
+                ro = u_rotation * ro;
+                rd = u_rotation * rd;
+                
+                vec4 col = raymarch(ro, rd);
+                
+                // トーンマッピング
+                col.rgb = col.rgb / (col.rgb + vec3(1.0));
+                col.rgb = pow(col.rgb, vec3(0.4545));
+                
+                gl_FragColor = col;
+            }
+        `;
 
-                <div class="control-group">
-                    <label>空間折り畳み | Space Folding</label>
-                    <input type="range" id="spaceFolding" min="1" max="10" value="5">
-                    <span class="value" id="spaceValue">5</span>
-                </div>
+        // シェーダーコンパイル
+        function createShader(gl, type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error('Shader compilation error:', gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+            
+            return shader;
+        }
 
-                <div class="control-group">
-                    <label>量子揺らぎ | Quantum Fluctuation</label>
-                    <input type="range" id="quantumFluctuation" min="0" max="100" value="30">
-                    <span class="value" id="quantumValue">30</span>
-                </div>
+        // プログラム作成
+        function createProgram(gl, vertexShader, fragmentShader) {
+            const program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+            
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                console.error('Program link error:', gl.getProgramInfoLog(program));
+                gl.deleteProgram(program);
+                return null;
+            }
+            
+            return program;
+        }
 
-                <div class="control-group">
-                    <label>色彩次元 | Color Dimension</label>
-                    <select id="colorDimension">
-                        <option value="rgb">RGB空間</option>
-                        <option value="hsv">HSV空間</option>
-                        <option value="quantum">量子色空間</option>
-                        <option value="hyperdimensional">超次元色彩</option>
-                    </select>
-                </div>
+        // 3x3回転行列
+        function rotationMatrix(angleX, angleY) {
+            const cx = Math.cos(angleX);
+            const sx = Math.sin(angleX);
+            const cy = Math.cos(angleY);
+            const sy = Math.sin(angleY);
+            
+            return [
+                cy, 0, sy,
+                sx * sy, cx, -sx * cy,
+                -cx * sy, sx, cx * cy
+            ];
+        }
 
-                <div class="button-group">
-                    <button id="generateBtn" class="primary-btn">生成 | Generate</button>
-                    <button id="animateBtn" class="secondary-btn">時空変動 | Animate</button>
-                    <button id="saveBtn" class="secondary-btn">保存 | Save</button>
-                    <button id="resetBtn" class="secondary-btn">リセット | Reset</button>
-                </div>
+        // メイン
+        function main() {
+            const canvas = document.getElementById('glCanvas');
+            const gl = canvas.getContext('webgl');
+            
+            if (!gl) {
+                alert('WebGL not supported');
+                return;
+            }
 
-                <div class="mode-selector">
-                    <label>生成モード | Generation Mode</label>
-                    <div class="mode-buttons">
-                        <button class="mode-btn active" data-mode="fractal">フラクタル</button>
-                        <button class="mode-btn" data-mode="wave">波動関数</button>
-                        <button class="mode-btn" data-mode="particle">粒子雲</button>
-                        <button class="mode-btn" data-mode="string">超弦理論</button>
-                        <button class="mode-btn" data-mode="void">虚空結晶</button>
-                    </div>
-                </div>
-            </div>
+            // リサイズ
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                gl.viewport(0, 0, canvas.width, canvas.height);
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
 
-            <div class="info-panel">
-                <h3>現在の時空座標</h3>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="label">時間位相:</span>
-                        <span class="value" id="timePhase">0.00</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">空間曲率:</span>
-                        <span class="value" id="spaceCurvature">0.00</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">次元交差数:</span>
-                        <span class="value" id="dimensionCrossing">0</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">エントロピー:</span>
-                        <span class="value" id="entropy">0.00</span>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
+            // シェーダー作成
+            const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+            const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+            const program = createProgram(gl, vertexShader, fragmentShader);
 
-    <script src="script.js"></script>
+            // 属性とユニフォーム
+            const positionLocation = gl.getAttribLocation(program, 'a_position');
+            const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
+            const timeLocation = gl.getUniformLocation(program, 'u_time');
+            const rotationLocation = gl.getUniformLocation(program, 'u_rotation');
+            const zoomLocation = gl.getUniformLocation(program, 'u_zoom');
+            const juliaCLocation = gl.getUniformLocation(program, 'u_juliaC');
+            const sliceWLocation = gl.getUniformLocation(program, 'u_sliceW');
+            const fractalTypeLocation = gl.getUniformLocation(program, 'u_fractalType');
+            const powerLocation = gl.getUniformLocation(program, 'u_power');
+            const colorModeLocation = gl.getUniformLocation(program, 'u_colorMode');
+
+            // バッファ
+            const positionBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+                -1, -1, 1, -1, -1, 1,
+                -1, 1, 1, -1, 1, 1,
+            ]), gl.STATIC_DRAW);
+
+            // 状態
+            let rotationX = 0.3;
+            let rotationY = 0.5;
+            let zoom = 2.0;
+            let juliaC = [-0.2, 0.8, 0.0, 0.0];
+            let sliceW = 0.0;
+            let fractalType = 0;
+            let power = 2.0;
+            let colorMode = 0.0;
+            let isDragging = false;
+            let lastX = 0;
+            let lastY = 0;
+            let lastTapTime = 0;
+            let autoRotate = true;
+
+            // イベントハンドラ
+            function handleStart(e) {
+                e.preventDefault();
+                const touch = e.touches ? e.touches[0] : e;
+                lastX = touch.clientX;
+                lastY = touch.clientY;
+                isDragging = true;
+                // autoRotate = false; // 自動回転を止めない
+                
+                // ダブルタップ検出
+                const currentTime = Date.now();
+                if (currentTime - lastTapTime < 300) {
+                    // フラクタルタイプ切り替え
+                    fractalType = (fractalType + 1) % 3;
+                    // ダブルタップで自動回転をトグル
+                    autoRotate = !autoRotate;
+                }
+                lastTapTime = currentTime;
+            }
+
+            function handleMove(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                
+                const touch = e.touches ? e.touches[0] : e;
+                const deltaX = touch.clientX - lastX;
+                const deltaY = touch.clientY - lastY;
+                
+                if (e.touches && e.touches.length === 2) {
+                    // 2本指：W軸スライス調整
+                    const touch2 = e.touches[1];
+                    const centerY = (touch.clientY + touch2.clientY) / 2;
+                    const deltaCenter = centerY - canvas.height / 2;
+                    sliceW = deltaCenter * 0.01;
+                } else {
+                    // 1本指：回転（自動回転を止めずに手動回転を追加）
+                    rotationY += deltaX * 0.01;
+                    rotationX += deltaY * 0.01;
+                    
+                    // 横スワイプ：ジュリア定数調整
+                    if (Math.abs(deltaX) > 50) {
+                        juliaC[0] += deltaX * 0.001;
+                        juliaC[0] = Math.max(-2, Math.min(juliaC[0], 2));
+                    }
+                    
+                    // 縦スワイプ：べき乗調整
+                    if (Math.abs(deltaY) > 50) {
+                        power += deltaY > 0 ? -0.1 : 0.1;
+                        power = Math.max(2, Math.min(power, 8));
+                    }
+                }
+                
+                lastX = touch.clientX;
+                lastY = touch.clientY;
+            }
+
+            function handleEnd(e) {
+                e.preventDefault();
+                isDragging = false;
+            }
+
+            // ピンチズーム
+            let lastPinchDistance = 0;
+            canvas.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 2) {
+                    e.preventDefault();
+                    const dx = e.touches[0].clientX - e.touches[1].clientX;
+                    const dy = e.touches[0].clientY - e.touches[1].clientY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (lastPinchDistance > 0) {
+                        const scale = distance / lastPinchDistance;
+                        zoom *= scale;
+                        zoom = Math.max(0.5, Math.min(zoom, 10));
+                    }
+                    
+                    lastPinchDistance = distance;
+                }
+            });
+
+            canvas.addEventListener('touchend', () => {
+                lastPinchDistance = 0;
+            });
+
+            // 3本指タップ：ランダムジュリア定数
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 3) {
+                    e.preventDefault();
+                    juliaC = [
+                        (Math.random() - 0.5) * 2,
+                        (Math.random() - 0.5) * 2,
+                        (Math.random() - 0.5) * 0.5,
+                        (Math.random() - 0.5) * 0.5
+                    ];
+                    colorMode = Math.random() * Math.PI * 2;
+                }
+            });
+
+            // イベントリスナー
+            canvas.addEventListener('mousedown', handleStart);
+            canvas.addEventListener('mousemove', handleMove);
+            canvas.addEventListener('mouseup', handleEnd);
+            canvas.addEventListener('touchstart', handleStart);
+            canvas.addEventListener('touchmove', handleMove);
+            canvas.addEventListener('touchend', handleEnd);
+            
+            // ホイールズーム
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                zoom *= e.deltaY > 0 ? 1.1 : 0.9;
+                zoom = Math.max(0.5, Math.min(zoom, 10));
+            });
+
+            const startTime = Date.now();
+
+            // 描画ループ
+            function draw() {
+                const time = (Date.now() - startTime) / 1000;
+
+                if (autoRotate) {
+                    rotationY += 0.003;
+                    sliceW = Math.sin(time * 0.2) * 0.5;
+                }
+
+                gl.useProgram(program);
+
+                gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+                gl.enableVertexAttribArray(positionLocation);
+                gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+                gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
+                gl.uniform1f(timeLocation, time);
+                gl.uniformMatrix3fv(rotationLocation, false, rotationMatrix(rotationX, rotationY));
+                gl.uniform1f(zoomLocation, zoom);
+                gl.uniform4fv(juliaCLocation, juliaC);
+                gl.uniform1f(sliceWLocation, sliceW);
+                gl.uniform1i(fractalTypeLocation, fractalType);
+                gl.uniform1f(powerLocation, power);
+                gl.uniform1f(colorModeLocation, colorMode);
+
+                gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+                requestAnimationFrame(draw);
+            }
+
+            draw();
+        }
+
+        window.addEventListener('load', main);
+    </script>
 </body>
 </html>

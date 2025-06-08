@@ -72,7 +72,7 @@
 72. Mouse Pointer Game
 73. KANBAN Game
 74. Password Strength Visualizer
-75. Art Generator
+75. Quaternionic Fractal
 76. Emoji catch
 77. 4D Fractal Projection
 78. NotGPT
