@@ -14,7 +14,7 @@ class EmojiSprite {
         this.emoji = emoji;
         this.type = type;
         this.position = { x, y, z };
-        this.velocity = { y: -0.02 - (level * 0.005) };
+        this.velocity = { y: -0.08 - (level * 0.01) };
         this.rotation = 0;
         this.rotationSpeed = (Math.random() - 0.5) * 0.1;
         
@@ -143,7 +143,7 @@ function setupControls() {
     document.addEventListener('mousemove', (event) => {
         if (!gameRunning) return;
         mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-        player.position.x = mouseX * 8;
+        player.position.x = mouseX * 6; // Reduced from 8 to 6 for better mobile control
     });
     
     // Touch controls
@@ -152,14 +152,14 @@ function setupControls() {
         event.preventDefault();
         const touch = event.touches[0];
         mouseX = (touch.clientX / window.innerWidth) * 2 - 1;
-        player.position.x = mouseX * 8;
+        player.position.x = mouseX * 6; // Reduced from 8 to 6 for better mobile control
     }, { passive: false });
 }
 
 function spawnEmoji() {
     if (!gameRunning) return;
     
-    const x = (Math.random() - 0.5) * 12;
+    const x = (Math.random() - 0.5) * 10; // Reduced spawn area for mobile
     const y = 8;
     const z = 0;
     
@@ -300,8 +300,8 @@ function gameLoop() {
         updateUI();
     }
     
-    // Spawn new emojis
-    if (Math.random() < 0.02 + (level * 0.005)) {
+    // Spawn new emojis (increased spawn rate)
+    if (Math.random() < 0.04 + (level * 0.008)) {
         spawnEmoji();
     }
     
@@ -346,6 +346,13 @@ window.addEventListener('resize', () => {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+// Prevent pull-to-refresh on mobile
+document.addEventListener('touchmove', (e) => {
+    if (e.touches.length > 1) {
+        e.preventDefault();
+    }
+}, { passive: false });
 
 // Initialize game when page loads
 window.addEventListener('load', init);
