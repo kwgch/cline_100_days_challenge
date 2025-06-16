@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>INSTANT WOW</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="experience-container">
+        <!-- ローディング画面 -->
+        <div class="loading-screen" id="loadingScreen">
+            <div class="loading-text">準備中...</div>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+
+        <!-- メインビジュアル -->
+        <div class="main-visual" id="mainVisual">
+            <!-- 3Dトンネル -->
+            <canvas id="tunnelCanvas"></canvas>
+            
+            <!-- パーティクルストーム -->
+            <canvas id="particleStorm"></canvas>
+            
+            <!-- エネルギーフィールド -->
+            <div class="energy-field" id="energyField">
+                <div class="energy-core"></div>
+                <div class="energy-ring ring-1"></div>
+                <div class="energy-ring ring-2"></div>
+                <div class="energy-ring ring-3"></div>
+                <div class="energy-wave"></div>
+            </div>
+            
+            <!-- テキストエフェクト -->
+            <div class="text-explosion" id="textExplosion">
+                <h1 class="wow-text" data-text="WOW">WOW</h1>
+                <div class="text-particles"></div>
+            </div>
+            
+            <!-- リアクティブオーブ -->
+            <div class="reactive-orb" id="reactiveOrb">
+                <div class="orb-core"></div>
+                <div class="orb-glow"></div>
+                <svg class="orb-waves" viewBox="0 0 400 400">
+                    <defs>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="10" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <circle class="wave-circle" cx="200" cy="200" r="100" />
+                </svg>
+            </div>
+            
+            <!-- 光線バースト -->
+            <div class="light-burst" id="lightBurst">
+                <div class="burst-ray"></div>
+                <div class="burst-ray"></div>
+                <div class="burst-ray"></div>
+                <div class="burst-ray"></div>
+                <div class="burst-ray"></div>
+                <div class="burst-ray"></div>
+                <div class="burst-ray"></div>
+                <div class="burst-ray"></div>
+            </div>
+            
+            <!-- データストリーム -->
+            <div class="data-stream" id="dataStream">
+                <canvas id="matrixCanvas"></canvas>
+            </div>
+            
+            <!-- グリッチエフェクト -->
+            <div class="glitch-container" id="glitchContainer">
+                <div class="glitch-text" data-text="AMAZING">AMAZING</div>
+                <div class="glitch-slice"></div>
+                <div class="glitch-slice"></div>
+                <div class="glitch-slice"></div>
+            </div>
+        </div>
+
+        <!-- インタラクションヒント -->
+        <div class="interaction-hint" id="interactionHint">
+            <p>マウスを動かして体験</p>
+            <div class="hint-arrow">↓</div>
+        </div>
+
+        <!-- コントロール -->
+        <div class="controls">
+            <button class="effect-btn" data-effect="tunnel">トンネル</button>
+            <button class="effect-btn" data-effect="storm">ストーム</button>
+            <button class="effect-btn" data-effect="energy">エネルギー</button>
+            <button class="effect-btn" data-effect="explosion">爆発</button>
+            <button class="effect-btn" data-effect="orb">オーブ</button>
+            <button class="effect-btn" data-effect="burst">バースト</button>
+            <button class="effect-btn" data-effect="matrix">マトリックス</button>
+            <button class="effect-btn" data-effect="glitch">グリッチ</button>
+            <button class="effect-btn active" data-effect="all">全て</button>
+        </div>
+
+        <!-- フルスクリーンボタン -->
+        <button class="fullscreen-btn" id="fullscreenBtn">
+            <svg width="24" height="24" viewBox="0 0 24 24">
+                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+            </svg>
+        </button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
