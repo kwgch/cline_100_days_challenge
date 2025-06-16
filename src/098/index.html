@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hyper-Realistic 3D Experience</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="experience-container">
+        <!-- 3Dシーン -->
+        <div class="scene-3d" id="scene3D">
+            <canvas id="mainCanvas"></canvas>
+            
+            <!-- 立体視効果のオーバーレイ -->
+            <div class="stereoscopic-overlay">
+                <div class="depth-layer layer-1"></div>
+                <div class="depth-layer layer-2"></div>
+                <div class="depth-layer layer-3"></div>
+            </div>
+            
+            <!-- ホログラムUI -->
+            <div class="hologram-ui">
+                <div class="holo-panel top-left">
+                    <h3>DEPTH</h3>
+                    <div class="depth-meter">
+                        <div class="depth-indicator"></div>
+                    </div>
+                </div>
+                
+                <div class="holo-panel top-right">
+                    <h3>PARALLAX</h3>
+                    <div class="parallax-display">
+                        <span class="parallax-value">0.50</span>
+                    </div>
+                </div>
+                
+                <div class="holo-panel bottom-left">
+                    <h3>PERSPECTIVE</h3>
+                    <div class="perspective-grid">
+                        <div class="grid-line"></div>
+                        <div class="grid-line"></div>
+                        <div class="grid-line"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- フローティングオブジェクト -->
+            <div class="floating-objects">
+                <div class="floating-cube" id="cube1">
+                    <div class="cube-face front"></div>
+                    <div class="cube-face back"></div>
+                    <div class="cube-face left"></div>
+                    <div class="cube-face right"></div>
+                    <div class="cube-face top"></div>
+                    <div class="cube-face bottom"></div>
+                </div>
+                
+                <div class="floating-sphere" id="sphere1">
+                    <div class="sphere-glow"></div>
+                </div>
+                
+                <div class="floating-pyramid" id="pyramid1">
+                    <div class="pyramid-face"></div>
+                    <div class="pyramid-face"></div>
+                    <div class="pyramid-face"></div>
+                    <div class="pyramid-face"></div>
+                </div>
+            </div>
+            
+            <!-- パーティクルフィールド -->
+            <canvas id="particleField"></canvas>
+            
+            <!-- 光と影のシステム -->
+            <div class="lighting-system">
+                <div class="light-source" id="mainLight"></div>
+                <div class="volumetric-light"></div>
+                <div class="shadow-caster"></div>
+            </div>
+            
+            <!-- リアルタイムリフレクション -->
+            <div class="reflection-plane">
+                <div class="reflection-content"></div>
+            </div>
+        </div>
+        
+        <!-- インストラクション -->
+        <div class="instructions">
+            <p>マウスを動かして視点を変更 • スクロールで拡大縮小</p>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
