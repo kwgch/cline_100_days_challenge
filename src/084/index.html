@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>絶対にバズらない投稿文ジェネレーター</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>絶対にバズらない投稿文ジェネレーター</h1>
+        <p class="subtitle">世界一退屈な投稿を自動生成します</p>
+        
+        <div class="settings">
+            <div class="setting-group">
+                <label for="platform">プラットフォーム：</label>
+                <select id="platform">
+                    <option value="twitter">X (旧Twitter)</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="facebook">Facebook</option>
+                    <option value="linkedin">LinkedIn</option>
+                </select>
+            </div>
+            
+            <div class="setting-group">
+                <label for="boringness">退屈度：</label>
+                <input type="range" id="boringness" min="1" max="10" value="5">
+                <span id="boringnessValue">5</span>
+            </div>
+        </div>
+        
+        <button id="generateBtn" class="generate-btn">退屈な投稿を生成</button>
+        
+        <div class="post-container">
+            <div id="postContent" class="post-content"></div>
+            <div class="post-stats">
+                <span class="stat">👍 いいね: <span id="likeCount">0</span></span>
+                <span class="stat">💬 コメント: <span id="commentCount">0</span></span>
+                <span class="stat">🔄 シェア: <span id="shareCount">0</span></span>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button id="copyBtn" class="action-btn">📋 コピー</button>
+            <button id="regenerateBtn" class="action-btn">🔄 再生成</button>
+        </div>
+        
+        <div class="tips">
+            <h3>バズらないコツ：</h3>
+            <ul id="tipsList"></ul>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
