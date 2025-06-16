@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>動かない動き</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="static-motion-container">
+        <header class="still-header">
+            <h1>動かない動き</h1>
+            <p class="subtitle">静止の中の運動、運動の中の静止</p>
+        </header>
+        
+        <main class="motion-gallery">
+            <!-- ゼノンのパラドックス -->
+            <section class="static-motion-item">
+                <h2>ゼノンの矢</h2>
+                <canvas id="zenoArrow" class="motion-canvas"></canvas>
+                <p class="description">飛んでいる矢は各瞬間において静止している</p>
+            </section>
+            
+            <!-- 残像効果 -->
+            <section class="static-motion-item">
+                <h2>静止した軌跡</h2>
+                <div class="afterimage-container" id="afterimageBox">
+                    <div class="static-ball"></div>
+                </div>
+                <p class="description">動いていないが、動きの痕跡が見える</p>
+            </section>
+            
+            <!-- ストロボ効果 -->
+            <section class="static-motion-item">
+                <h2>断続的な静止</h2>
+                <div class="strobe-container" id="strobeBox">
+                    <div class="strobe-object"></div>
+                </div>
+                <p class="description">連続した静止画が動きを作る</p>
+            </section>
+            
+            <!-- 視覚的振動 -->
+            <section class="static-motion-item">
+                <h2>振動する静止</h2>
+                <div class="vibration-field" id="vibrationField"></div>
+                <p class="description">物理的には静止、知覚的には振動</p>
+            </section>
+            
+            <!-- モーションブラー -->
+            <section class="static-motion-item">
+                <h2>ぼやけた静止</h2>
+                <div class="motion-blur-container">
+                    <div class="blurred-static"></div>
+                </div>
+                <p class="description">動きの暗示だけが存在する</p>
+            </section>
+            
+            <!-- 相対的静止 -->
+            <section class="static-motion-item">
+                <h2>相対的な不動</h2>
+                <div class="relative-motion" id="relativeBox">
+                    <div class="reference-frame"></div>
+                    <div class="moving-static"></div>
+                </div>
+                <p class="description">観測者に対して静止、空間に対して運動</p>
+            </section>
+            
+            <!-- 時間の凍結 -->
+            <section class="static-motion-item">
+                <h2>凍結した瞬間</h2>
+                <div class="frozen-time" id="frozenTime">
+                    <div class="time-slice"></div>
+                </div>
+                <p class="description">時間が止まった動きの瞬間</p>
+            </section>
+            
+            <!-- 潜在的運動 -->
+            <section class="static-motion-item">
+                <h2>内在する動き</h2>
+                <div class="potential-motion" id="potentialBox">
+                    <div class="coiled-spring"></div>
+                </div>
+                <p class="description">今にも動き出しそうな静止</p>
+            </section>
+        </main>
+        
+        <footer class="static-footer">
+            <div class="motion-meter">
+                <label>動き度: <span id="motionLevel">0</span>%</label>
+                <div class="meter-bar">
+                    <div class="meter-fill" id="motionMeter"></div>
+                </div>
+            </div>
+            <p class="paradox-text">このページは動いていますか？</p>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

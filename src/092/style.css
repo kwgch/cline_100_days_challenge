@@ -1,0 +1,388 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    overflow-x: hidden;
+    /* 知覚できないほど遅い動き */
+    animation: imperceptibleDrift 1000s linear infinite;
+}
+
+@keyframes imperceptibleDrift {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(1px); }
+}
+
+.static-motion-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* 静止したヘッダー（でも何かが違う） */
+.still-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.still-header h1 {
+    font-size: 3rem;
+    font-weight: 200;
+    letter-spacing: 0.2em;
+    /* テキストの微細な振動 */
+    animation: microVibration 0.1s infinite;
+}
+
+@keyframes microVibration {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(0.1px); }
+}
+
+.subtitle {
+    margin-top: 1rem;
+    color: #666;
+    font-style: italic;
+}
+
+/* モーションギャラリー */
+.motion-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.static-motion-item {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.static-motion-item h2 {
+    font-size: 1.5rem;
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.description {
+    text-align: center;
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+}
+
+/* キャンバス */
+.motion-canvas {
+    display: block;
+    margin: 0 auto;
+    border: 1px solid #eee;
+}
+
+/* 残像効果 */
+.afterimage-container {
+    width: 300px;
+    height: 200px;
+    margin: 0 auto;
+    position: relative;
+    background: #fafafa;
+    border: 1px solid #eee;
+    cursor: none;
+    overflow: hidden;
+}
+
+.static-ball {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: #333;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.afterimage {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: rgba(51, 51, 51, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    animation: fadeOut 1s ease-out forwards;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+}
+
+/* ストロボ効果 */
+.strobe-container {
+    width: 300px;
+    height: 100px;
+    margin: 0 auto;
+    position: relative;
+    background: #fafafa;
+    border: 1px solid #eee;
+}
+
+.strobe-object {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: #e74c3c;
+    border-radius: 4px;
+    top: 30px;
+    left: 0;
+    transition: opacity 0.1s;
+}
+
+/* 視覚的振動 */
+.vibration-field {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.vibration-cell {
+    position: absolute;
+    transform-origin: center;
+}
+
+/* モーションブラー */
+.motion-blur-container {
+    width: 300px;
+    height: 100px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.blurred-static {
+    width: 60px;
+    height: 60px;
+    background: #3498db;
+    border-radius: 50%;
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    /* 動いているように見えるブラー */
+    filter: blur(10px) brightness(1.2);
+    box-shadow: 
+        -20px 0 20px rgba(52, 152, 219, 0.4),
+        -40px 0 30px rgba(52, 152, 219, 0.3),
+        -60px 0 40px rgba(52, 152, 219, 0.2);
+}
+
+/* 相対的静止 */
+.relative-motion {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.reference-frame {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 2px solid #ddd;
+    border-radius: 50%;
+}
+
+.reference-frame::before,
+.reference-frame::after {
+    content: '';
+    position: absolute;
+    background: #ddd;
+}
+
+.reference-frame::before {
+    width: 100%;
+    height: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.reference-frame::after {
+    width: 2px;
+    height: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.moving-static {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: #e74c3c;
+    border-radius: 50%;
+    top: 30%;
+    left: 70%;
+    transform: translate(-50%, -50%);
+}
+
+/* 凍結した時間 */
+.frozen-time {
+    width: 300px;
+    height: 100px;
+    margin: 0 auto;
+    position: relative;
+    background: linear-gradient(90deg, #ecf0f1 0%, #bdc3c7 100%);
+    overflow: hidden;
+}
+
+.time-slice {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.time-slice span {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+}
+
+/* 潜在的運動 */
+.potential-motion {
+    width: 300px;
+    height: 150px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.coiled-spring {
+    width: 100px;
+    height: 100px;
+    border: 10px solid #f39c12;
+    border-radius: 50%;
+    position: relative;
+    /* バネの巻き */
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 5px,
+        #f39c12 5px,
+        #f39c12 7px
+    );
+}
+
+/* フッター */
+.static-footer {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.motion-meter {
+    max-width: 400px;
+    margin: 0 auto 1rem;
+}
+
+.motion-meter label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #666;
+}
+
+.meter-bar {
+    height: 20px;
+    background: #ecf0f1;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.meter-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3498db, #2980b9);
+    width: 0;
+    transition: width 0.3s ease;
+    /* 静止しているが動いているように見える */
+    background-size: 20px 20px;
+    background-image: repeating-linear-gradient(
+        45deg,
+        #3498db,
+        #3498db 10px,
+        #2980b9 10px,
+        #2980b9 20px
+    );
+    animation: staticFlow 1s linear infinite;
+}
+
+@keyframes staticFlow {
+    0% { background-position: 0 0; }
+    100% { background-position: 20px 0; }
+}
+
+.paradox-text {
+    color: #999;
+    font-style: italic;
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+    .static-motion-container {
+        padding: 1rem;
+    }
+    
+    .still-header h1 {
+        font-size: 2rem;
+    }
+    
+    .motion-gallery {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .afterimage-container,
+    .strobe-container,
+    .motion-blur-container,
+    .frozen-time,
+    .potential-motion {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+/* 全体的な静止効果 */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    /* 見えない動き */
+    background: radial-gradient(
+        circle at center,
+        transparent 0%,
+        rgba(0, 0, 0, 0.01) 100%
+    );
+    animation: invisiblePulse 10s ease-in-out infinite;
+}
+
+@keyframes invisiblePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.01); }
+}
