@@ -1,0 +1,494 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: radial-gradient(ellipse at center, #1a1a2e 0%, #0f0f23 50%, #000000 100%);
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.ouroboros-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* ヘッダー */
+.circular-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    position: relative;
+}
+
+.circular-header h1 {
+    font-size: 3rem;
+    font-weight: 200;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #f7dc6f, #ff6b6b);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: cycleGradient 10s linear infinite;
+}
+
+@keyframes cycleGradient {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+.subtitle {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.2rem;
+    font-style: italic;
+}
+
+/* サイクルギャラリー */
+.cycle-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 3rem;
+    margin-bottom: 4rem;
+}
+
+.cycle-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.cycle-item::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    transform: rotate(45deg);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.cycle-item:hover::before {
+    opacity: 1;
+}
+
+.cycle-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
+}
+
+.cycle-item h2 {
+    font-size: 1.5rem;
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #ffd700;
+}
+
+/* キャンバス共通スタイル */
+.cycle-canvas {
+    display: block;
+    margin: 0 auto;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.cycle-description {
+    text-align: center;
+    margin-top: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-style: italic;
+}
+
+/* 人生の円環 */
+.life-cycle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 250px;
+    height: 250px;
+    margin: 0 auto;
+}
+
+.life-stage {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    transition: all 0.5s ease;
+    cursor: pointer;
+}
+
+.life-stage:nth-child(1) { transform: rotate(0deg) translateX(100px) rotate(0deg); }
+.life-stage:nth-child(2) { transform: rotate(72deg) translateX(100px) rotate(-72deg); }
+.life-stage:nth-child(3) { transform: rotate(144deg) translateX(100px) rotate(-144deg); }
+.life-stage:nth-child(4) { transform: rotate(216deg) translateX(100px) rotate(-216deg); }
+.life-stage:nth-child(5) { transform: rotate(288deg) translateX(100px) rotate(-288deg); }
+
+.life-stage.active {
+    background: rgba(255, 215, 0, 0.3);
+    border-color: #ffd700;
+    transform: scale(1.2);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.current-stage {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 1.1rem;
+    color: #ffd700;
+}
+
+/* 季節の巡り */
+.season-wheel {
+    width: 250px;
+    height: 250px;
+    margin: 0 auto;
+    position: relative;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        #90EE90 0deg 90deg,
+        #87CEEB 90deg 180deg,
+        #DDA0DD 180deg 270deg,
+        #B0C4DE 270deg 360deg
+    );
+    transition: all 0.5s ease;
+}
+
+.season {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.season.spring { top: 20px; left: 50%; transform: translateX(-50%); }
+.season.summer { right: 20px; top: 50%; transform: translateY(-50%); }
+.season.autumn { bottom: 20px; left: 50%; transform: translateX(-50%); }
+.season.winter { left: 20px; top: 50%; transform: translateY(-50%); }
+
+.season-pointer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 3px;
+    height: 100px;
+    background: #fff;
+    transform-origin: center bottom;
+    transform: translate(-50%, -100%) rotate(0deg);
+    transition: transform 1s ease;
+}
+
+.season-pointer::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 20px solid #fff;
+}
+
+.season-haiku {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.5;
+}
+
+/* 円形の物語 */
+.circular-story {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 1rem;
+}
+
+.story-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.9);
+    min-height: 3em;
+    transition: opacity 0.3s ease;
+}
+
+.story-btn {
+    display: block;
+    margin: 1.5rem auto 0;
+    padding: 0.8rem 2rem;
+    background: linear-gradient(90deg, #3498db, #2980b9);
+    border: none;
+    border-radius: 25px;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.story-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+}
+
+.story-progress {
+    width: 100%;
+    height: 30px;
+    border-radius: 15px;
+    background: #ecf0f1;
+    overflow: hidden;
+    position: relative;
+}
+
+/* 回文生成器 */
+.palindrome-generator {
+    text-align: center;
+}
+
+#palindromeInput {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    color: #fff;
+    margin-bottom: 1rem;
+}
+
+#palindromeInput::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.palindrome-display {
+    font-size: 1.5rem;
+    letter-spacing: 0.1em;
+    margin: 1rem 0;
+    min-height: 2em;
+}
+
+.palindrome-char {
+    display: inline-block;
+    animation: palindromeReveal 0.5s ease forwards;
+    opacity: 0;
+}
+
+@keyframes palindromeReveal {
+    from {
+        opacity: 0;
+        transform: rotateY(180deg);
+    }
+    to {
+        opacity: 1;
+        transform: rotateY(0deg);
+    }
+}
+
+#generatePalindrome {
+    padding: 0.6rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#generatePalindrome:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+/* 永遠の時計 */
+.eternal-clock {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    position: relative;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+}
+
+.clock-hand {
+    position: absolute;
+    background: #fff;
+    transform-origin: center bottom;
+    left: 50%;
+    bottom: 50%;
+    transform: translateX(-50%);
+}
+
+.hour-hand {
+    width: 4px;
+    height: 60px;
+    background: #ffd700;
+}
+
+.minute-hand {
+    width: 2px;
+    height: 80px;
+    background: #fff;
+}
+
+.clock-center {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+}
+
+.time-philosophy {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* フッター */
+.circular-footer {
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.journey-tracker h3 {
+    font-size: 1.5rem;
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+    color: #ffd700;
+}
+
+.journey-circle {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 1rem;
+    position: relative;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+}
+
+.journey-point {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #ffd700;
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    transform: translate(-50%, -50%);
+    transition: all 0.05s linear;
+}
+
+.journey-point::after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgba(255, 215, 0, 0.5);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+.journey-status {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 1.5rem;
+}
+
+.reset-journey {
+    padding: 0.8rem 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 30px;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.reset-journey:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+    .ouroboros-container {
+        padding: 1rem;
+    }
+    
+    .circular-header h1 {
+        font-size: 2rem;
+    }
+    
+    .cycle-gallery {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .cycle-item {
+        padding: 1.5rem;
+    }
+    
+    .life-cycle,
+    .season-wheel,
+    .eternal-clock,
+    .journey-circle {
+        transform: scale(0.8);
+    }
+    
+    .story-text {
+        font-size: 1rem;
+    }
+}

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>始まりと終わりが同じ場所</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ouroboros-container">
+        <header class="circular-header">
+            <h1>始まりと終わりが同じ場所にあるもの</h1>
+            <p class="subtitle">永遠の循環、無限のループ</p>
+        </header>
+        
+        <main class="cycle-gallery">
+            <!-- ウロボロスの蛇 -->
+            <section class="cycle-item">
+                <h2>ウロボロス</h2>
+                <canvas id="ouroborosCanvas" class="cycle-canvas"></canvas>
+                <p class="cycle-description">自らの尾を食べる蛇</p>
+            </section>
+            
+            <!-- 人生の円環 -->
+            <section class="cycle-item">
+                <h2>人生の旅路</h2>
+                <div class="life-cycle" id="lifeCycle">
+                    <div class="life-stage" data-stage="birth">誕生</div>
+                    <div class="life-stage" data-stage="growth">成長</div>
+                    <div class="life-stage" data-stage="peak">絶頂</div>
+                    <div class="life-stage" data-stage="decline">衰退</div>
+                    <div class="life-stage" data-stage="return">回帰</div>
+                </div>
+                <p class="current-stage" id="currentStage">現在: 誕生</p>
+            </section>
+            
+            <!-- メビウスの輪 -->
+            <section class="cycle-item">
+                <h2>メビウスの輪</h2>
+                <canvas id="mobiusCanvas" class="cycle-canvas"></canvas>
+                <p class="cycle-description">表と裏が繋がった一つの面</p>
+            </section>
+            
+            <!-- 季節の巡り -->
+            <section class="cycle-item">
+                <h2>季節の円環</h2>
+                <div class="season-wheel" id="seasonWheel">
+                    <div class="season spring" data-season="spring">春</div>
+                    <div class="season summer" data-season="summer">夏</div>
+                    <div class="season autumn" data-season="autumn">秋</div>
+                    <div class="season winter" data-season="winter">冬</div>
+                    <div class="season-pointer"></div>
+                </div>
+                <p class="season-haiku" id="seasonHaiku">巡り来て また巡りゆく 季節かな</p>
+            </section>
+            
+            <!-- 円形の物語 -->
+            <section class="cycle-item">
+                <h2>円環の物語</h2>
+                <div class="circular-story" id="circularStory">
+                    <div class="story-text" id="storyText">
+                        昔々、ある旅人が長い旅に出ました...
+                    </div>
+                    <button class="story-btn" id="nextStory">次へ →</button>
+                </div>
+                <div class="story-progress" id="storyProgress"></div>
+            </section>
+            
+            <!-- 回文 -->
+            <section class="cycle-item">
+                <h2>回文生成器</h2>
+                <div class="palindrome-generator">
+                    <input type="text" id="palindromeInput" placeholder="文字を入力">
+                    <div class="palindrome-display" id="palindromeDisplay"></div>
+                    <button id="generatePalindrome">回文を作る</button>
+                </div>
+            </section>
+            
+            <!-- 循環する時計 -->
+            <section class="cycle-item">
+                <h2>永遠の時計</h2>
+                <div class="eternal-clock" id="eternalClock">
+                    <div class="clock-hand hour-hand"></div>
+                    <div class="clock-hand minute-hand"></div>
+                    <div class="clock-center"></div>
+                    <div class="clock-numbers"></div>
+                </div>
+                <p class="time-philosophy" id="timePhilosophy">時は巡り、また始まる</p>
+            </section>
+            
+            <!-- フラクタル螺旋 -->
+            <section class="cycle-item">
+                <h2>無限螺旋</h2>
+                <canvas id="spiralCanvas" class="cycle-canvas"></canvas>
+                <p class="cycle-description">内へ外へ、永遠に続く</p>
+            </section>
+        </main>
+        
+        <footer class="circular-footer">
+            <div class="journey-tracker">
+                <h3>あなたの循環</h3>
+                <div class="journey-circle" id="journeyCircle">
+                    <div class="journey-point" id="journeyPoint"></div>
+                </div>
+                <p class="journey-status" id="journeyStatus">旅は続く...</p>
+            </div>
+            <button class="reset-journey" id="resetJourney">最初に戻る（それは終わりでもある）</button>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
