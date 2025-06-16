@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>矛盾の体現</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="title">これは矛盾です</h1>
+            <p class="subtitle">でも矛盾ではありません</p>
+        </header>
+        
+        <main class="paradox-zone">
+            <!-- 押せない押せるボタン -->
+            <div class="paradox-item">
+                <button class="unpushable-pushable" id="mainButton">
+                    <span class="button-text">押せません</span>
+                    <span class="button-subtext">（押してください）</span>
+                </button>
+                <p class="counter">押した回数: <span id="pushCount">0</span></p>
+            </div>
+            
+            <!-- 存在しない存在するテキスト -->
+            <div class="paradox-item">
+                <div class="invisible-visible" id="invisibleText">
+                    <p>このテキストは見えません</p>
+                </div>
+            </div>
+            
+            <!-- 止まっている動く要素 -->
+            <div class="paradox-item">
+                <div class="static-moving" id="movingStatic">
+                    <div class="inner-static">静止しています</div>
+                </div>
+            </div>
+            
+            <!-- 真実の嘘 -->
+            <div class="paradox-item">
+                <div class="truth-lie" id="truthLie">
+                    <p class="statement">この文章は<span class="changing">嘘</span>です</p>
+                </div>
+            </div>
+            
+            <!-- 満ちている空のプログレスバー -->
+            <div class="paradox-item">
+                <div class="progress-container">
+                    <div class="empty-full" id="progressBar"></div>
+                    <p class="progress-text">0% 完了（100% 完了）</p>
+                </div>
+            </div>
+            
+            <!-- 音のない音 -->
+            <div class="paradox-item">
+                <button class="silent-sound" id="soundButton">
+                    <span>🔇 無音を再生</span>
+                    <span class="volume-indicator">音量: MAX</span>
+                </button>
+            </div>
+            
+            <!-- 選択できない選択肢 -->
+            <div class="paradox-item">
+                <div class="choice-container">
+                    <p>以下から選んでください（選べません）：</p>
+                    <div class="choices">
+                        <label class="unselectable-selectable">
+                            <input type="radio" name="choice" value="yes">
+                            <span>はい</span>
+                        </label>
+                        <label class="unselectable-selectable">
+                            <input type="radio" name="choice" value="no">
+                            <span>いいえ</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 閉じている開いた箱 -->
+            <div class="paradox-item">
+                <div class="schrodinger-box" id="box">
+                    <div class="box-state">
+                        <p>この箱は<span class="box-status">閉じて</span>います</p>
+                        <p class="box-content">中身: <span class="content-state">存在し、存在しない</span></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p class="footer-text">このページは<span class="existence">存在</span>します</p>
+        </footer>
+        
+        <!-- 見えない見えるカーソル -->
+        <div class="invisible-cursor" id="customCursor"></div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

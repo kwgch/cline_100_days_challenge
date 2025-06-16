@@ -1,0 +1,440 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #fff;
+    color: #000;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: none; /* 実際のカーソルを隠す */
+    transition: all 0.5s ease;
+}
+
+/* でも黒背景に白文字にも見える */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #000;
+    opacity: 0;
+    pointer-events: none;
+    animation: invertBackground 10s infinite;
+    z-index: -1;
+}
+
+@keyframes invertBackground {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* ヘッダー：存在するが存在しない */
+header {
+    text-align: center;
+    margin-bottom: 3rem;
+    opacity: 1;
+    animation: existNotExist 5s infinite;
+}
+
+@keyframes existNotExist {
+    0%, 100% { opacity: 1; filter: blur(0); }
+    50% { opacity: 0.3; filter: blur(2px); }
+}
+
+.title {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #000;
+    text-shadow: 2px 2px 0 #fff, -2px -2px 0 #000;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: #666;
+    font-style: italic;
+}
+
+/* 矛盾ゾーン */
+.paradox-zone {
+    display: grid;
+    gap: 3rem;
+}
+
+.paradox-item {
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    position: relative;
+    overflow: visible;
+}
+
+/* 押せない押せるボタン */
+.unpushable-pushable {
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: not-allowed;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.unpushable-pushable:hover {
+    background: #e74c3c;
+    cursor: pointer;
+    transform: scale(1.1);
+}
+
+.unpushable-pushable:active {
+    transform: scale(0.9);
+}
+
+.unpushable-pushable.clicked {
+    animation: unclick 0.3s ease;
+}
+
+@keyframes unclick {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2) rotate(180deg); }
+    100% { transform: scale(1) rotate(360deg); }
+}
+
+.button-text {
+    display: block;
+    font-weight: bold;
+}
+
+.button-subtext {
+    display: block;
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.counter {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* 見えない見えるテキスト */
+.invisible-visible {
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    transition: opacity 0.5s ease;
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+.invisible-visible p {
+    margin: 0;
+    user-select: none;
+}
+
+/* 止まっている動く要素 */
+.static-moving {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    background: linear-gradient(45deg, #3498db, #e74c3c);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s linear;
+    cursor: pointer;
+}
+
+.inner-static {
+    background: white;
+    padding: 1rem;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: transform 0.1s linear;
+}
+
+/* 真実の嘘 */
+.truth-lie {
+    text-align: center;
+    font-size: 1.5rem;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.statement {
+    margin: 0;
+}
+
+.changing {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+/* 満ちている空のプログレスバー */
+.progress-container {
+    background: #ecf0f1;
+    height: 30px;
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.empty-full {
+    height: 100%;
+    background: linear-gradient(90deg, #2ecc71, #3498db);
+    transition: width 0.1s ease;
+    border-radius: 15px;
+}
+
+.progress-text {
+    text-align: center;
+    color: #666;
+}
+
+/* 音のない音 */
+.silent-sound {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    background: #9b59b6;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    transition: all 0.3s ease;
+}
+
+.silent-sound.playing {
+    animation: soundPulse 0.5s ease infinite;
+}
+
+@keyframes soundPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.sound-waves {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.sound-waves::before,
+.sound-waves::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    animation: soundWave 2s ease-out infinite;
+}
+
+.sound-waves::after {
+    animation-delay: 0.5s;
+}
+
+@keyframes soundWave {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    100% {
+        width: 200%;
+        height: 200%;
+        opacity: 0;
+    }
+}
+
+/* 選択できない選択肢 */
+.choice-container {
+    text-align: center;
+}
+
+.choices {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.unselectable-selectable {
+    padding: 1rem 2rem;
+    background: #ecf0f1;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.unselectable-selectable:hover {
+    background: #bdc3c7;
+    transform: translateY(-2px);
+}
+
+.unselectable-selectable input {
+    margin-right: 0.5rem;
+    cursor: not-allowed;
+}
+
+/* シュレーディンガーの箱 */
+.schrodinger-box {
+    width: 300px;
+    height: 200px;
+    margin: 0 auto;
+    background: linear-gradient(135deg, #34495e, #2c3e50);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.5s ease;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.schrodinger-box.open {
+    transform: rotateY(180deg);
+    opacity: 0.5;
+}
+
+.box-state {
+    text-align: center;
+    color: white;
+}
+
+.box-content {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* フッター */
+footer {
+    margin-top: 4rem;
+    text-align: center;
+    padding: 2rem;
+    border-top: 1px solid #ecf0f1;
+}
+
+.footer-text {
+    color: #666;
+    font-style: italic;
+}
+
+.existence {
+    font-weight: bold;
+    color: #3498db;
+}
+
+/* 見えない見えるカーソル */
+.invisible-cursor {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle, rgba(255, 0, 0, 0.8), transparent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: opacity 0.3s ease;
+    mix-blend-mode: difference;
+}
+
+.cursor-trail {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    background: rgba(0, 0, 255, 0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: opacity 1s ease;
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+    body {
+        cursor: auto; /* モバイルでは通常のカーソル */
+    }
+    
+    .invisible-cursor,
+    .cursor-trail {
+        display: none;
+    }
+    
+    .container {
+        padding: 1rem;
+    }
+    
+    .title {
+        font-size: 2rem;
+    }
+    
+    .paradox-item {
+        padding: 1.5rem;
+    }
+    
+    .static-moving {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .schrodinger-box {
+        width: 250px;
+        height: 150px;
+    }
+    
+    .choices {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* 矛盾的なアニメーション */
+@keyframes moveStatic {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes staticMove {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* すべての要素に矛盾を適用 */
+* {
+    animation: exist 0.001s infinite;
+}
+
+@keyframes exist {
+    0% { opacity: 0.99999; }
+    100% { opacity: 1; }
+}
