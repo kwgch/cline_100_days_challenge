@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>てきとうミームジェネレーター</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>てきとうミーム<br>ジェネレーター</h1>
+        <p class="subtitle">※クオリティは保証しません</p>
+        
+        <div class="meme-container">
+            <canvas id="memeCanvas"></canvas>
+            <div class="loading" id="loading">よみこみちゅう...</div>
+        </div>
+        
+        <div class="controls">
+            <button id="generateBtn" class="btn-generate">てきとうに作る</button>
+            
+            <div class="options">
+                <label>
+                    <input type="checkbox" id="autoText" checked>
+                    文字も適当に
+                </label>
+                <label>
+                    <input type="checkbox" id="lowQuality" checked>
+                    画質わるくする
+                </label>
+                <label>
+                    <input type="checkbox" id="wrongFont">
+                    フォントまちがえる
+                </label>
+            </div>
+            
+            <div class="text-inputs">
+                <input type="text" id="topText" placeholder="うえのもじ（てきとう）">
+                <input type="text" id="bottomText" placeholder="したのもじ（てきとう）">
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button id="saveBtn" class="btn-action">ほぞん</button>
+            <button id="shareBtn" class="btn-action">しぇあ（たぶん）</button>
+        </div>
+        
+        <div class="history">
+            <h3>さっき作ったやつ</h3>
+            <div id="historyList" class="history-list"></div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

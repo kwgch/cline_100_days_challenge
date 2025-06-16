@@ -1,0 +1,277 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial', sans-serif;
+    background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00, #ff00ff);
+    background-size: 400% 400%;
+    animation: rainbow 15s ease infinite;
+    min-height: 100vh;
+    padding: 10px;
+}
+
+@keyframes rainbow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.container {
+    max-width: 500px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 0 20px 5px 30px;
+    box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.3);
+    transform: rotate(-1deg);
+}
+
+h1 {
+    text-align: center;
+    font-size: 2rem;
+    color: #ff00ff;
+    text-shadow: 3px 3px 0 #00ffff, -3px -3px 0 #ffff00;
+    margin-bottom: 10px;
+    transform: rotate(2deg);
+    line-height: 1.2;
+}
+
+.subtitle {
+    text-align: center;
+    color: #666;
+    font-size: 0.8rem;
+    font-style: italic;
+    margin-bottom: 20px;
+    transform: rotate(-2deg);
+}
+
+.meme-container {
+    position: relative;
+    margin-bottom: 20px;
+    background: #f0f0f0;
+    padding: 10px;
+    border: 3px dashed #999;
+    transform: rotate(1deg);
+}
+
+#memeCanvas {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 2px solid #333;
+    box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    color: #ff00ff;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px 20px;
+    border-radius: 10px;
+    display: none;
+    animation: blink 0.5s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.controls {
+    margin-bottom: 20px;
+}
+
+.btn-generate {
+    width: 100%;
+    padding: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    color: white;
+    border: none;
+    border-radius: 10px 0 10px 0;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: all 0.3s;
+    margin-bottom: 15px;
+    transform: rotate(-0.5deg);
+}
+
+.btn-generate:hover {
+    transform: rotate(0.5deg) scale(1.05);
+    box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.3);
+}
+
+.btn-generate:active {
+    transform: rotate(0deg) scale(0.95);
+}
+
+.options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.options label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    background: #ffe66d;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.options label:hover {
+    background: #ffd93d;
+    transform: scale(1.05);
+}
+
+.options input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.text-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.text-inputs input {
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    font-family: inherit;
+    transform: rotate(-0.5deg);
+}
+
+.text-inputs input:focus {
+    outline: none;
+    border-color: #ff00ff;
+    transform: rotate(0deg);
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.btn-action {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    background: #4ecdc4;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-action:hover {
+    background: #45b7b1;
+    transform: translateY(-2px);
+}
+
+.btn-action:active {
+    transform: translateY(0);
+}
+
+.history {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 10px;
+    border: 2px solid #ddd;
+    transform: rotate(0.5deg);
+}
+
+.history h3 {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.history-list {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 5px;
+}
+
+.history-list img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.history-list img:hover {
+    transform: scale(1.1);
+    border-color: #ff00ff;
+}
+
+/* モバイル対応 */
+@media (max-width: 600px) {
+    .container {
+        transform: none;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    .btn-generate {
+        font-size: 18px;
+        padding: 12px;
+    }
+    
+    .options {
+        justify-content: center;
+    }
+}
+
+/* スクロールバーも適当に */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, #ff00ff, #00ffff);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(45deg, #00ffff, #ff00ff);
+}
+
+/* タッチハイライト無効化 */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
