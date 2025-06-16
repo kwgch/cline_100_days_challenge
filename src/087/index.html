@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>時間の概念</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <canvas id="timeCanvas"></canvas>
+        
+        <div class="controls">
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="linear">線形</button>
+                <button class="mode-btn" data-mode="circular">循環</button>
+                <button class="mode-btn" data-mode="quantum">量子</button>
+                <button class="mode-btn" data-mode="relative">相対</button>
+                <button class="mode-btn" data-mode="entropy">エントロピー</button>
+                <button class="mode-btn" data-mode="memory">記憶</button>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <div class="time-display">
+                <div class="current-time" id="currentTime"></div>
+                <div class="time-info" id="timeInfo"></div>
+            </div>
+            <div class="perspective-text" id="perspectiveText"></div>
+        </div>
+        
+        <div class="interaction-hint" id="interactionHint">画面をクリック/タッチで時間と対話</div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
