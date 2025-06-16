@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tactile Playground - 触感の遊び場</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="playground-container">
+        <!-- スライムシミュレーター -->
+        <section class="tactile-zone" id="slimeZone">
+            <h2>ぷるぷるスライム</h2>
+            <canvas id="slimeCanvas" class="interactive-canvas"></canvas>
+            <div class="touch-indicator" id="slimeTouch"></div>
+        </section>
+
+        <!-- 磁性流体 -->
+        <section class="tactile-zone" id="ferrofluidZone">
+            <h2>磁性流体</h2>
+            <canvas id="ferrofluidCanvas" class="interactive-canvas"></canvas>
+            <div class="magnet-cursor" id="magnetCursor"></div>
+        </section>
+
+        <!-- バブルラップ -->
+        <section class="tactile-zone" id="bubbleWrapZone">
+            <h2>無限プチプチ</h2>
+            <div class="bubble-wrap" id="bubbleWrap"></div>
+            <div class="pop-counter">
+                <span>POP: </span><span id="popCount">0</span>
+            </div>
+        </section>
+
+        <!-- 砂遊び -->
+        <section class="tactile-zone" id="sandboxZone">
+            <h2>魔法の砂場</h2>
+            <canvas id="sandCanvas" class="interactive-canvas"></canvas>
+            <div class="sand-tools">
+                <button class="tool-btn active" data-tool="draw">描く</button>
+                <button class="tool-btn" data-tool="erase">消す</button>
+                <button class="tool-btn" data-tool="rain">雨</button>
+            </div>
+        </section>
+
+        <!-- ゴムバンド -->
+        <section class="tactile-zone" id="elasticZone">
+            <h2>伸縮ゴムバンド</h2>
+            <div class="elastic-container">
+                <svg id="elasticSvg" class="interactive-svg" viewBox="0 0 600 600">
+                    <defs>
+                        <filter id="gooey">
+                            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+                            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" />
+                        </filter>
+                    </defs>
+                    <g id="elasticBands"></g>
+                </svg>
+                <div class="elastic-pins" id="elasticPins"></div>
+            </div>
+        </section>
+
+        <!-- 粒子の滝 -->
+        <section class="tactile-zone" id="particleFallZone">
+            <h2>きらきら粒子の滝</h2>
+            <canvas id="particleFallCanvas" class="interactive-canvas"></canvas>
+            <div class="particle-emitter" id="particleEmitter"></div>
+        </section>
+
+        <!-- リキッドボタン -->
+        <section class="tactile-zone" id="liquidButtonZone">
+            <h2>液体ボタン</h2>
+            <div class="liquid-buttons">
+                <button class="liquid-btn" data-color="cyan">
+                    <span class="liquid-bg"></span>
+                    <span class="btn-text">ぷるん</span>
+                </button>
+                <button class="liquid-btn" data-color="magenta">
+                    <span class="liquid-bg"></span>
+                    <span class="btn-text">ぷにぷに</span>
+                </button>
+                <button class="liquid-btn" data-color="yellow">
+                    <span class="liquid-bg"></span>
+                    <span class="btn-text">ぽよん</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 音の波紋 -->
+        <section class="tactile-zone" id="soundRippleZone">
+            <h2>音の波紋</h2>
+            <canvas id="soundRippleCanvas" class="interactive-canvas"></canvas>
+            <div class="sound-controls">
+                <button class="sound-btn" data-note="C">ド</button>
+                <button class="sound-btn" data-note="D">レ</button>
+                <button class="sound-btn" data-note="E">ミ</button>
+                <button class="sound-btn" data-note="F">ファ</button>
+                <button class="sound-btn" data-note="G">ソ</button>
+            </div>
+        </section>
+
+        <!-- タッチメニュー -->
+        <nav class="touch-menu">
+            <button class="menu-btn" data-zone="slime">スライム</button>
+            <button class="menu-btn" data-zone="ferrofluid">磁性流体</button>
+            <button class="menu-btn" data-zone="bubbleWrap">プチプチ</button>
+            <button class="menu-btn" data-zone="sandbox">砂場</button>
+            <button class="menu-btn" data-zone="particleFall">粒子</button>
+        </nav>
+
+        <!-- ハプティックフィードバック表示 -->
+        <div class="haptic-indicator" id="hapticIndicator">
+            <div class="haptic-wave"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

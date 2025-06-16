@@ -1,0 +1,512 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #1a1a2e;
+    color: #fff;
+    overflow: hidden;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+.playground-container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+/* タクタイルゾーン */
+.tactile-zone {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.tactile-zone h2 {
+    position: absolute;
+    top: 2rem;
+    font-size: 2rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    opacity: 0.8;
+}
+
+/* インタラクティブキャンバス */
+.interactive-canvas {
+    width: 100%;
+    max-width: 600px;
+    height: 60vh;
+    max-height: 600px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    touch-action: none;
+}
+
+#elasticSvg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.interactive-canvas {
+    width: 100%;
+    max-width: 600px;
+    height: 60vh;
+    max-height: 600px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    touch-action: none;
+}
+
+/* スライム */
+#slimeZone {
+    background: linear-gradient(135deg, #1a3a3a 0%, #2a4a4a 100%);
+}
+
+.touch-indicator {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* 磁性流体 */
+#ferrofluidZone {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+}
+
+.magnet-cursor {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    border: 2px solid #ff0000;
+    border-radius: 50%;
+    pointer-events: none;
+    display: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+}
+
+.magnet-cursor::before,
+.magnet-cursor::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 2px;
+    background: #ff0000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.magnet-cursor::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+}
+
+/* バブルラップ */
+#bubbleWrapZone {
+    background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+    color: #333;
+}
+
+.bubble-wrap {
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    gap: 5px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    max-width: 600px;
+}
+
+.bubble {
+    width: 35px;
+    height: 35px;
+    background: radial-gradient(circle at 30% 30%, #ffffff, #e0e0e0);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    box-shadow: 
+        inset -2px -2px 4px rgba(0, 0, 0, 0.2),
+        inset 2px 2px 4px rgba(255, 255, 255, 0.7),
+        2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.bubble:hover {
+    transform: scale(0.95);
+}
+
+.bubble.popped {
+    background: #f0f0f0;
+    box-shadow: 
+        inset 2px 2px 4px rgba(0, 0, 0, 0.2),
+        inset -2px -2px 4px rgba(255, 255, 255, 0.7);
+    transform: scale(0.8);
+}
+
+.pop-counter {
+    position: absolute;
+    bottom: 2rem;
+    font-size: 1.5rem;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+}
+
+/* 砂場 */
+#sandboxZone {
+    background: linear-gradient(135deg, #d4a574 0%, #b8956a 100%);
+}
+
+.sand-tools {
+    position: absolute;
+    bottom: 2rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.tool-btn {
+    padding: 0.8rem 1.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    color: #fff;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.tool-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.tool-btn.active {
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+/* ゴムバンド */
+#elasticZone {
+    background: linear-gradient(135deg, #4a0e4e 0%, #81689d 100%);
+}
+
+.elastic-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    height: 60vh;
+    max-height: 600px;
+    margin: 0 auto;
+}
+
+.elastic-pins {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;
+}
+
+.elastic-pin {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: radial-gradient(circle, #ffd700, #ffb700);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease;
+}
+
+.elastic-pin:hover {
+    transform: scale(1.2);
+}
+
+.elastic-band,
+.elastic-band-temp {
+    stroke: #ff00ff;
+    stroke-width: 8;
+    stroke-linecap: round;
+    filter: url(#gooey);
+}
+
+.elastic-band-temp {
+    stroke: rgba(255, 0, 255, 0.5);
+    stroke-dasharray: 5, 5;
+}
+
+/* 粒子の滝 */
+#particleFallZone {
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+}
+
+/* 液体ボタン */
+#liquidButtonZone {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.liquid-buttons {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.liquid-btn {
+    position: relative;
+    padding: 2rem 3rem;
+    font-size: 1.5rem;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    border-radius: 50px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.liquid-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent);
+    border-radius: 50%;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.liquid-btn[data-color="cyan"] .liquid-bg {
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.5), transparent);
+}
+
+.liquid-btn[data-color="magenta"] .liquid-bg {
+    background: radial-gradient(circle, rgba(255, 0, 255, 0.5), transparent);
+}
+
+.liquid-btn[data-color="yellow"] .liquid-bg {
+    background: radial-gradient(circle, rgba(255, 255, 0, 0.5), transparent);
+}
+
+.btn-text {
+    position: relative;
+    z-index: 1;
+}
+
+.liquid-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(0);
+    animation: liquidRipple 1s ease-out;
+}
+
+@keyframes liquidRipple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* 音の波紋 */
+#soundRippleZone {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+}
+
+.sound-controls {
+    position: absolute;
+    bottom: 2rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.sound-btn {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    color: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.sound-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.sound-btn:active {
+    transform: scale(0.95);
+}
+
+/* タッチメニュー */
+.touch-menu {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    padding: 1rem;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(20px);
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    z-index: 100;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.touch-menu::-webkit-scrollbar {
+    height: 4px;
+}
+
+.touch-menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.touch-menu::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+}
+
+.menu-btn {
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    min-width: fit-content;
+}
+
+.menu-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.menu-btn.active {
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+/* ハプティックインジケーター */
+.haptic-indicator {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.haptic-wave {
+    width: 100%;
+    height: 100%;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    animation: hapticWave 0.5s ease-out;
+}
+
+@keyframes hapticWave {
+    from {
+        transform: scale(0);
+        opacity: 1;
+    }
+    to {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+    .tactile-zone {
+        padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+    }
+    
+    .tactile-zone h2 {
+        font-size: 1.5rem;
+    }
+    
+    .interactive-canvas,
+    .interactive-svg {
+        max-height: calc(100vh - 10rem - env(safe-area-inset-bottom));
+    }
+    
+    .bubble-wrap {
+        grid-template-columns: repeat(10, 1fr);
+    }
+    
+    .bubble {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .liquid-btn {
+        padding: 1.5rem 2rem;
+        font-size: 1.2rem;
+    }
+    
+    .touch-menu {
+        gap: 0.3rem;
+        padding: 0.8rem;
+        padding-bottom: calc(0.8rem + env(safe-area-inset-bottom));
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .touch-menu::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 20px;
+        background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.8));
+        pointer-events: none;
+    }
+    
+    .menu-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        min-width: 70px;
+    }
+}
