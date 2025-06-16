@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>∞ 無限の視覚化</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <canvas id="infinityCanvas"></canvas>
+        
+        <div class="controls">
+            <div class="infinity-selector">
+                <button class="infinity-btn active" data-type="mathematical">数学的無限</button>
+                <button class="infinity-btn" data-type="fractal">フラクタル</button>
+                <button class="infinity-btn" data-type="paradox">パラドックス</button>
+                <button class="infinity-btn" data-type="recursive">再帰</button>
+                <button class="infinity-btn" data-type="continuous">連続体</button>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <h2 id="infinityName">数学的無限</h2>
+            <p id="infinityDescription"></p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="label">深度:</span>
+                    <span id="depth">0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">反復:</span>
+                    <span id="iterations">0</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="zoom-controls">
+            <button id="zoomIn">+</button>
+            <button id="zoomOut">−</button>
+            <button id="reset">⟲</button>
+        </div>
+        
+        <div class="hint">マウスホイール/ピンチでズーム • ドラッグで移動</div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
