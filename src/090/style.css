@@ -1,0 +1,495 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: radial-gradient(ellipse at center, #0a0a0a 0%, #000 50%, transparent 100%);
+    color: rgba(255, 255, 255, 0.8);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    transition: opacity 0.5s ease;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(255, 255, 255, 0.03) 2px,
+            rgba(255, 255, 255, 0.03) 4px
+        );
+    pointer-events: none;
+    z-index: 1;
+}
+
+.void-container {
+    position: relative;
+    z-index: 2;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* 存在しないヘッダー */
+.non-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    opacity: 0.9;
+}
+
+.absent-title {
+    font-size: 3rem;
+    font-weight: 100;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    background: linear-gradient(
+        45deg,
+        transparent 20%,
+        rgba(255, 255, 255, 0.8) 50%,
+        transparent 80%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { background-position: -100% 0; }
+    50% { background-position: 100% 0; }
+}
+
+.missing-subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 1rem;
+    font-style: italic;
+}
+
+/* 存在フィールド */
+.existence-field {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 3rem;
+    margin-bottom: 4rem;
+}
+
+/* 各要素の基本スタイル */
+.existence-field > div {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s ease;
+}
+
+.existence-field > div:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-5px);
+}
+
+.existence-field h3 {
+    font-weight: 300;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+/* 不可能な形状 */
+.shape-void {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    position: relative;
+}
+
+.shape-void canvas {
+    filter: blur(0.5px);
+}
+
+.shape-label {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* 存在しない色 */
+.color-void {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 0 50px rgba(255, 255, 255, 0.1),
+        inset 0 0 50px rgba(255, 255, 255, 0.1);
+}
+
+.color-label {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+#colorName {
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* 無音の騒音 */
+.void-button {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+}
+
+.void-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.void-icon {
+    font-size: 1.5rem;
+    display: inline-block;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 1; }
+}
+
+.sound-visualization {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    height: 100px;
+    margin-top: 1rem;
+    gap: 3px;
+}
+
+.sound-bar {
+    width: 8px;
+    background: linear-gradient(to top, transparent, rgba(255, 255, 255, 0.5));
+    animation: soundWave 1s ease-in-out infinite;
+}
+
+@keyframes soundWave {
+    0%, 100% { height: 10px; }
+    50% { height: var(--height, 50px); }
+}
+
+/* 読めない文字 */
+.unreadable-text {
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+    min-height: 100px;
+    font-family: 'Courier New', monospace;
+    line-height: 1.8;
+}
+
+.unword {
+    display: inline-block;
+    margin: 0 0.2em;
+    filter: blur(0.5px);
+    transition: all 0.3s ease;
+}
+
+.unword:hover {
+    filter: blur(2px);
+    transform: rotate(180deg);
+}
+
+/* 存在しない時計 */
+.void-clock {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    position: relative;
+}
+
+.hour-hand,
+.minute-hand,
+.no-hand {
+    position: absolute;
+    left: 50%;
+    bottom: 50%;
+    transform-origin: center bottom;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.hour-hand {
+    width: 4px;
+    height: 40px;
+    margin-left: -2px;
+}
+
+.minute-hand {
+    width: 2px;
+    height: 60px;
+    margin-left: -1px;
+}
+
+.no-hand {
+    width: 1px;
+    height: 70px;
+    margin-left: -0.5px;
+    background: rgba(255, 0, 0, 0.5);
+    filter: blur(1px);
+}
+
+.time-label {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+#voidTime {
+    font-family: 'Courier New', monospace;
+    font-size: 1.2rem;
+    letter-spacing: 0.2em;
+}
+
+/* 忘れられた記憶 */
+.memory-fragments {
+    min-height: 100px;
+    margin: 1rem 0;
+}
+
+.memory-fragment {
+    padding: 0.8rem;
+    margin: 0.5rem 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 3px solid rgba(255, 255, 255, 0.3);
+    font-style: italic;
+    transition: all 0.5s ease;
+}
+
+.remember-button {
+    display: block;
+    margin: 0 auto;
+    padding: 0.8rem 1.5rem;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.remember-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* 影のパラドックス */
+.object-without-shadow,
+.shadow-without-object {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    transition: transform 0.1s ease;
+}
+
+.object-without-shadow {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    top: 50%;
+    left: 30%;
+    transform: translate(-50%, -50%);
+}
+
+.shadow-without-object {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    top: 60%;
+    left: 70%;
+    transform: translate(-50%, -50%) skew(20deg, 0);
+    filter: blur(5px);
+}
+
+.shadow-label {
+    position: absolute;
+    bottom: 1rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+/* 存在しない空間 */
+.spatial-paradox {
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1000px;
+}
+
+.inside-outside {
+    width: 120px;
+    height: 120px;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        rgba(255, 255, 255, 0.2) 90deg,
+        transparent 180deg,
+        rgba(255, 255, 255, 0.2) 270deg,
+        transparent 360deg
+    );
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    position: relative;
+    transform-style: preserve-3d;
+}
+
+.inside-outside::before {
+    content: '';
+    position: absolute;
+    inset: 20%;
+    background: inherit;
+    border: inherit;
+    border-radius: inherit;
+    transform: translateZ(-50px);
+}
+
+/* フッター */
+.absent-footer {
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.existence-counter {
+    font-size: 2rem;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.manifest-button {
+    margin-top: 1rem;
+    padding: 1rem 3rem;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    cursor: pointer;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.manifest-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
+}
+
+/* 存在しない粒子 */
+.void-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.void-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    animation: floatVoid 20s infinite linear;
+}
+
+@keyframes floatVoid {
+    0% {
+        transform: translate(0, 100vh) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(100px, -100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* 存在状態のクラス */
+body.non-existent {
+    animation: fadeToVoid 2s ease-in-out;
+}
+
+@keyframes fadeToVoid {
+    0%, 100% { opacity: 0.3; filter: blur(0); }
+    50% { opacity: 0; filter: blur(10px); }
+}
+
+body.fully-existent {
+    animation: manifestation 2s ease-in-out;
+}
+
+@keyframes manifestation {
+    0% { filter: brightness(1) contrast(1); }
+    50% { filter: brightness(2) contrast(2); }
+    100% { filter: brightness(1) contrast(1); }
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+    .void-container {
+        padding: 1rem;
+    }
+    
+    .absent-title {
+        font-size: 2rem;
+    }
+    
+    .existence-field {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .existence-field > div {
+        padding: 1.5rem;
+    }
+}
+
+/* タッチデバイス対応 */
+@media (hover: none) {
+    .existence-field > div:hover {
+        transform: none;
+    }
+}

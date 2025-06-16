@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>存在しないものの存在</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="void-container">
+        <header class="non-header">
+            <h1 class="absent-title">ここには何もありません</h1>
+            <p class="missing-subtitle">でも、あなたには見えているはずです</p>
+        </header>
+        
+        <main class="existence-field">
+            <!-- 存在しない形 -->
+            <div class="non-existent-shape" id="impossibleShape">
+                <div class="shape-void"></div>
+                <p class="shape-label">不可能な形状</p>
+            </div>
+            
+            <!-- 存在しない色 -->
+            <div class="non-existent-color" id="impossibleColor">
+                <div class="color-void"></div>
+                <p class="color-label">存在しない色: <span id="colorName">虚色</span></p>
+            </div>
+            
+            <!-- 存在しない音 -->
+            <div class="non-existent-sound" id="silentNoise">
+                <button class="void-button" id="playVoid">
+                    <span class="void-icon">◯</span>
+                    <span>無音の騒音を聴く</span>
+                </button>
+                <div class="sound-visualization" id="soundViz"></div>
+            </div>
+            
+            <!-- 存在しない言葉 -->
+            <div class="non-existent-words" id="unwords">
+                <h3>読めない文字で書かれた詩</h3>
+                <div class="unreadable-text" id="voidPoem"></div>
+            </div>
+            
+            <!-- 存在しない時間 -->
+            <div class="non-existent-time" id="noTime">
+                <div class="void-clock" id="voidClock">
+                    <div class="hour-hand"></div>
+                    <div class="minute-hand"></div>
+                    <div class="no-hand"></div>
+                </div>
+                <p class="time-label">存在しない時刻: <span id="voidTime">∅:∅∅</span></p>
+            </div>
+            
+            <!-- 存在しない記憶 -->
+            <div class="non-existent-memory" id="forgottenMemory">
+                <h3>あなたが忘れた記憶</h3>
+                <div class="memory-fragments" id="memoryContainer"></div>
+                <button class="remember-button" id="rememberVoid">思い出せないものを思い出す</button>
+            </div>
+            
+            <!-- 存在しない影 -->
+            <div class="non-existent-shadow" id="shadowless">
+                <div class="object-without-shadow"></div>
+                <div class="shadow-without-object"></div>
+                <p class="shadow-label">影のない物体と物体のない影</p>
+            </div>
+            
+            <!-- 存在しない空間 -->
+            <div class="non-existent-space" id="voidSpace">
+                <div class="spatial-paradox">
+                    <div class="inside-outside"></div>
+                    <p>内側でも外側でもない場所</p>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="absent-footer">
+            <p>このページは <span class="existence-counter" id="existenceLevel">0</span>% 存在しています</p>
+            <button class="manifest-button" id="manifestButton">存在させる / 消滅させる</button>
+        </footer>
+        
+        <!-- 存在しない粒子 -->
+        <div class="void-particles" id="particles"></div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
