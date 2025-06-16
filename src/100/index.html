@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>100 Days Complete! - Interactive Journey Showcase</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="loading" class="loading-screen">
+        <div class="loading-content">
+            <h2>Loading 100 Days of Code...</h2>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <span class="progress-text">0%</span>
+        </div>
+    </div>
+
+    <div id="celebration" class="celebration-overlay">
+        <canvas id="confetti"></canvas>
+        <div class="celebration-content">
+            <h1 class="celebration-title">🎉 100 Days Complete! 🎉</h1>
+            <p class="celebration-subtitle">A Journey Through Code</p>
+            <button class="explore-btn" onclick="startExploring()">Explore the Journey</button>
+        </div>
+    </div>
+
+    <header class="main-header">
+        <h1>100 Days of Code Challenge</h1>
+        <div class="stats-summary">
+            <div class="stat-item">
+                <span class="stat-number">100</span>
+                <span class="stat-label">Projects</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="total-lines">0</span>
+                <span class="stat-label">Lines of Code</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="total-files">0</span>
+                <span class="stat-label">Files Created</span>
+            </div>
+        </div>
+    </header>
+
+    <nav class="filter-nav">
+        <button class="filter-btn active" data-filter="all">All Projects</button>
+        <button class="filter-btn" data-filter="games">Games</button>
+        <button class="filter-btn" data-filter="tools">Tools</button>
+        <button class="filter-btn" data-filter="art">Art & Visuals</button>
+        <button class="filter-btn" data-filter="ai">AI & ML</button>
+        <button class="filter-btn" data-filter="experimental">Experimental</button>
+    </nav>
+
+    <div class="view-controls">
+        <button class="view-btn active" data-view="gallery">Gallery</button>
+        <button class="view-btn" data-view="timeline">Timeline</button>
+        <button class="view-btn" data-view="stats">Statistics</button>
+    </div>
+
+    <main id="main-content" class="main-content">
+        <div id="gallery-view" class="view-container active">
+            <div class="projects-grid" id="projects-grid"></div>
+        </div>
+
+        <div id="timeline-view" class="view-container">
+            <div class="timeline" id="timeline"></div>
+        </div>
+
+        <div id="stats-view" class="view-container">
+            <div class="stats-container">
+                <canvas id="project-chart"></canvas>
+                <div class="tech-stats" id="tech-stats"></div>
+                <div class="achievement-grid" id="achievements"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="project-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <iframe id="project-iframe" frameborder="0"></iframe>
+            <div class="modal-info">
+                <h3 id="modal-title"></h3>
+                <p id="modal-description"></p>
+                <a id="modal-link" target="_blank" class="project-link">Open in New Tab</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <p>100 Days of Code Challenge - Completed with AI Assistance</p>
+        <div class="social-links">
+            <a href="#" class="share-btn" onclick="shareJourney()">Share Journey</a>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
