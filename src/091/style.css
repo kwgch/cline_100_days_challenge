@@ -1,0 +1,404 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #fafafa;
+    color: #333;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* わずかに中心からずれたコンテナ */
+.perfectly-imperfect-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    /* 0.5pxだけ左にずれている */
+    transform: translateX(-0.5px);
+}
+
+/* ほぼ中央揃えのヘッダー */
+.almost-centered {
+    text-align: center;
+    margin-bottom: 3rem;
+    /* 1度だけ傾いている */
+    transform: rotate(-0.1deg);
+}
+
+.perfect-title {
+    font-size: 3rem;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.05em;
+}
+
+.imperfect {
+    font-weight: 700;
+    /* わずかにサイズが違う */
+    font-size: 3.02rem;
+    color: #e74c3c;
+}
+
+.subtitle {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* ギャラリー */
+.imperfection-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.imperfect-item {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    /* わずかに異なる影 */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1),
+                0 2.1px 10px rgba(0, 0, 0, 0.05);
+}
+
+.imperfect-item h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 400;
+}
+
+/* 完璧な円 */
+.shape-canvas {
+    display: block;
+    margin: 0 auto 1rem;
+}
+
+.perfection-meter {
+    position: relative;
+    height: 8px;
+    background: #ecf0f1;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.meter-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #2ecc71, #27ae60);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.meter-label {
+    display: block;
+    text-align: center;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* 完璧なグリッド */
+.perfect-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+    margin: 0 auto 1rem;
+    width: 200px;
+    cursor: pointer;
+}
+
+.grid-cell {
+    width: 100%;
+    aspect-ratio: 1;
+    background: #333;
+    transition: all 0.3s ease;
+}
+
+.grid-cell:hover {
+    background: #555;
+}
+
+.imperfect-cell {
+    /* 視覚的には分からないが、確かにずれている */
+}
+
+.imperfection-note {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #999;
+    font-style: italic;
+}
+
+/* 完璧なグラデーション */
+.perfect-gradient {
+    height: 100px;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    position: relative;
+}
+
+.perfect-gradient.highlight-flaw::after {
+    content: '↑ ここ！';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    animation: blink 0.5s ease 3;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* ボタン */
+.find-flaw,
+.perfect-button {
+    display: block;
+    margin: 0 auto;
+    padding: 0.5rem 1.5rem;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.find-flaw:hover,
+.perfect-button:hover {
+    background: #2980b9;
+    /* ホバー時に0.5px上がる */
+    transform: translateY(-0.5px);
+}
+
+/* 完璧なパターン */
+.perfect-pattern {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 1px;
+    margin: 0 auto 1rem;
+    width: 200px;
+    background: #ecf0f1;
+    padding: 1px;
+}
+
+.pattern-dot {
+    width: 100%;
+    aspect-ratio: 1;
+    transition: all 0.2s ease;
+}
+
+.pattern-dot.black {
+    background: #333;
+}
+
+.pattern-dot.white {
+    background: white;
+}
+
+.pattern-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.pattern-controls button {
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+    background: #95a5a6;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pattern-controls button:hover {
+    background: #7f8c8d;
+}
+
+/* リズムビジュアライザー */
+.rhythm-visualizer {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.beat-indicator {
+    width: 30px;
+    height: 30px;
+    background: #ecf0f1;
+    border-radius: 50%;
+    transition: all 0.1s ease;
+}
+
+.beat-indicator.active {
+    background: #e74c3c;
+    transform: scale(1.2);
+    box-shadow: 0 0 20px rgba(231, 76, 60, 0.5);
+}
+
+.rhythm-status {
+    text-align: center;
+    color: #666;
+}
+
+/* 対称性テスト */
+.symmetry-test {
+    margin-bottom: 1rem;
+}
+
+.symmetry-test canvas {
+    display: block;
+    margin: 0 auto;
+    border: 1px solid #ecf0f1;
+}
+
+input[type="range"] {
+    width: 100%;
+    margin: 1rem 0 0.5rem;
+}
+
+/* 色彩調和 */
+.color-harmony {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-bottom: 1rem;
+}
+
+.color-block {
+    width: 50px;
+    height: 50px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.color-block:hover {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.harmony-score {
+    text-align: center;
+    color: #666;
+}
+
+/* タイポグラフィ */
+.perfect-text {
+    font-size: 16px;
+    line-height: 1.8;
+    text-align: justify;
+    color: #555;
+}
+
+/* フッター */
+.imperfectly-aligned {
+    text-align: center;
+    padding: 3rem 0;
+    /* 0.2度だけ傾いている */
+    transform: rotate(0.2deg);
+}
+
+.perfection-calculator {
+    margin-bottom: 2rem;
+}
+
+.perfection-calculator h3 {
+    font-weight: 400;
+    margin-bottom: 1rem;
+}
+
+.total-perfection {
+    font-size: 3rem;
+    font-weight: 100;
+    color: #2ecc71;
+}
+
+.perfection-graph {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 5px;
+    height: 100px;
+    margin: 1rem auto;
+    max-width: 400px;
+}
+
+.graph-bar {
+    flex: 1;
+    background: linear-gradient(to top, #3498db, #2980b9);
+    transition: height 0.5s ease;
+    border-radius: 2px 2px 0 0;
+}
+
+.perfect-button {
+    font-size: 1.1rem;
+    padding: 0.8rem 2rem;
+    margin-bottom: 1rem;
+}
+
+.disclaimer {
+    font-size: 0.85rem;
+    color: #999;
+    font-style: italic;
+}
+
+/* 完璧すぎる状態 */
+body.too-perfect {
+    filter: grayscale(100%) contrast(0.8);
+    transition: filter 1s ease;
+}
+
+body.too-perfect * {
+    border-radius: 0 !important;
+    transform: none !important;
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+    .perfectly-imperfect-container {
+        padding: 1rem;
+    }
+    
+    .perfect-title {
+        font-size: 2rem;
+    }
+    
+    .imperfect {
+        font-size: 2.01rem;
+    }
+    
+    .imperfection-gallery {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .imperfect-item {
+        padding: 1.5rem;
+    }
+}
+
+/* 微妙なアニメーション */
+@keyframes almostStill {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-0.5px); }
+}
+
+.perfectly-imperfect-container {
+    animation: almostStill 10s ease-in-out infinite;
+}

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>完璧に不完全</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="perfectly-imperfect-container">
+        <header class="almost-centered">
+            <h1 class="perfect-title">完璧に<span class="imperfect">不完全</span></h1>
+            <p class="subtitle">99.9% 完璧、0.1% 不完全、100% 美しい</p>
+        </header>
+        
+        <main class="imperfection-gallery">
+            <!-- 完璧な円（でも完璧じゃない） -->
+            <section class="imperfect-item">
+                <h2>完璧な円</h2>
+                <canvas id="perfectCircle" class="shape-canvas"></canvas>
+                <div class="perfection-meter">
+                    <div class="meter-fill" id="circlePerfection"></div>
+                    <span class="meter-label">完璧度: <span id="circlePercent">99.7</span>%</span>
+                </div>
+            </section>
+            
+            <!-- 完璧なグリッド（1ピクセルずれ） -->
+            <section class="imperfect-item">
+                <h2>整列したグリッド</h2>
+                <div class="perfect-grid" id="gridContainer"></div>
+                <p class="imperfection-note">※1つだけ違います</p>
+            </section>
+            
+            <!-- 完璧なグラデーション（微妙な段差） -->
+            <section class="imperfect-item">
+                <h2>滑らかなグラデーション</h2>
+                <div class="perfect-gradient" id="gradientBox"></div>
+                <button class="find-flaw" data-target="gradient">欠陥を見つける</button>
+            </section>
+            
+            <!-- 完璧なパターン（規則性の乱れ） -->
+            <section class="imperfect-item">
+                <h2>規則的なパターン</h2>
+                <div class="perfect-pattern" id="patternContainer"></div>
+                <div class="pattern-controls">
+                    <button id="increaseOrder">秩序 +</button>
+                    <button id="increaseChaos">カオス +</button>
+                </div>
+            </section>
+            
+            <!-- 完璧なタイミング（微妙にずれる） -->
+            <section class="imperfect-item">
+                <h2>完璧なリズム</h2>
+                <div class="rhythm-visualizer" id="rhythmViz">
+                    <div class="beat-indicator"></div>
+                    <div class="beat-indicator"></div>
+                    <div class="beat-indicator"></div>
+                    <div class="beat-indicator"></div>
+                </div>
+                <p class="rhythm-status">BPM: <span id="bpmDisplay">120.0</span></p>
+            </section>
+            
+            <!-- 完璧な対称（わずかな非対称） -->
+            <section class="imperfect-item">
+                <h2>完全な対称性</h2>
+                <div class="symmetry-test" id="symmetryCanvas"></div>
+                <input type="range" id="symmetrySlider" min="0" max="100" value="99">
+                <label>対称度: <span id="symmetryValue">99</span>%</label>
+            </section>
+            
+            <!-- 完璧な色のバランス（微妙な色差） -->
+            <section class="imperfect-item">
+                <h2>完璧な色彩調和</h2>
+                <div class="color-harmony" id="colorHarmony">
+                    <div class="color-block"></div>
+                    <div class="color-block"></div>
+                    <div class="color-block"></div>
+                    <div class="color-block"></div>
+                </div>
+                <p class="harmony-score">調和度: <span id="harmonyScore">99.8</span>%</p>
+            </section>
+            
+            <!-- 完璧なフォント（1文字だけ違う） -->
+            <section class="imperfect-item">
+                <h2>統一されたタイポグラフィ</h2>
+                <p class="perfect-text" id="typographyTest">
+                    すべての文字が完璧に統一されています。
+                    フォントサイズ、太さ、間隔、すべてが一致しています。
+                    でも、よく見ると...
+                </p>
+            </section>
+        </main>
+        
+        <footer class="imperfectly-aligned">
+            <div class="perfection-calculator">
+                <h3>総合完璧度</h3>
+                <div class="total-perfection">
+                    <span id="totalPercent">99.4</span>%
+                    <div class="perfection-graph" id="perfectionGraph"></div>
+                </div>
+            </div>
+            <button class="perfect-button" id="makePerfect">完璧にする</button>
+            <p class="disclaimer">※完璧にすると美しさが失われます</p>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
