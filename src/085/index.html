@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>見つめる</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="score-display">
+            <span id="score">0</span>
+            <div class="multiplier" id="multiplier">x1</div>
+        </div>
+        
+        <div class="main-area">
+            <div class="eye-container" id="eyeContainer">
+                <div class="eye" id="mainEye">
+                    <div class="iris">
+                        <div class="pupil"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="message" id="message"></div>
+        </div>
+        
+        <div class="status-bar">
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+                <span class="progress-text">凝視度</span>
+            </div>
+            <div class="timer" id="timer">00:00</div>
+        </div>
+        
+        <div class="floating-eyes" id="floatingEyes"></div>
+        
+        <!-- 不気味な効果用のオーバーレイ -->
+        <div class="glitch-overlay"></div>
+        <div class="static-noise"></div>
+    </div>
+    
+    <audio id="heartbeat" loop>
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHGu88+OZURE"/>
+    </audio>
+    
+    <script src="script.js"></script>
+</body>
+</html>

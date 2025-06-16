@@ -1,0 +1,343 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background: #000;
+    color: #fff;
+    overflow: hidden;
+    height: 100vh;
+    position: relative;
+}
+
+.game-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* スコア表示 */
+.score-display {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 10;
+}
+
+#score {
+    font-size: 48px;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    transition: all 0.3s;
+}
+
+#score.pulse {
+    transform: scale(1.2);
+    text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+}
+
+.multiplier {
+    font-size: 24px;
+    color: #666;
+    margin-top: 5px;
+    transition: all 0.3s;
+}
+
+.multiplier.active {
+    color: #ff0000;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+}
+
+/* メインエリア */
+.main-area {
+    position: relative;
+    z-index: 5;
+}
+
+.eye-container {
+    width: 200px;
+    height: 200px;
+    position: relative;
+    cursor: pointer;
+}
+
+.eye {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    border-radius: 50% 0;
+    transform: rotate(45deg);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 50px rgba(255, 255, 255, 0.3);
+    transition: all 0.3s;
+}
+
+.eye.staring {
+    box-shadow: 0 0 100px rgba(255, 0, 0, 0.6);
+    transform: rotate(45deg) scale(1.1);
+}
+
+.eye.blink {
+    height: 20%;
+}
+
+.iris {
+    width: 50%;
+    height: 50%;
+    background: #333;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s;
+}
+
+.pupil {
+    width: 50%;
+    height: 50%;
+    background: #000;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* メッセージ */
+.message {
+    position: absolute;
+    top: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.5s;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* ステータスバー */
+.status-bar {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    max-width: 400px;
+    z-index: 10;
+}
+
+.progress-container {
+    width: 100%;
+    height: 20px;
+    background: #222;
+    border: 1px solid #444;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #666;
+    transition: all 0.3s;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    color: #ccc;
+}
+
+.timer {
+    text-align: center;
+    font-size: 18px;
+    color: #999;
+}
+
+/* 浮遊する目 */
+.floating-eyes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.floating-eye {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: #fff;
+    border-radius: 50% 0;
+    transform: rotate(45deg);
+    opacity: 0.3;
+    animation: float 10s infinite ease-in-out;
+    transition: opacity 1s;
+}
+
+.floating-eye .iris {
+    width: 50%;
+    height: 50%;
+    background: #333;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.floating-eye .pupil {
+    width: 50%;
+    height: 50%;
+    background: #000;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* アニメーション */
+@keyframes float {
+    0%, 100% {
+        transform: rotate(45deg) translateY(0);
+    }
+    50% {
+        transform: rotate(45deg) translateY(-20px);
+    }
+}
+
+/* グリッチ効果 */
+.glitch-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 20;
+    opacity: 0;
+}
+
+body.glitch .glitch-overlay {
+    opacity: 1;
+    background: linear-gradient(
+        transparent 0%,
+        rgba(255, 0, 0, 0.1) 10%,
+        transparent 20%,
+        rgba(0, 255, 0, 0.1) 30%,
+        transparent 40%,
+        rgba(0, 0, 255, 0.1) 50%,
+        transparent 60%
+    );
+    animation: glitch-move 0.1s infinite;
+}
+
+@keyframes glitch-move {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    50% { transform: translateX(2px); }
+    75% { transform: translateX(-1px); }
+    100% { transform: translateX(0); }
+}
+
+/* ノイズ効果 */
+.static-noise {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 1;
+}
+
+body.creepy-level-1 .static-noise {
+    opacity: 0.02;
+    background-image: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 2px,
+        rgba(255, 255, 255, 0.1) 2px,
+        rgba(255, 255, 255, 0.1) 4px
+    );
+    animation: noise 0.2s infinite;
+}
+
+body.creepy-level-2 {
+    animation: shake 0.1s infinite;
+}
+
+body.creepy-level-3 {
+    filter: contrast(1.2) brightness(0.8);
+}
+
+body.creepy-level-3 .static-noise {
+    opacity: 0.05;
+}
+
+@keyframes noise {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-5px); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-1px); }
+    75% { transform: translateX(1px); }
+}
+
+/* モバイル対応 */
+@media (max-width: 600px) {
+    #score {
+        font-size: 36px;
+    }
+    
+    .multiplier {
+        font-size: 20px;
+    }
+    
+    .eye-container {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .message {
+        font-size: 18px;
+        top: -60px;
+    }
+    
+    .floating-eye {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* タッチハイライト無効化 */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* カーソル */
+body {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="8" fill="red" opacity="0.5"/></svg>') 16 16, auto;
+}
