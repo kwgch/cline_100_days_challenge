@@ -1,0 +1,464 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.invisible-color-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* ヘッダー */
+.color-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.color-header h1 {
+    font-size: 3rem;
+    font-weight: 200;
+    letter-spacing: 0.2em;
+    margin-bottom: 1rem;
+    background: linear-gradient(90deg, 
+        transparent 0%,
+        rgba(255, 255, 255, 0.8) 25%,
+        rgba(255, 255, 255, 0.8) 75%,
+        transparent 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.2rem;
+}
+
+/* メインセクション */
+.color-exploration {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 3rem;
+    margin-bottom: 4rem;
+}
+
+.invisible-color-section {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+}
+
+.invisible-color-section:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.invisible-color-section h2 {
+    font-size: 1.5rem;
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* UV スペクトラム */
+.uv-spectrum {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+#uvCanvas {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+}
+
+.spectrum-label {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.perception-filter {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.filter-btn {
+    padding: 0.5rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+/* 赤外線ビジョン */
+.heat-map {
+    width: 300px;
+    height: 200px;
+    margin: 0 auto 1rem;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 2px;
+    background: #000;
+    padding: 2px;
+    border-radius: 5px;
+}
+
+.heat-cell {
+    aspect-ratio: 1;
+    transition: all 0.3s ease;
+}
+
+input[type="range"] {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+/* 不可能な色 */
+.impossible-colors {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.color-pair {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.reddish-green {
+    background: linear-gradient(90deg, red 0%, red 50%, green 50%, green 100%);
+}
+
+.yellowish-blue {
+    background: linear-gradient(90deg, yellow 0%, yellow 50%, blue 50%, blue 100%);
+}
+
+#perceiveImpossible {
+    display: block;
+    margin: 1rem auto 0;
+    padding: 0.5rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    border-radius: 25px;
+    cursor: pointer;
+}
+
+/* 残像 */
+.afterimage-generator {
+    position: relative;
+    width: 300px;
+    height: 200px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 5px;
+}
+
+.stare-point {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.afterimage-canvas {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: none;
+    border-radius: 5px;
+    transition: background-color 0.5s ease;
+}
+
+.instruction {
+    text-align: center;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 1rem;
+}
+
+/* 四色覚 */
+#tetraCanvas {
+    display: block;
+    margin: 0 auto;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+}
+
+.color-dimension-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.dimension-btn {
+    padding: 0.3rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dimension-btn.active {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* 共感覚 */
+.synesthesia {
+    text-align: center;
+}
+
+.sound-color-field {
+    width: 250px;
+    height: 150px;
+    margin: 0 auto 1rem;
+    border-radius: 10px;
+    background: #333;
+    transition: all 0.5s ease;
+}
+
+.sound-color-field.vibrating {
+    animation: vibrate 0.1s linear infinite;
+}
+
+@keyframes vibrate {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-1px); }
+    75% { transform: translateX(1px); }
+}
+
+.frequency-display {
+    font-family: 'Courier New', monospace;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 1rem;
+}
+
+#playSoundColor {
+    padding: 0.5rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    border-radius: 25px;
+    cursor: pointer;
+}
+
+/* 感情の色 */
+.emotion-field {
+    width: 250px;
+    height: 150px;
+    margin: 0 auto 1rem;
+    border-radius: 10px;
+    transition: all 0.5s ease;
+}
+
+.emotion-field.joy {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+}
+
+.emotion-field.sadness {
+    box-shadow: 0 0 30px rgba(70, 130, 180, 0.5);
+}
+
+.emotion-field.anger {
+    box-shadow: 0 0 30px rgba(220, 20, 60, 0.5);
+}
+
+.emotion-field.fear {
+    box-shadow: 0 0 30px rgba(47, 79, 79, 0.5);
+}
+
+.emotion-field.love {
+    box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+}
+
+.emotion-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.emotion-btn {
+    padding: 0.3rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.emotion-btn:hover,
+.emotion-btn.active {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+/* 暗黒色 */
+.vantablack {
+    text-align: center;
+}
+
+.darkness-level {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 1rem;
+    background: #000;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.5s ease;
+}
+
+.darkness-level.absolute-darkness {
+    animation: voidPulse 2s ease-in-out infinite;
+}
+
+@keyframes voidPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+}
+
+#deeperDark {
+    padding: 0.5rem 1.5rem;
+    background: #000;
+    border: 1px solid #333;
+    color: #fff;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#deeperDark:hover:not(:disabled) {
+    border-color: #666;
+}
+
+#deeperDark:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* カラーミキサー */
+.color-footer {
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.color-mixer h3 {
+    font-size: 1.5rem;
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+}
+
+.mixer-display {
+    width: 300px;
+    height: 300px;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.5s ease;
+}
+
+.mixer-display.mixing {
+    animation: mixRotate 2s ease-in-out;
+}
+
+@keyframes mixRotate {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+#mixInvisible {
+    padding: 0.8rem 2rem;
+    background: linear-gradient(45deg, 
+        rgba(255, 0, 255, 0.3),
+        rgba(0, 255, 255, 0.3)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+#mixInvisible:hover {
+    background: linear-gradient(45deg, 
+        rgba(255, 0, 255, 0.5),
+        rgba(0, 255, 255, 0.5)
+    );
+    transform: scale(1.05);
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+    .invisible-color-container {
+        padding: 1rem;
+    }
+    
+    .color-header h1 {
+        font-size: 2rem;
+    }
+    
+    .color-exploration {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .invisible-color-section {
+        padding: 1.5rem;
+    }
+    
+    .heat-map,
+    #uvCanvas,
+    #tetraCanvas,
+    .afterimage-generator,
+    .sound-color-field,
+    .emotion-field,
+    .mixer-display {
+        max-width: 100%;
+        width: auto;
+    }
+}

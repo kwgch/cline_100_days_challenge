@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>見えない色</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="invisible-color-container">
+        <header class="color-header">
+            <h1>見えない色を使って</h1>
+            <p class="subtitle">知覚の境界を超えた色彩体験</p>
+        </header>
+        
+        <main class="color-exploration">
+            <!-- 紫外線色 -->
+            <section class="invisible-color-section">
+                <h2>紫外線スペクトラム</h2>
+                <div class="uv-spectrum" id="uvSpectrum">
+                    <canvas id="uvCanvas"></canvas>
+                    <p class="spectrum-label">蜂が見ている花の色</p>
+                </div>
+                <div class="perception-filter">
+                    <button class="filter-btn" data-filter="bee">蜂の視覚</button>
+                    <button class="filter-btn" data-filter="human">人間の視覚</button>
+                </div>
+            </section>
+            
+            <!-- 赤外線色 -->
+            <section class="invisible-color-section">
+                <h2>赤外線ビジョン</h2>
+                <div class="ir-vision" id="irVision">
+                    <div class="heat-map"></div>
+                    <p class="spectrum-label">蛇が感じる熱の色</p>
+                </div>
+                <input type="range" id="heatSensitivity" min="0" max="100" value="50">
+                <label>熱感度</label>
+            </section>
+            
+            <!-- 不可能な色 -->
+            <section class="invisible-color-section">
+                <h2>不可能な色</h2>
+                <div class="impossible-colors" id="impossibleColors">
+                    <div class="color-pair reddish-green"></div>
+                    <div class="color-pair yellowish-blue"></div>
+                    <p class="spectrum-label">同時に知覚できない色の組み合わせ</p>
+                </div>
+                <button id="perceiveImpossible">知覚を試みる</button>
+            </section>
+            
+            <!-- 補色残像 -->
+            <section class="invisible-color-section">
+                <h2>残像の中の色</h2>
+                <div class="afterimage-generator" id="afterimageGen">
+                    <div class="stare-point" id="starePoint"></div>
+                    <div class="afterimage-canvas" id="afterimageCanvas"></div>
+                </div>
+                <p class="instruction">中心を30秒見つめてから白い部分を見る</p>
+            </section>
+            
+            <!-- 四色覚 -->
+            <section class="invisible-color-section">
+                <h2>四色覚の世界</h2>
+                <div class="tetrachromat" id="tetrachromat">
+                    <canvas id="tetraCanvas"></canvas>
+                    <p class="spectrum-label">通常の3原色＋第4の原色</p>
+                </div>
+                <div class="color-dimension-control">
+                    <span>次元: </span>
+                    <button class="dimension-btn" data-dim="3">3D</button>
+                    <button class="dimension-btn active" data-dim="4">4D</button>
+                </div>
+            </section>
+            
+            <!-- 音の色 -->
+            <section class="invisible-color-section">
+                <h2>共感覚：音の色</h2>
+                <div class="synesthesia" id="synesthesia">
+                    <div class="sound-color-field"></div>
+                    <div class="frequency-display">
+                        <span id="frequency">440</span> Hz
+                    </div>
+                </div>
+                <button id="playSoundColor">音色を見る</button>
+            </section>
+            
+            <!-- 感情の色 -->
+            <section class="invisible-color-section">
+                <h2>感情の色彩</h2>
+                <div class="emotion-colors" id="emotionColors">
+                    <div class="emotion-field"></div>
+                    <div class="emotion-selector">
+                        <button class="emotion-btn" data-emotion="joy">喜び</button>
+                        <button class="emotion-btn" data-emotion="sadness">悲しみ</button>
+                        <button class="emotion-btn" data-emotion="anger">怒り</button>
+                        <button class="emotion-btn" data-emotion="fear">恐れ</button>
+                        <button class="emotion-btn" data-emotion="love">愛</button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 暗黒色 -->
+            <section class="invisible-color-section">
+                <h2>暗黒より暗い色</h2>
+                <div class="vantablack" id="vantablack">
+                    <div class="darkness-level" id="darknessLevel"></div>
+                    <p class="spectrum-label">光を99.965%吸収する色</p>
+                </div>
+                <button id="deeperDark">さらに深く</button>
+            </section>
+        </main>
+        
+        <footer class="color-footer">
+            <div class="color-mixer">
+                <h3>見えない色を混ぜる</h3>
+                <div class="mixer-display" id="mixerDisplay"></div>
+                <button id="mixInvisible">混色</button>
+            </div>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
