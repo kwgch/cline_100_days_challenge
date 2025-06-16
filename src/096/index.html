@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dream Logic Circuit / 夢論理回路 / 梦逻辑电路</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+            touch-action: none;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        canvas {
+            display: block;
+            cursor: crosshair;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 12px;
+            background: rgba(10, 0, 20, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            pointer-events: none;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(150, 100, 255, 0.3);
+            max-width: 350px;
+        }
+        #dream-symbols {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.1);
+            font-size: 48px;
+            font-family: Georgia, serif;
+            pointer-events: none;
+            text-align: center;
+            width: 80%;
+            text-shadow: 0 0 20px rgba(150, 100, 255, 0.5);
+            transition: all 1s ease;
+        }
+        .control-hint {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="glCanvas"></canvas>
+    <div id="info">
+        <div><strong>Dream Logic Circuit / 夢論理回路 / 梦逻辑电路</strong></div>
+        <div>Click/Touch: Create dream node / クリック：夢ノード作成 / 点击：创建梦境节点</div>
+        <div>Drag: Form associations / ドラッグ：連想形成 / 拖动：形成关联</div>
+        <div>Hold: Dive into subconscious / 長押し：潜在意識へ / 长按：潜入潜意识</div>
+        <div class="control-hint">Explore the non-linear pathways of dreams / 夢の非線形経路を探索 / 探索梦境的非线性路径</div>
+    </div>
+    <div id="dream-symbols"></div>
+
+    <script>
+        // 夢のシンボル辞書（多言語対応）
+        const dreamSymbols = [
+            // Universal symbols
+            "∞", "◯", "△", "☾", "☆", "♾", "⚛", "✧", "◈", "⬡",
+            // Japanese
+            "水", "火", "風", "土", "光", "影", "鏡", "扉", "鍵", "橋",
+            "飛翔", "落下", "迷路", "海", "森", "雲", "星", "月", "太陽", "虹",
+            // English
+            "Water", "Fire", "Wind", "Earth", "Light", "Shadow", "Mirror", "Door", "Key", "Bridge",
+            "Flight", "Fall", "Maze", "Ocean", "Forest", "Cloud", "Star", "Moon", "Sun", "Rainbow",
+            // Chinese
+            "水", "火", "風", "土", "光", "影", "鏡", "門", "鑰", "橋",
+            // Korean
+            "물", "불", "바람", "흙", "빛", "그림자", "거울", "문", "열쇠", "다리",
+            // Arabic
+            "ماء", "نار", "ريح", "أرض", "ضوء", "ظل", "مرآة", "باب", "مفتاح", "جسر",
+            // Hindi
+            "पानी", "आग", "हवा", "धरती", "प्रकाश", "छाया", "दर्पण", "द्वार", "चाबी", "पुल",
+            // Spanish
+            "Agua", "Fuego", "Viento", "Tierra", "Luz", "Sombra", "Espejo", "Puerta", "Llave", "Puente",
+            // French
+            "Eau", "Feu", "Vent", "Terre", "Lumière", "Ombre", "Miroir", "Porte", "Clé", "Pont",
+            // German
+            "Wasser", "Feuer", "Wind", "Erde", "Licht", "Schatten", "Spiegel", "Tür", "Schlüssel", "Brücke",
+            // Russian
+            "Вода", "Огонь", "Ветер", "Земля", "Свет", "Тень", "Зеркало", "Дверь", "Ключ", "Мост"
+        ];
+
+        const dreamConcepts = [
+            // English
+            "memory", "desire", "fear", "joy", "loss", "discovery",
+            "transformation", "connection", "isolation", "freedom",
+            "past", "future", "self", "other", "unknown", "familiar",
+            // Japanese
+            "記憶", "欲望", "恐怖", "喜び", "喪失", "発見",
+            "変容", "繋がり", "孤独", "自由",
+            "過去", "未来", "自己", "他者", "未知", "親しみ",
+            // Spanish
+            "memoria", "deseo", "miedo", "alegría", "pérdida", "descubrimiento",
+            "transformación", "conexión", "aislamiento", "libertad",
+            // French
+            "mémoire", "désir", "peur", "joie", "perte", "découverte",
+            "transformation", "connexion", "isolement", "liberté",
+            // German
+            "Erinnerung", "Verlangen", "Angst", "Freude", "Verlust", "Entdeckung",
+            "Verwandlung", "Verbindung", "Isolation", "Freiheit"
+        ];
+
+        // 頂点シェーダー
+        const vertexShaderSource = `
+            precision highp float;
+            
+            attribute vec2 a_position;
+            
+            void main() {
+                gl_Position = vec4(a_position, 0.0, 1.0);
+            }
+        `;
+
+        // フラグメントシェーダー
+        const fragmentShaderSource = `
+            precision highp float;
+            
+            uniform vec2 u_resolution;
+            uniform float u_time;
+            uniform vec2 u_nodes[50];
+            uniform float u_nodeTypes[50];
+            uniform float u_nodeActivations[50];
+            uniform int u_nodeCount;
+            uniform vec2 u_connections[100];
+            uniform float u_connectionStrengths[50];
+            uniform int u_connectionCount;
+            uniform vec2 u_mouse;
+            uniform float u_subconsciousDepth;
+            
+            #define PI 3.14159265359
+            #define TAU 6.28318530718
+            #define MAX_NODES 50
+            #define MAX_CONNECTIONS 50
+            
+            // ノイズ関数
+            float noise(vec2 st) {
+                return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+            }
+            
+            // スムーズノイズ
+            float smoothNoise(vec2 st) {
+                vec2 i = floor(st);
+                vec2 f = fract(st);
+                vec2 u = f * f * (3.0 - 2.0 * f);
+                
+                float a = noise(i);
+                float b = noise(i + vec2(1.0, 0.0));
+                float c = noise(i + vec2(0.0, 1.0));
+                float d = noise(i + vec2(1.0, 1.0));
+                
+                return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+            }
+            
+            // フラクタルブラウン運動
+            float fbm(vec2 st) {
+                float value = 0.0;
+                float amplitude = 0.5;
+                float frequency = 1.0;
+                
+                for (int i = 0; i < 5; i++) {
+                    value += amplitude * smoothNoise(st * frequency);
+                    frequency *= 2.0;
+                    amplitude *= 0.5;
+                }
+                
+                return value;
+            }
+            
+            // 夢のノード（シンボル）
+            vec3 dreamNode(vec2 pos, vec2 nodePos, float nodeType, float activation) {
+                float dist = distance(pos, nodePos);
+                
+                // ノードの核
+                float core = exp(-dist * dist * 100.0) * activation;
+                
+                // 脈動するオーラ
+                float pulse = sin(u_time * 3.0 + nodeType * TAU) * 0.5 + 0.5;
+                float aura = exp(-dist * dist * 20.0) * pulse * activation;
+                
+                // ノードタイプによる色分け
+                vec3 color;
+                if (nodeType < 0.2) {
+                    // 記憶：青紫
+                    color = vec3(0.4, 0.3, 0.8);
+                } else if (nodeType < 0.4) {
+                    // 感情：赤紫
+                    color = vec3(0.8, 0.3, 0.5);
+                } else if (nodeType < 0.6) {
+                    // 概念：緑青
+                    color = vec3(0.3, 0.8, 0.6);
+                } else if (nodeType < 0.8) {
+                    // 恐怖：深紅
+                    color = vec3(0.6, 0.1, 0.2);
+                } else {
+                    // 希望：金色
+                    color = vec3(0.9, 0.7, 0.3);
+                }
+                
+                // 夢のような歪み
+                float distortion = fbm(pos * 10.0 + vec2(u_time * 0.1)) * 0.3;
+                
+                return color * (core + aura * 0.5) * (1.0 + distortion);
+            }
+            
+            // シナプス接続
+            vec3 synapticConnection(vec2 pos, vec2 start, vec2 end, float strength) {
+                // ベジェ曲線で接続を表現
+                vec2 control = (start + end) * 0.5 + vec2(
+                    sin(u_time + length(start - end)) * 0.2,
+                    cos(u_time + length(start - end)) * 0.2
+                );
+                
+                float minDist = 1000.0;
+                
+                // ベジェ曲線上の最近点を探す
+                for (float t = 0.0; t <= 1.0; t += 0.02) {
+                    vec2 p1 = mix(start, control, t);
+                    vec2 p2 = mix(control, end, t);
+                    vec2 curvePoint = mix(p1, p2, t);
+                    
+                    float dist = distance(pos, curvePoint);
+                    minDist = min(minDist, dist);
+                }
+                
+                // 電気的インパルス
+                float impulse = sin(length(pos - start) * 20.0 - u_time * 10.0) * 0.5 + 0.5;
+                impulse *= exp(-minDist * 50.0) * strength;
+                
+                // 接続の太さと輝き
+                float connection = exp(-minDist * minDist * 500.0) * strength;
+                
+                // 思考の流れ
+                vec3 flowColor = vec3(0.6, 0.4, 0.9) * impulse;
+                vec3 baseColor = vec3(0.3, 0.2, 0.6) * connection;
+                
+                return flowColor + baseColor;
+            }
+            
+            // 集合的無意識の層
+            vec3 collectiveUnconscious(vec2 pos) {
+                // マンダラ的パターン
+                float r = length(pos);
+                float theta = atan(pos.y, pos.x);
+                
+                float mandala = 0.0;
+                for (int i = 1; i <= 8; i++) {
+                    float fi = float(i);
+                    mandala += sin(theta * fi + u_time * 0.1 * fi) * 
+                               sin(r * fi * 10.0 - u_time * 0.5) / fi;
+                }
+                
+                // 原型的シンボル
+                float archetype = fbm(pos * 3.0 + vec2(sin(u_time * 0.1), cos(u_time * 0.1)));
+                
+                // 深層からの泡
+                float bubbles = 0.0;
+                for (int i = 0; i < 5; i++) {
+                    vec2 bubblePos = vec2(
+                        sin(float(i) * 1.618 + u_time * 0.2) * 0.8,
+                        cos(float(i) * 1.618 + u_time * 0.2) * 0.8
+                    );
+                    float bubble = exp(-distance(pos, bubblePos) * 5.0);
+                    bubbles += bubble * sin(u_time * 2.0 + float(i));
+                }
+                
+                vec3 deepColor = vec3(0.1, 0.05, 0.2);
+                vec3 archetypeColor = vec3(0.2, 0.1, 0.4);
+                vec3 mandalaColor = vec3(0.3, 0.2, 0.5);
+                
+                return deepColor + archetypeColor * archetype * 0.3 + 
+                       mandalaColor * abs(mandala) * 0.1 + 
+                       vec3(0.4, 0.3, 0.6) * bubbles * 0.2;
+            }
+            
+            // 夢の境界の曖昧さ
+            vec3 dreamBoundary(vec2 pos) {
+                // 現実と夢の境界線
+                float boundary = sin(pos.x * 5.0 + sin(pos.y * 3.0 + u_time) * 2.0) * 
+                                sin(pos.y * 7.0 + cos(pos.x * 4.0 + u_time) * 2.0);
+                
+                // 境界のぼやけ
+                float blur = fbm(pos * 10.0 + vec2(u_time * 0.05));
+                
+                return vec3(0.5, 0.3, 0.7) * abs(boundary) * blur * 0.2;
+            }
+            
+            // 潜在意識への潜行
+            vec3 subconsciousDive(vec2 pos, float depth) {
+                // 深度による色の変化
+                vec3 shallowColor = vec3(0.4, 0.3, 0.6);
+                vec3 deepColor = vec3(0.1, 0.05, 0.3);
+                vec3 color = mix(shallowColor, deepColor, depth);
+                
+                // 深層での視覚的歪み
+                float distortion = fbm(pos * (5.0 + depth * 10.0) + vec2(u_time * 0.1));
+                
+                // 無意識のパターン
+                float pattern = sin(pos.x * 20.0 * (1.0 + depth) + distortion * 5.0) * 
+                               cos(pos.y * 20.0 * (1.0 + depth) + distortion * 5.0);
+                
+                return color * (0.5 + pattern * 0.5) * (1.0 - depth * 0.3);
+            }
+            
+            // 連想の波紋
+            vec3 associationRipple(vec2 pos, vec2 center, float time) {
+                float dist = distance(pos, center);
+                float ripple = sin(dist * 30.0 - time * 10.0) * exp(-dist * 3.0) * exp(-time * 2.0);
+                
+                return vec3(0.6, 0.5, 0.8) * max(0.0, ripple);
+            }
+            
+            void main() {
+                vec2 uv = (gl_FragCoord.xy - u_resolution * 0.5) / min(u_resolution.x, u_resolution.y);
+                
+                // 背景：集合的無意識
+                vec3 background = collectiveUnconscious(uv * 1.5);
+                
+                // 潜在意識への潜行効果
+                if (u_subconsciousDepth > 0.0) {
+                    background = mix(background, subconsciousDive(uv, u_subconsciousDepth), u_subconsciousDepth);
+                }
+                
+                // 夢の境界
+                vec3 boundary = dreamBoundary(uv);
+                
+                // ノードとシナプス
+                vec3 nodes = vec3(0.0);
+                vec3 connections = vec3(0.0);
+                
+                // シナプス接続の描画
+                for (int i = 0; i < MAX_CONNECTIONS; i++) {
+                    if (i >= u_connectionCount) break;
+                    
+                    vec2 start = (u_connections[i * 2] - u_resolution * 0.5) / min(u_resolution.x, u_resolution.y);
+                    vec2 end = (u_connections[i * 2 + 1] - u_resolution * 0.5) / min(u_resolution.x, u_resolution.y);
+                    
+                    connections += synapticConnection(uv, start, end, u_connectionStrengths[i]);
+                }
+                
+                // ノードの描画
+                for (int i = 0; i < MAX_NODES; i++) {
+                    if (i >= u_nodeCount) break;
+                    
+                    vec2 nodePos = (u_nodes[i] - u_resolution * 0.5) / min(u_resolution.x, u_resolution.y);
+                    nodes += dreamNode(uv, nodePos, u_nodeTypes[i], u_nodeActivations[i]);
+                }
+                
+                // マウス位置からの連想の波紋
+                vec2 mousePos = (u_mouse - u_resolution * 0.5) / min(u_resolution.x, u_resolution.y);
+                vec3 ripple = associationRipple(uv, mousePos, mod(u_time, 3.0));
+                
+                // 最終合成
+                vec3 color = background + boundary + connections * 0.8 + nodes + ripple * 0.3;
+                
+                // 夢のような後処理
+                // ビネット効果
+                float vignette = 1.0 - length(uv) * 0.5;
+                color *= vignette;
+                
+                // 色収差
+                vec2 caOffset = uv * 0.01 * length(uv);
+                color.r = color.r * 0.9 + background.r * 0.1;
+                color.b = color.b * 0.9 + boundary.b * 0.1;
+                
+                // トーンマッピング
+                color = color / (color + vec3(1.0));
+                color = pow(color, vec3(0.45));
+                
+                gl_FragColor = vec4(color, 1.0);
+            }
+        `;
+
+        // シェーダーコンパイル
+        function createShader(gl, type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error('Shader compilation error:', gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+            
+            return shader;
+        }
+
+        // プログラム作成
+        function createProgram(gl, vertexShader, fragmentShader) {
+            const program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+            
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                console.error('Program link error:', gl.getProgramInfoLog(program));
+                gl.deleteProgram(program);
+                return null;
+            }
+            
+            return program;
+        }
+
+        // 夢のノードクラス
+        class DreamNode {
+            constructor(x, y, type = Math.random()) {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.activation = 1.0;
+                this.symbol = dreamSymbols[Math.floor(Math.random() * dreamSymbols.length)];
+                this.concept = dreamConcepts[Math.floor(Math.random() * dreamConcepts.length)];
+                this.connections = new Set();
+            }
+            
+            update(deltaTime) {
+                // 活性化の減衰
+                this.activation *= 0.99;
+                
+                // ランダムな活性化
+                if (Math.random() < 0.01) {
+                    this.activation = Math.min(1.0, this.activation + 0.5);
+                }
+            }
+        }
+
+        // 接続クラス
+        class Connection {
+            constructor(startNode, endNode) {
+                this.start = startNode;
+                this.end = endNode;
+                this.strength = 1.0;
+            }
+            
+            update(deltaTime) {
+                // 接続強度の変動
+                this.strength = 0.5 + 0.5 * Math.sin(Date.now() * 0.001 + 
+                    this.start.x + this.end.y);
+            }
+        }
+
+        // メイン
+        function main() {
+            const canvas = document.getElementById('glCanvas');
+            const gl = canvas.getContext('webgl');
+            const dreamSymbolsDiv = document.getElementById('dream-symbols');
+            
+            if (!gl) {
+                alert('WebGL not supported');
+                return;
+            }
+
+            // リサイズ
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                gl.viewport(0, 0, canvas.width, canvas.height);
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // シェーダー作成
+            const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+            const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+            const program = createProgram(gl, vertexShader, fragmentShader);
+
+            // 属性とユニフォーム
+            const positionLocation = gl.getAttribLocation(program, 'a_position');
+            const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
+            const timeLocation = gl.getUniformLocation(program, 'u_time');
+            const nodesLocation = gl.getUniformLocation(program, 'u_nodes');
+            const nodeTypesLocation = gl.getUniformLocation(program, 'u_nodeTypes');
+            const nodeActivationsLocation = gl.getUniformLocation(program, 'u_nodeActivations');
+            const nodeCountLocation = gl.getUniformLocation(program, 'u_nodeCount');
+            const connectionsLocation = gl.getUniformLocation(program, 'u_connections');
+            const connectionStrengthsLocation = gl.getUniformLocation(program, 'u_connectionStrengths');
+            const connectionCountLocation = gl.getUniformLocation(program, 'u_connectionCount');
+            const mouseLocation = gl.getUniformLocation(program, 'u_mouse');
+            const subconsciousDepthLocation = gl.getUniformLocation(program, 'u_subconsciousDepth');
+
+            // バッファ
+            const positionBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+                -1, -1, 1, -1, -1, 1,
+                -1, 1, 1, -1, 1, 1,
+            ]), gl.STATIC_DRAW);
+
+            // 状態
+            const nodes = [];
+            const connections = [];
+            let mouseX = canvas.width / 2;
+            let mouseY = canvas.height / 2;
+            let isCreatingConnection = false;
+            let connectionStart = null;
+            let subconsciousDepth = 0;
+            let lastNodeCreationTime = 0;
+            const startTime = Date.now();
+
+            // 初期ノードの生成
+            for (let i = 0; i < 5; i++) {
+                const angle = (i / 5) * Math.PI * 2;
+                const radius = 200;
+                const x = canvas.width / 2 + Math.cos(angle) * radius;
+                const y = canvas.height / 2 + Math.sin(angle) * radius;
+                nodes.push(new DreamNode(x, y));
+            }
+
+            // ランダムな初期接続
+            for (let i = 0; i < 3; i++) {
+                const start = nodes[Math.floor(Math.random() * nodes.length)];
+                const end = nodes[Math.floor(Math.random() * nodes.length)];
+                if (start !== end) {
+                    connections.push(new Connection(start, end));
+                }
+            }
+
+            // イベントハンドラ
+            canvas.addEventListener('mousedown', (e) => {
+                const currentTime = Date.now();
+                
+                // 最も近いノードを探す
+                let closestNode = null;
+                let closestDist = 50;
+                
+                for (const node of nodes) {
+                    const dist = Math.hypot(e.clientX - node.x, e.clientY - node.y);
+                    if (dist < closestDist) {
+                        closestNode = node;
+                        closestDist = dist;
+                    }
+                }
+                
+                if (closestNode) {
+                    // 既存ノードから接続開始
+                    isCreatingConnection = true;
+                    connectionStart = closestNode;
+                    closestNode.activation = 1.0;
+                } else if (currentTime - lastNodeCreationTime > 300) {
+                    // 新しいノードを作成
+                    const newNode = new DreamNode(e.clientX, e.clientY);
+                    nodes.push(newNode);
+                    lastNodeCreationTime = currentTime;
+                    
+                    // 夢のシンボルを表示
+                    dreamSymbolsDiv.textContent = newNode.symbol;
+                    dreamSymbolsDiv.style.opacity = '0.8';
+                    setTimeout(() => {
+                        dreamSymbolsDiv.style.opacity = '0.1';
+                    }, 2000);
+                    
+                    // 近くのノードと自動接続
+                    for (const node of nodes) {
+                        if (node !== newNode) {
+                            const dist = Math.hypot(newNode.x - node.x, newNode.y - node.y);
+                            if (dist < 150 && Math.random() < 0.3) {
+                                connections.push(new Connection(newNode, node));
+                            }
+                        }
+                    }
+                }
+                
+                // 長押しで潜在意識へ
+                const holdTimer = setTimeout(() => {
+                    subconsciousDepth = 0.8;
+                }, 1000);
+                
+                canvas.addEventListener('mouseup', () => {
+                    clearTimeout(holdTimer);
+                    subconsciousDepth = 0;
+                }, { once: true });
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+
+            canvas.addEventListener('mouseup', (e) => {
+                if (isCreatingConnection && connectionStart) {
+                    // 最も近いノードを探す
+                    let closestNode = null;
+                    let closestDist = 50;
+                    
+                    for (const node of nodes) {
+                        if (node !== connectionStart) {
+                            const dist = Math.hypot(e.clientX - node.x, e.clientY - node.y);
+                            if (dist < closestDist) {
+                                closestNode = node;
+                                closestDist = dist;
+                            }
+                        }
+                    }
+                    
+                    if (closestNode) {
+                        // 新しい接続を作成
+                        connections.push(new Connection(connectionStart, closestNode));
+                        closestNode.activation = 1.0;
+                    }
+                }
+                
+                isCreatingConnection = false;
+                connectionStart = null;
+            });
+
+            // タッチイベント
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                mouseX = touch.clientX;
+                mouseY = touch.clientY;
+            });
+
+            canvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                const mouseEvent = new MouseEvent('mouseup');
+                canvas.dispatchEvent(mouseEvent);
+            });
+
+            // 自動的な夢の生成
+            setInterval(() => {
+                // ランダムなノードの活性化
+                if (nodes.length > 0 && Math.random() < 0.1) {
+                    const randomNode = nodes[Math.floor(Math.random() * nodes.length)];
+                    randomNode.activation = 1.0;
+                }
+                
+                // ランダムな接続の生成/消滅
+                if (Math.random() < 0.05) {
+                    if (nodes.length >= 2) {
+                        const start = nodes[Math.floor(Math.random() * nodes.length)];
+                        const end = nodes[Math.floor(Math.random() * nodes.length)];
+                        if (start !== end) {
+                            connections.push(new Connection(start, end));
+                        }
+                    }
+                }
+                
+                // 古い接続の削除
+                if (connections.length > 30) {
+                    connections.splice(0, connections.length - 30);
+                }
+            }, 2000);
+
+            // 描画ループ
+            function draw() {
+                const time = (Date.now() - startTime) / 1000;
+                const deltaTime = 1 / 60;
+
+                // ノードとコネクションの更新
+                for (const node of nodes) {
+                    node.update(deltaTime);
+                }
+                for (const connection of connections) {
+                    connection.update(deltaTime);
+                }
+
+                // 潜在意識の深度を徐々に戻す
+                subconsciousDepth *= 0.95;
+
+                // ユニフォーム用の配列を準備
+                const nodePositions = new Float32Array(100);
+                const nodeTypes = new Float32Array(50);
+                const nodeActivations = new Float32Array(50);
+                
+                for (let i = 0; i < Math.min(nodes.length, 50); i++) {
+                    nodePositions[i * 2] = nodes[i].x;
+                    nodePositions[i * 2 + 1] = nodes[i].y;
+                    nodeTypes[i] = nodes[i].type;
+                    nodeActivations[i] = nodes[i].activation;
+                }
+
+                const connectionPositions = new Float32Array(200);
+                const connectionStrengths = new Float32Array(50);
+                
+                for (let i = 0; i < Math.min(connections.length, 50); i++) {
+                    connectionPositions[i * 4] = connections[i].start.x;
+                    connectionPositions[i * 4 + 1] = connections[i].start.y;
+                    connectionPositions[i * 4 + 2] = connections[i].end.x;
+                    connectionPositions[i * 4 + 3] = connections[i].end.y;
+                    connectionStrengths[i] = connections[i].strength;
+                }
+
+                gl.useProgram(program);
+
+                gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+                gl.enableVertexAttribArray(positionLocation);
+                gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+                // ユニフォームの設定
+                gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
+                gl.uniform1f(timeLocation, time);
+                gl.uniform2fv(nodesLocation, nodePositions);
+                gl.uniform1fv(nodeTypesLocation, nodeTypes);
+                gl.uniform1fv(nodeActivationsLocation, nodeActivations);
+                gl.uniform1i(nodeCountLocation, Math.min(nodes.length, 50));
+                gl.uniform2fv(connectionsLocation, connectionPositions);
+                gl.uniform1fv(connectionStrengthsLocation, connectionStrengths);
+                gl.uniform1i(connectionCountLocation, Math.min(connections.length, 50));
+                gl.uniform2f(mouseLocation, mouseX, mouseY);
+                gl.uniform1f(subconsciousDepthLocation, subconsciousDepth);
+
+                // 描画中の接続
+                if (isCreatingConnection && connectionStart) {
+                    gl.uniform2f(mouseLocation, mouseX, mouseY);
+                }
+
+                gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+                requestAnimationFrame(draw);
+            }
+
+            draw();
+        }
+
+        window.addEventListener('load', main);
+    </script>
+</body>
+</html>
